@@ -8,14 +8,14 @@
         }
     ],
     "compilerOptions": {
+        "declaration": true,
         "paths": {
             "@/*": [
                 "./src/*"
             ]
         },
-        "rootDir": "./src",
-        "outDir": "./dist",
-        "skipLibCheck": true
+        "rootDir": "src",
+        "outDir": "dist"
     },
     "include": [
         "src/**/*.ts",
