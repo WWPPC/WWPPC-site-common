@@ -13,7 +13,8 @@
                 "./src/*"
             ]
         },
-        "outDir": "dist",
+        "rootDir": "./src",
+        "outDir": "./dist",
         "skipLibCheck": true
     },
     "include": [
