@@ -1,5 +1,10 @@
 /* whole-page things */
 
+:root {
+    --color-1: lime;
+    --color-2: red;
+}
+
 body {
     font-family: 'Source Code Pro', Courier, monospace;
     background-color: black;
@@ -29,7 +34,7 @@ body {
 }
 
 ::selection {
-    background-color: rgba(0, 255, 0, 0.7);
+    background-color: color-mix(var(--color-1) 70%, transparent 30%);
     color: black;
     text-shadow: none !important;
 }
@@ -99,7 +104,7 @@ i {
 }
 
 a {
-    color: lime;
+    color: var(--color-1);
 }
 
 code {
