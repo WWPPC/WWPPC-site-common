@@ -7,20 +7,13 @@
             "path": "./tsconfig.app.json"
         }
     ],
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "compilerOptions": {
-        "declaration": true,
         "paths": {
             "@/*": [
                 "./src/*"
             ]
         },
-        "rootDir": "src",
-        "outDir": "dist"
     },
-    "include": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "src/**/*.vue"
-    ],
     "allowJS": true,
 }
