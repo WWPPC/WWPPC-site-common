@@ -1,4 +1,4 @@
-import { load, ReCaptchaInstance } from 'recaptcha-v3';
+import { load, type ReCaptchaInstance } from 'recaptcha-v3';
 import { ref } from 'vue';
 
 let loaded = false;
