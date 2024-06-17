@@ -28,6 +28,7 @@ export default defineConfig({
                 userAgent: resolve(__dirname, 'src/scripts/userAgent.ts'),
             },
             name: 'WWPPCSiteCommon',
+            formats: ['es']
         },
         rollupOptions: {
             external: ['vue', 'vue-router', 'pinia', 'katex', '/icon.svg', '/logo.svg'],

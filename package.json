@@ -15,9 +15,9 @@
     "types": "./dist/index.d.ts",
     "scripts": {
         "dev": "vite",
-        "build": "vue-tsc --build --force && vite build",
+        "build": "vue-tsc --build --declaration && vite build",
         "preview": "vite preview",
-        "type-check": "vue-tsc --build --force",
+        "type-check": "vue-tsc --build --declaration --force",
         "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
     },
     "dependencies": {
