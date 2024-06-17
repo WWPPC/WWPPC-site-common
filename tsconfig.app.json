@@ -2,11 +2,24 @@
     "extends": "@vue/tsconfig/tsconfig.dom.json",
     "include": [
         "env.d.ts",
-        "src/**/*",
-        "src/**/*.vue"
+        "src/**/*"
     ],
-    "exclude": [
-        "src/**/__tests__/*"
+    "exclude": [],
+    "files": [
+        "src/index.ts",
+        "src/common/common.ts",
+        "src/containers/containers.ts",
+        "src/inputs/inputs.ts",
+        "src/text/text.ts",
+        "src/modal/modal.ts",
+        "src/panels/panels.ts",
+        "src/scripts/userAgent.ts",
+        "src/scripts/recaptcha.ts",
+        "src/scripts/katexify.ts",
+        "src/scripts/title.ts",
+        "src/scripts/ServerConnection.ts",
+        "src/scripts/ConnectionEnforcer.ts",
+        "src/scripts/AccountManager.ts"
     ],
     "compilerOptions": {
         "composite": true,
@@ -15,11 +28,12 @@
         "emitDeclarationOnly": true,
         "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
         "baseUrl": ".",
+        "rootDir": "src",
+        "outDir": "dist",
         "paths": {
             "@/*": [
                 "./src/*"
             ]
-        },
-        "outDir": "dist"
+        }
     }
 }

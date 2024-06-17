@@ -1,5 +1,13 @@
 // text transitions (from red pixel simulator)
-import { ref, type Ref, watch, type WatchSource } from 'vue';
+import { ref, type Ref, watch, WatchSource } from 'vue';
+
+import GlitchText from './GlitchText.vue';
+import GlowText from './GlowText.vue';
+
+export {
+    GlitchText,
+    GlowText
+}
 
 // these support HTML tags but it's very buggy, it's best to not use them (HTML character codes are fine)
 function getTags(from: string, to: string) {

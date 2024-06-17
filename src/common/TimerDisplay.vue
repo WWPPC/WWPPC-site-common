@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue';
-import { GlowText } from '../UIDefaults';
+import { GlowText } from '@/text/text';
 
 const props = defineProps<{
     to: Date

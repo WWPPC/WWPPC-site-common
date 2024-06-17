@@ -1,11 +1,11 @@
-import PanelView from './PanelView.vue';
+import PanelBody from './PanelBody.vue';
 import PanelHeader from './PanelHeader.vue';
+import PanelMain from './PanelMain.vue';
+import PanelNavButton from './PanelNavButton.vue';
 import PanelNavLargeLogo from './PanelNavLargeLogo.vue';
 import PanelNavList from './PanelNavList.vue';
-import PanelNavButton from './PanelNavButton.vue';
 import PanelRightList from './PanelRightList.vue';
-import PanelMain from './PanelMain.vue';
-import PanelBody from './PanelBody.vue';
+import PanelView from './PanelView.vue';
 
 export {
     PanelView,

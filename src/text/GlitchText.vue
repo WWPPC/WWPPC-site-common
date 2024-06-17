@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { watch } from 'vue';
-import { glitchTextTransition, randomGlitchTextTransition, type AsyncTextTransition } from '@/ui-defaults/TextTransitions';
+import { glitchTextTransition, randomGlitchTextTransition, type AsyncTextTransition } from './text';
 import GlowText from './GlowText.vue';
 
 defineProps<{

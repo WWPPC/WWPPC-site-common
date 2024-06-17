@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
-import { glitchTextTransition } from '../TextTransitions';
+import { glitchTextTransition } from '../text/text';
 
 const props = defineProps<{
     text: string

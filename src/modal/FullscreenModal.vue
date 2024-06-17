@@ -1,8 +1,8 @@
 <!-- oops i used options and composition api -->
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
-import { glitchTextTransition } from '@/ui-defaults/TextTransitions';
-import { UIButton, UITextBox } from '@/ui-defaults/UIDefaults';
+import { glitchTextTransition } from '@/text/text';
+import { InputButton, InputTextBox } from '@/inputs/inputs';
 
 const modalInput = ref('');
 const modal = reactive<{
@@ -136,12 +136,12 @@ export interface ModalParams {
                 <h1 v-html=modal.title></h1>
                 <p v-html=modal.content></p>
                 <span v-if="modal.mode == ModalMode.QUERY">
-                    <UITextBox v-model=modalInput :type=modal.inputType autocomplete="off"></UITextBox>
+                    <InputTextBox v-model=modalInput :type=modal.inputType autocomplete="off"></InputTextBox>
                     <br>
                 </span>
                 <div class="modalButtons">
                     <span v-if="modal.mode == ModalMode.INPUT">
-                        <UIButton text="NO" @click=modalReject width="5em" color="red" font="bold var(--font-16) 'Source Code Pro'"></UIButton>
+                        <InputButton text="NO" @click=modalReject width="5em" color="red" font="bold var(--font-16) 'Source Code Pro'"></InputButton>
                         <UIButton text="YES" @click=modalResolve width="5em" color="lime" font="bold var(--font-16) 'Source Code Pro'"></UIButton>
                     </span>
                     <span v-else>

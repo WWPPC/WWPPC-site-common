@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UIButton } from '@/ui-defaults/UIDefaults';
+import { InputButton } from '@/inputs/inputs';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -13,7 +13,7 @@ const router = useRouter();
         <br>
         <br>
         <span>
-            <UIButton text="Magical Fix Button" color="lime" width="200px" @click="router.push('/home')"></UIButton>
+            <InputButton text="Magical Fix Button" color="lime" width="200px" @click="router.push('/home')"></InputButton>
         </span>
     </div>
 </template>

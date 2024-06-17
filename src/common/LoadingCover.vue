@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useServerConnection } from '@/scripts/ServerConnection';
-import { UILoadingSquare } from '@/ui-defaults/UIDefaults';
+import { LoadingSquare } from './common';
 import { useRoute } from 'vue-router';
 
 defineProps<{
@@ -17,7 +17,7 @@ const route = useRoute();
     <Transition name="loading-cover">
         <div class="loadingCoverContainer" v-if="$props.show || (!serverConnection.handshakeComplete && (route.query.ignore_server === undefined || !$props.ignoreServer))">
             <div class="loadingCoverSquareWrapper">
-                <UILoadingSquare></UILoadingSquare>
+                <LoadingSquare></LoadingSquare>
             </div>
             <div class="loadingCoverText">
                 {{ $props.text }}

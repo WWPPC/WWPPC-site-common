@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, ref } from 'vue';
-import { UILoadingSpinner } from '@/ui-defaults/UIDefaults';
+import { LoadingSpinner } from './common';
 
 defineProps<{
     text: string
@@ -33,7 +33,7 @@ export default {
     <Transition name="wait-cover">
         <div class="waitCoverContainer" v-if=$props.show>
             <div class="waitCoverSpinnerWrapper">
-                <UILoadingSpinner></UILoadingSpinner>
+                <LoadingSpinner></LoadingSpinner>
             </div>
             <div class="waitCoverText">
                 {{ $props.text }}
