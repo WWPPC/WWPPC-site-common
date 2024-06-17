@@ -1,4 +1,5 @@
 {
+    "files": [],
     "references": [
         {
             "path": "./tsconfig.node.json"
@@ -7,13 +8,13 @@
             "path": "./tsconfig.app.json"
         }
     ],
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "compilerOptions": {
+        "declaration": true,
         "paths": {
             "@/*": [
                 "./src/*"
             ]
         },
     },
-    "allowJS": true,
+    "allowJS": true
 }
