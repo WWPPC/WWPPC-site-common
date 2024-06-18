@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { InputButton } from '@/inputs/inputs';
+import { InputButton } from '@/inputs';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();

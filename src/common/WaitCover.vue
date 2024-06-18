@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, ref } from 'vue';
-import { LoadingSpinner } from './common';
+import LoadingSpinner from './LoadingSpinner.vue';
 
 defineProps<{
     text: string

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-import FullscreenModal, { ModalMode, type ModalParams } from './modal/FullscreenModal.vue';
+import FullscreenModal, { ModalMode, type ModalParams } from '@/modal/FullscreenModal.vue';
 
 export {
     FullscreenModal,

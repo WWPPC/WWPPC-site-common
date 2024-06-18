@@ -1,14 +1,14 @@
-import AngledTitledContainer from './AngledTitledContainer.vue';
-import AnimateInContainer from './AnimateInContainer.vue';
-import CenteredContainer from './CenteredContainer.vue';
-import CutCornerContainer from './CutCornerContainer.vue';
-import DoubleCutCornerContainer from './DoubleCutCornerContainer.vue';
-import HeaderedTable from './HeaderedTable.vue';
-import PairedGridContainer from './PairedGridContainer.vue';
-import ShowOnscreenContainer from './ShowOnscreenContainer.vue';
-import TitledCollapsible from './TitledCollapsible.vue';
-import TitledCutCornerContainer from './TitledCutCornerContainer.vue';
-import TitledDoubleCutCornerContainer from './TitledDoubleCutCornerContainer.vue';
+import AngledTitledContainer from '@/containers/AngledTitledContainer.vue';
+import AnimateInContainer from '@/containers/AnimateInContainer.vue';
+import CenteredContainer from '@/containers/CenteredContainer.vue';
+import CutCornerContainer from '@/containers/CutCornerContainer.vue';
+import DoubleCutCornerContainer from '@/containers/DoubleCutCornerContainer.vue';
+import HeaderedTable from '@/containers/HeaderedTable.vue';
+import PairedGridContainer from '@/containers/PairedGridContainer.vue';
+import ShowOnscreenContainer from '@/containers/ShowOnscreenContainer.vue';
+import TitledCollapsible from '@/containers/TitledCollapsible.vue';
+import TitledCutCornerContainer from '@/containers/TitledCutCornerContainer.vue';
+import TitledDoubleCutCornerContainer from '@/containers/TitledDoubleCutCornerContainer.vue';
 
 export {
     ShowOnscreenContainer,

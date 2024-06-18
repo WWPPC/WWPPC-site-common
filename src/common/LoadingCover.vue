@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useServerConnection } from '@/ServerConnection';
-import { LoadingSquare } from '@/common';
+import { useServerConnection } from '@/scripts/ServerConnection';
+import LoadingSquare from './LoadingSquare.vue';
 import { useRoute } from 'vue-router';
 
 defineProps<{

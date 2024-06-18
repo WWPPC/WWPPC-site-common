@@ -1,13 +1,13 @@
-import InputButton from './InputButton.vue';
-import InputCopyButton from './InputCopyButton.vue';
-import InputDropdown from './InputDropdown.vue';
-import InputFileUpload from './InputFileUpload.vue';
-import InputIconButton from './InputIconButton.vue';
-import InputLinkButton from './InputLinkButton.vue';
-import InputNumberBox from './InputNumberBox.vue';
-import InputTextArea from './InputTextArea.vue';
-import InputTextBox from './InputTextBox.vue';
-import InputToggle from './InputToggle.vue';
+import InputButton from '@/inputs/InputButton.vue';
+import InputCopyButton from '@/inputs/InputCopyButton.vue';
+import InputDropdown from '@/inputs/InputDropdown.vue';
+import InputFileUpload from '@/inputs/InputFileUpload.vue';
+import InputIconButton from '@/inputs/InputIconButton.vue';
+import InputLinkButton from '@/inputs/InputLinkButton.vue';
+import InputNumberBox from '@/inputs/InputNumberBox.vue';
+import InputTextArea from '@/inputs/InputTextArea.vue';
+import InputTextBox from '@/inputs/InputTextBox.vue';
+import InputToggle from '@/inputs/InputToggle.vue';
 
 export {
     InputButton,

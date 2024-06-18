@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AnimateInContainer } from '@/containers/containers';
+import { AnimateInContainer } from '@/containers';
 import { isMobileRef } from '@/scripts/userAgent';
 
 defineProps<{

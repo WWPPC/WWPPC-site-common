@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { inject } from 'vue';
-import { useMultipane } from './multipane';
+import { useMultipane } from '@/multipane';
 
 const props = defineProps<{
     for: string

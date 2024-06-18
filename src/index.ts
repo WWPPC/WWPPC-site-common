@@ -1,5 +1,5 @@
 import 'katex/dist/katex.min.css';
-import './assets/style.css';
+import '@/assets/style.css';
 
 import recaptcha from '@/scripts/recaptcha';
 

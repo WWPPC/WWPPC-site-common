@@ -1,8 +1,8 @@
 <!-- oops i used options and composition api -->
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
-import { glitchTextTransition } from '@/text/text';
-import { InputButton, InputTextBox } from '@/inputs/inputs';
+import { glitchTextTransition } from '@/text';
+import { InputButton, InputTextBox } from '@/inputs';
 
 const modalInput = ref('');
 const modal = reactive<{

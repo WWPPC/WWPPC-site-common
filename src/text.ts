@@ -1,8 +1,8 @@
 // text transitions (from red pixel simulator)
 import { ref, watch } from 'vue';
 
-import GlitchText from './text/GlitchText.vue';
-import GlowText from './text/GlowText.vue';
+import GlitchText from '@/text/GlitchText.vue';
+import GlowText from '@/text/GlowText.vue';
 
 import type { Ref, WatchSource} from 'vue';
 

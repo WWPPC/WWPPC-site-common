@@ -2,35 +2,9 @@
     "name": "wwppc-site-common",
     "private": true,
     "type": "module",
-    "files": [
-        "dist"
-    ],
-    "module": "./dist/index.js",
-    "exports": {
-        ".": "./dist/index.js",
-        "./common": "./dist/common.js",
-        "./containers": "./dist/containers.js",
-        "./inputs": "./dist/inputs.js",
-        "./text": "./dist/text.js",
-        "./modal": "./dist/modal.js",
-        "./panels": "./dist/panels.js",
-        "./scripts/user-agent": "./dist/userAgent.js",
-        "./scripts/recaptcha": "./dist/recaptcha.js",
-        "./scripts/katex": "./dist/katexify.js",
-        "./scripts/title": "./dist/title.js",
-        "./server-conn": "./dist/serverConnection.js",
-        "./conn-enforcer": "./dist/connectionEnforcer.js",
-        "./account-manager": "./dist/accountManager.js",
-        "./style.css": "./dist/style.css",
-        "./assets": "./dist/assets"
-    },
-    "types": "./dist/index.d.ts",
     "scripts": {
         "update": "git pull https://github.com/WWPPC/WWPPC-site-common.git main",
-        "dev": "vite",
-        "build": "vue-tsc && vite build",
-        "type-check": "vue-tsc",
-        "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+        "type-check": "vue-tsc --build --force"
     },
     "dependencies": {
         "@hsorby/vue3-katex": "^0.6.0-rc.7",

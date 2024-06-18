@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
 import { reactive, ref, watch } from 'vue';
 
-import { AccountOpResult, apiFetch, sendCredentials, socket, TeamOpResult, useServerConnection } from './scripts/ServerConnection';
+import { AccountOpResult, apiFetch, sendCredentials, socket, TeamOpResult, useServerConnection } from './ServerConnection';
 
-import type { CredentialsSignupData } from './scripts/ServerConnection';
+import type { CredentialsSignupData } from './ServerConnection';
 
 export interface AccountData {
     username: string

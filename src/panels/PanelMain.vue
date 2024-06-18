@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import NotFound from './NotFound.vue';
+import NotFound from '@/common/NotFound.vue';
 </script>
 
 <template>
