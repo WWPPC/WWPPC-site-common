@@ -7,10 +7,22 @@
     ],
     "module": "./dist/index.js",
     "exports": {
-        ".": {
-            "import": "./dist/index.js"
-        },
-        "./style.css": "./dist/style.css"
+        ".": "./dist/index.ts.js",
+        "./common": "./dist/common.ts.js",
+        "./containers": "./dist/containers.ts.js",
+        "./inputs": "./dist/inputs.ts.js",
+        "./text": "./dist/text.ts.js",
+        "./modal": "./dist/modal.ts.js",
+        "./panels": "./dist/panels.ts.js",
+        "./scripts/user-agent": "./dist/userAgent.ts.js",
+        "./scripts/recaptcha": "./dist/recaptcha.ts.js",
+        "./scripts/katex": "./dist/katexify.ts.js",
+        "./scripts/title": "./dist/title.ts.js",
+        "./server-conn": "./dist/ServerConnection.ts.js",
+        "./conn-enforcer": "./dist/ConnectionEnforcer.ts.js",
+        "./account-manager": "./dist/AccountManager.ts.js",
+        "./style.css": "./dist/style.css",
+        "./assets": "./dist/assets"
     },
     "types": "./dist/index.d.ts",
     "scripts": {
