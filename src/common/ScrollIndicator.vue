@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { AnimateInContainer } from '@/containers';
-import { isMobileRef } from '@/scripts/userAgent';
+import { AnimateInContainer } from '#/containers';
+import { isMobileRef } from '#/scripts/userAgent';
 
 defineProps<{
     anchor: string

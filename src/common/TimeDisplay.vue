@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
-import { GlowText } from '@/text';
+import { GlowText } from '#/text';
 
 const props = defineProps<{
     time: number

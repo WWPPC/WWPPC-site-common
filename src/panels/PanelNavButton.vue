@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { glitchTextTransition, type AsyncTextTransition } from '@/text';
+import { glitchTextTransition, type AsyncTextTransition } from '#/text';
 import { useRouter } from 'vue-router';
-import { isMobileRef } from '@/scripts/userAgent';
+import { isMobileRef } from '#/scripts/userAgent';
 
 const props = defineProps<{
     text: string

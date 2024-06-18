@@ -1,5 +1,5 @@
 <script lang="ts">
-import { isMobile } from '@/scripts/userAgent';
+import { isMobile } from '#/scripts/userAgent';
 
 export default {
     props: {

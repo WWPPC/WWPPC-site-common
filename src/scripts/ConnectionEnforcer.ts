@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { reactive, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { globalModal, ModalMode } from '@/modal';
+import { globalModal, ModalMode } from '#/modal';
 import { useServerConnection } from './ServerConnection';
 
 const state = reactive<{
