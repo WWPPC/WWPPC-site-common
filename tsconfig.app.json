@@ -5,27 +5,9 @@
         "src/**/*"
     ],
     "exclude": [],
-    "files": [
-        "src/index.ts",
-        "src/common/common.ts",
-        "src/containers/containers.ts",
-        "src/inputs/inputs.ts",
-        "src/text/text.ts",
-        "src/modal/modal.ts",
-        "src/panels/panels.ts",
-        "src/scripts/userAgent.ts",
-        "src/scripts/recaptcha.ts",
-        "src/scripts/katexify.ts",
-        "src/scripts/title.ts",
-        "src/scripts/ServerConnection.ts",
-        "src/scripts/ConnectionEnforcer.ts",
-        "src/scripts/AccountManager.ts"
-    ],
     "compilerOptions": {
         "composite": true,
-        "noEmit": false,
-        "noEmitHelpers": true,
-        "emitDeclarationOnly": true,
+        "noEmit": true,
         "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
         "baseUrl": ".",
         "rootDir": "src",

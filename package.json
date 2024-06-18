@@ -7,20 +7,20 @@
     ],
     "module": "./dist/index.js",
     "exports": {
-        ".": "./dist/index.ts.js",
-        "./common": "./dist/common.ts.js",
-        "./containers": "./dist/containers.ts.js",
-        "./inputs": "./dist/inputs.ts.js",
-        "./text": "./dist/text.ts.js",
-        "./modal": "./dist/modal.ts.js",
-        "./panels": "./dist/panels.ts.js",
-        "./scripts/user-agent": "./dist/userAgent.ts.js",
-        "./scripts/recaptcha": "./dist/recaptcha.ts.js",
-        "./scripts/katex": "./dist/katexify.ts.js",
-        "./scripts/title": "./dist/title.ts.js",
-        "./server-conn": "./dist/ServerConnection.ts.js",
-        "./conn-enforcer": "./dist/ConnectionEnforcer.ts.js",
-        "./account-manager": "./dist/AccountManager.ts.js",
+        ".": "./dist/index.js",
+        "./common": "./dist/common.js",
+        "./containers": "./dist/containers.js",
+        "./inputs": "./dist/inputs.js",
+        "./text": "./dist/text.js",
+        "./modal": "./dist/modal.js",
+        "./panels": "./dist/panels.js",
+        "./scripts/user-agent": "./dist/userAgent.js",
+        "./scripts/recaptcha": "./dist/recaptcha.js",
+        "./scripts/katex": "./dist/katexify.js",
+        "./scripts/title": "./dist/title.js",
+        "./server-conn": "./dist/serverConnection.js",
+        "./conn-enforcer": "./dist/connectionEnforcer.js",
+        "./account-manager": "./dist/accountManager.js",
         "./style.css": "./dist/style.css",
         "./assets": "./dist/assets"
     },
@@ -28,7 +28,7 @@
     "scripts": {
         "update": "git pull https://github.com/WWPPC/WWPPC-site-common.git main",
         "dev": "vite",
-        "build": "vite build && vue-tsc --build --force",
+        "build": "vue-tsc && vite build",
         "type-check": "vue-tsc",
         "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
     },
@@ -53,6 +53,7 @@
         "eslint-plugin-vue": "^9.17.0",
         "typescript": "^5.2.2",
         "vite": "^5.2.0",
+        "vite-plugin-dts": "^3.9.1",
         "vue-tsc": "^2.0.6"
     }
 }
