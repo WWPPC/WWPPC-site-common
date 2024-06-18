@@ -26,9 +26,9 @@
     },
     "types": "./dist/index.d.ts",
     "scripts": {
+        "update": "git pull https://github.com/WWPPC/WWPPC-site-common.git main",
         "dev": "vite",
         "build": "vite build && vue-tsc --build --force",
-        "preview": "vite preview",
         "type-check": "vue-tsc",
         "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
     },
