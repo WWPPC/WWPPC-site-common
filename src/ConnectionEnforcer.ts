@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { globalModal, ModalMode } from '@/modal/modal';
 
-import { useServerConnection } from './ServerConnection';
+import { useServerConnection } from './scripts/ServerConnection';
 
 const state = reactive<{
     connectionInclude: Set<string>

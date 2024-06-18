@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { io } from 'socket.io-client';
 import { reactive } from 'vue';
 
-import { globalModal } from '@/modal/modal';
+import { globalModal } from '@/modal';
 
 import { useAccountManager } from './AccountManager';
 import recaptcha from './recaptcha';
