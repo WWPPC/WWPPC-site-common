@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { glitchTextTransition, type AsyncTextTransition } from '#/text';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { isMobileRef } from '#/scripts/userAgent';
 
 const props = defineProps<{
@@ -14,6 +14,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: 'click'): void
 }>();
+const route = useRoute();
 const router = useRouter();
 
 function click() {
@@ -37,7 +38,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <input type="button" :class="'panelNavButton ' + (((props.isDefault && $route.params.panel == undefined) || props.for == `/${$route.params.page}/${$route.params.panel}`) ? 'panelNavButtonSelected ' : '') + (isMobileRef ? 'panelNavButtonNoHover' : '')" :value=buttonText @click=click @mouseover=mouseover :title=title>
+    <input type="button" :class="'panelNavButton ' + (((props.isDefault && route.params.panel == undefined) || props.for == `/${route.params.page}/${route.params.panel}`) ? 'panelNavButtonSelected ' : '') + (isMobileRef ? 'panelNavButtonNoHover' : '')" :value=buttonText @click=click @mouseover=mouseover :title=title>
 </template>
 
 <style scoped>

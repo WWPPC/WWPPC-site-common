@@ -102,7 +102,7 @@ defineExpose({
     background-position: center;
     background-repeat: no-repeat;
     background-size: 100% 100%;
-    background-image: url(/assets/arrow-down.svg);
+    background-image: url(#/assets/arrow-down.svg);
     transition: 200ms ease transform;
     transform: v-bind("show ? 'scaleY(-1)' : 'scaleY(1)'");
 }

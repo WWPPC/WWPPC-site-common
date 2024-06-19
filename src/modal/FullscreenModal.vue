@@ -142,13 +142,13 @@ export interface ModalParams {
                 <div class="modalButtons">
                     <span v-if="modal.mode == ModalMode.INPUT">
                         <InputButton text="NO" @click=modalReject width="5em" color="red" font="bold var(--font-16) 'Source Code Pro'"></InputButton>
-                        <UIButton text="YES" @click=modalResolve width="5em" color="lime" font="bold var(--font-16) 'Source Code Pro'"></UIButton>
+                        <InputButton text="YES" @click=modalResolve width="5em" color="lime" font="bold var(--font-16) 'Source Code Pro'"></InputButton>
                     </span>
                     <span v-else>
                         <span v-if="modal.mode == ModalMode.QUERY || modal.mode == ModalMode.CONFIRM">
-                            <UIButton text="CANCEL" @click=modalReject width="5em" color="red" font="bold var(--font-16) 'Source Code Pro'"></UIButton>
+                            <InputButton text="CANCEL" @click=modalReject width="5em" color="red" font="bold var(--font-16) 'Source Code Pro'"></InputButton>
                         </span>
-                        <UIButton text="OK" @click=modalResolve width="5em" color="lime" font="bold var(--font-16) 'Source Code Pro'"></UIButton>
+                        <InputButton text="OK" @click=modalResolve width="5em" color="lime" font="bold var(--font-16) 'Source Code Pro'"></InputButton>
                     </span>
                 </div>
             </div>
