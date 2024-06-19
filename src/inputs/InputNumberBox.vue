@@ -56,7 +56,7 @@ defineExpose({
 }
 
 .uiNumberBoxHighlightInvalid.uiNumberBox:invalid {
-    border-color: yellow;
+    border-color: var(--color-3);
 }
 
 .uiNumberBox:disabled {

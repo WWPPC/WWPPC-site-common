@@ -56,7 +56,7 @@ defineExpose({
 }
 
 .uiTextBoxHighlightInvalid.uiTextBox:invalid {
-    border-color: yellow;
+    border-color: var(--color-3);
 }
 
 .uiTextBox:disabled {

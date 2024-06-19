@@ -3,6 +3,7 @@
 :root {
     --color-1: lime;
     --color-2: red;
+    --color-3: yellow;
 }
 
 body {
@@ -34,7 +35,7 @@ body {
 }
 
 ::selection {
-    background-color: color-mix(var(--color-1) 70%, transparent 30%);
+    background-color: color-mix(in hsl, var(--color-1) 70%, transparent 30%);
     color: black;
     text-shadow: none !important;
 }
@@ -186,19 +187,19 @@ ol {
     }
 
     *::-webkit-scrollbar-button:single-button:vertical:decrement {
-        background-image: url(#/assets/arrow-up.svg);
+        background-image: url(./arrow-up.svg);
     }
 
     *::-webkit-scrollbar-button:single-button:vertical:increment {
-        background-image: url(#/assets/arrow-down.svg);
+        background-image: url(./arrow-down.svg);
     }
 
     *::-webkit-scrollbar-button:single-button:horizontal:decrement {
-        background-image: url(#/assets/arrow-left.svg);
+        background-image: url(./arrow-left.svg);
     }
 
     *::-webkit-scrollbar-button:single-button:horizontal:increment {
-        background-image: url(#/assets/arrow-right.svg);
+        background-image: url(./arrow-right.svg);
     }
 
     *::-webkit-scrollbar-corner {
