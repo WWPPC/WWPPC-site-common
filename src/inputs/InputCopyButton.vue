@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import copyImg from '#/assets/copy.svg';
+// import copyImg from '#p/assets/copy.svg';
 
 const props = defineProps<{
     value: string
@@ -11,7 +11,7 @@ const copy = () => {
 </script>
 
 <template>
-    <img :src="copyImg" class="uiCopyButton" @click="copy()" title="Copy to clipboard">
+    <img src="~#/assets/copy.svg" class="uiCopyButton" @click="copy()" title="Copy to clipboard">
 </template>
 
 <style scoped>

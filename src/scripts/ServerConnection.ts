@@ -2,9 +2,9 @@ import { defineStore } from 'pinia';
 import { io } from 'socket.io-client';
 import { reactive } from 'vue';
 
-import { useAccountManager } from '#/scripts/AccountManager';
+import { useAccountManager } from './AccountManager';
 import { globalModal } from '#/modal';
-import recaptcha from '#/scripts/recaptcha';
+import recaptcha from './recaptcha';
 
 // send HTTP wakeup request before trying socket.io
 export const serverHostname = process.env.NODE_ENV == 'development' ? 'https://localhost:8000' : 'https://server.wwppc.tech';

@@ -12,9 +12,6 @@
                 "./src/*"
             ]
         },
-        "typeRoots": [
-            "./dist/types"
-        ],
         "isolatedModules": true
     },
     "allowJS": true
