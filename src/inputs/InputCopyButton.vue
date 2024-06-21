@@ -11,7 +11,7 @@ const copy = () => {
 </script>
 
 <template>
-    <img src="~#/assets/copy.svg" class="uiCopyButton" @click="copy()" title="Copy to clipboard">
+    <img src="../../public/assets/copy.svg" class="uiCopyButton" @click="copy()" title="Copy to clipboard">
 </template>
 
 <style scoped>
