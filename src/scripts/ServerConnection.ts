@@ -130,23 +130,23 @@ socket.on('getCredentials', async (session) => {
         console.warn('<h1>Insecure context!</h1><br>The page has been opened in an insecure context and cannot perform encryption processes. Credentials and submissions will be sent in PLAINTEXT!');
     } else {
         RSA.publicKey = await window.crypto.subtle.importKey('jwk', session.key, { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
-        RSA.sid = session.session;
-        const sessionCreds = window.localStorage.getItem('sessionCredentials');
-        // autologin if possible
-        if (sessionCreds != null && RSA.sid.toString() === window.localStorage.getItem('sessionId')) {
-            const creds = JSON.parse(sessionCreds);
-            const res = await sendCredentials(creds.username, creds.password, await recaptcha.execute('autologin'));
-            if (res == AccountOpResult.SUCCESS) {
-                state.loggedIn = true;
-                state.manualLogin = false;
-            } else {
-                window.localStorage.removeItem('sessionCredentials');
-                window.localStorage.removeItem('sessionId');
-            }
-        }
-        state.handshakeComplete = true;
-        handshakeResolve(undefined);
     }
+    RSA.sid = session.session;
+    const sessionCreds = window.sessionStorage.getItem('sessionCredentials');
+    // autologin if possible
+    if (sessionCreds != null && RSA.sid.toString() === window.sessionStorage.getItem('sessionId')) {
+        const creds = JSON.parse(sessionCreds);
+        const res = await sendCredentials(creds.username, creds.password, await recaptcha.execute('autologin'));
+        if (res == AccountOpResult.SUCCESS) {
+            state.loggedIn = true;
+            state.manualLogin = false;
+        } else {
+            window.sessionStorage.removeItem('sessionCredentials');
+            window.sessionStorage.removeItem('sessionId');
+        }
+    }
+    state.handshakeComplete = true;
+    handshakeResolve(undefined);
 });
 export const sendCredentials = async (username: string, password: string | number[], token: string, signupData?: CredentialsSignupData): Promise<AccountOpResult> => {
     return await new Promise(async (resolve, reject) => {
@@ -172,12 +172,12 @@ export const sendCredentials = async (username: string, password: string | numbe
                 } : undefined
             });
             if (res === AccountOpResult.SUCCESS) {
-                window.localStorage.setItem('sessionCredentials', JSON.stringify({
+                window.sessionStorage.setItem('sessionCredentials', JSON.stringify({
                     username: username,
                     password: password2 instanceof ArrayBuffer ? Array.from(new Uint32Array(password2)) : password2,
                 }));
                 state.encryptedPassword = password2;
-                window.localStorage.setItem('sessionId', RSA.sid.toString());
+                window.sessionStorage.setItem('sessionId', RSA.sid.toString());
                 state.loggedIn = true;
                 loginResolve(undefined);
                 accountManager.username = username;
