@@ -117,7 +117,8 @@ export const useAccountManager = defineStore('accountManager', {
             return await serverConnection.emitWithAck('changeCredentials', {
                 password: await serverConnection.RSAencrypt(password),
                 newPassword: await serverConnection.RSAencrypt(newPassword),
-                token: token
+                token: token,
+                session: serverConnection.RSAsessionId
             });
         },
         async deleteAccount(password: string, token: string): Promise<AccountOpResult> {
@@ -125,7 +126,8 @@ export const useAccountManager = defineStore('accountManager', {
             if (!serverConnection.loggedIn) return AccountOpResult.NOT_CONNECTED;
             return await serverConnection.emitWithAck('deleteCredentials', {
                 password: await serverConnection.RSAencrypt(password),
-                token: token
+                token: token,
+                session: serverConnection.RSAsessionId
             });
         },
         async requestRecovery(username: string, email: string, token: string): Promise<AccountOpResult> {
@@ -134,7 +136,8 @@ export const useAccountManager = defineStore('accountManager', {
             return await serverConnection.emitWithAck('requestRecovery', {
                 username: username,
                 email: email,
-                token: token
+                token: token,
+                session: serverConnection.RSAsessionId
             });
         },
         async recoverAccount(username: string, recoveryPassword: string, newPassword: string, token: string): Promise<AccountOpResult> {
@@ -144,7 +147,8 @@ export const useAccountManager = defineStore('accountManager', {
                 username: username,
                 recoveryPassword: await serverConnection.RSAencrypt(recoveryPassword),
                 newPassword: await serverConnection.RSAencrypt(newPassword),
-                token: token
+                token: token,
+                session: serverConnection.RSAsessionId
             });
         },
         signout() {
