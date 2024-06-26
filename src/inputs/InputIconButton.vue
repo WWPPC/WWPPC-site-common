@@ -14,6 +14,7 @@ const props = defineProps<{
     backgroundColor?: string
     imgColor?: string
     imgHoverColor?: string
+    imgOnly?: boolean
     disabled?: boolean
     glitchOnMount?: boolean
 }>();
@@ -34,10 +35,10 @@ watch(() => props.text, () => buttonText.value = props.text);
 </script>
 
 <template>
-    <label :class="'uiIconButtonLabel ' + (props.disabled ? 'uiIconButtonLabelDisabled' : '')">
-        <input type="button" class="uiIconButton" @click=click :title=title :disabled=props.disabled>
+    <label :class="'uiIconButtonLabel ' + (props.disabled ? 'uiIconButtonLabelDisabled' : '')" :title=title>
+        <input type="button" class="uiIconButton" @click=click :disabled=props.disabled>
         <div class="uiIconButtonImage"></div>
-        <span class="uiIconButtonText">{{ buttonText }}</span>
+        <span class="uiIconButtonText" v-if="!props.imgOnly">{{ buttonText }}</span>
     </label>
 </template>
 
@@ -49,7 +50,7 @@ watch(() => props.text, () => buttonText.value = props.text);
     height: v-bind("$props.height ?? 'min-content'");
     border: 4px solid white;
     margin: 0px 4px;
-    padding: 0.125em 0.2em;
+    padding: 0.125em 0.4em;
     background-color: v-bind("$props.backgroundColor ?? 'black'");
     color: v-bind("$props.color ?? 'white'");
     font: v-bind("$props.font ?? 'inherit'");
@@ -65,7 +66,6 @@ watch(() => props.text, () => buttonText.value = props.text);
 .uiIconButtonImage {
     width: 1.2em;
     height: 1.2em;
-    margin-left: 0.2em;
     mask-size: 1.2em;
     mask-repeat: no-repeat;
     mask-position: center;
@@ -75,7 +75,7 @@ watch(() => props.text, () => buttonText.value = props.text);
 }
 
 .uiIconButtonText {
-    margin: 0px 0.2em;
+    margin-left: 0.2em;
     text-wrap: nowrap;
     white-space: nowrap;
     font-size: v-bind("$props.fontSize ?? 'var(--font-16)'");

@@ -160,7 +160,7 @@ export interface ModalParams {
 .modalContainer {
     display: grid;
     grid-template-rows: 1fr min-content 1fr;
-    grid-template-columns: 1fr minmax(50% 100%) 1fr;
+    grid-template-columns: 1fr 50vw 1fr;
     position: fixed;
     top: 0px;
     left: 0px;
@@ -174,13 +174,18 @@ export interface ModalParams {
     z-index: 1000;
 }
 
+@media (max-width: 500px) {
+    .modalContainer {
+        grid-template-columns: 1fr 90vw 1fr;
+    }
+}
+
 .modalBodyWrapper {
     grid-row: 2;
     grid-column: 2;
     display: flex;
     position: relative;
     bottom: calc(50vh + 50%);
-    width: 50vw;
     padding: 4px 4px;
     background-color: v-bind("modalColor");
     box-shadow: 0px 0px 8px v-bind("modalColor");

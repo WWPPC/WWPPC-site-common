@@ -31,8 +31,8 @@ watch(() => props.text, () => buttonText.value = props.text);
 </script>
 
 <template>
-    <label :class="'uiLinkButtonLabel ' + (props.disabled ? 'uiLinkButtonLabelDisabled' : '')">
-        <input type="button" class="uiLinkButton" @click=click :title=title :disabled=props.disabled>
+    <label :class="'uiLinkButtonLabel ' + (props.disabled ? 'uiLinkButtonLabelDisabled' : '')" :title=title>
+        <input type="button" class="uiLinkButton" @click=click :disabled=props.disabled>
         <span class="uiLinkButtonText">{{ buttonText }}</span>
         <div class="uiLinkButtonArrow"></div>
     </label>
