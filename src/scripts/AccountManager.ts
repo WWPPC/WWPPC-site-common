@@ -152,8 +152,8 @@ export const useAccountManager = defineStore('accountManager', {
             });
         },
         signout() {
-            window.localStorage.removeItem('sessionCredentials');
-            window.localStorage.removeItem('sessionId');
+            window.sessionStorage.removeItem('sessionCredentials');
+            window.sessionStorage.removeItem('sessionId');
             window.location.replace('/home');
         },
         async getUserData(username: string): Promise<AccountData | Error> {
