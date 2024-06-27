@@ -5,9 +5,10 @@ import { reactive } from 'vue';
 import { useAccountManager } from './AccountManager';
 import { globalModal } from '#/modal';
 import recaptcha from './recaptcha';
+import { isDev } from '#/index';
 
 // send HTTP wakeup request before trying socket.io
-export const serverHostname = process.env.NODE_ENV == 'development' ? 'https://localhost:8000' : 'https://server.wwppc.tech';
+export const serverHostname = isDev ? 'https://localhost:8000' : 'https://server.wwppc.tech';
 export const socket = io(serverHostname, {
     path: '/web-socketio',
     autoConnect: false,
@@ -133,17 +134,17 @@ socket.on('getCredentials', async (session) => {
         RSA.publicKey = await window.crypto.subtle.importKey('jwk', session.key, { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
     }
     RSA.sessionID = session.session;
-    const sessionCreds = window.sessionStorage.getItem('sessionCredentials');
+    const sessionCreds = window.localStorage.getItem('sessionCredentials');
     // autologin if possible
-    if (sessionCreds != null && RSA.sessionID.toString() === window.sessionStorage.getItem('sessionId')) {
+    if (sessionCreds != null && RSA.sessionID.toString() === window.localStorage.getItem('sessionId')) {
         const creds = JSON.parse(sessionCreds);
         const res = await sendCredentials(creds.username, creds.password, await recaptcha.execute('autologin'));
         if (res == AccountOpResult.SUCCESS) {
             state.loggedIn = true;
             state.manualLogin = false;
         } else {
-            window.sessionStorage.removeItem('sessionCredentials');
-            window.sessionStorage.removeItem('sessionId');
+            window.localStorage.removeItem('sessionCredentials');
+            window.localStorage.removeItem('sessionId');
         }
     }
     state.handshakeComplete = true;
@@ -174,12 +175,12 @@ export const sendCredentials = async (username: string, password: string | numbe
                 } : undefined
             });
             if (res === AccountOpResult.SUCCESS) {
-                window.sessionStorage.setItem('sessionCredentials', JSON.stringify({
+                window.localStorage.setItem('sessionCredentials', JSON.stringify({
                     username: username,
                     password: password2 instanceof ArrayBuffer ? Array.from(new Uint32Array(password2)) : password2,
                 }));
                 state.encryptedPassword = password2;
-                window.sessionStorage.setItem('sessionId', RSA.sessionID.toString());
+                window.localStorage.setItem('sessionId', RSA.sessionID.toString());
                 state.loggedIn = true;
                 loginResolve(undefined);
                 accountManager.username = username;

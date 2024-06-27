@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { isMobileRef } from '#/scripts/userAgent';
+import { isMobile } from '#/scripts/userAgent';
 import { nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue';
 
 const props = defineProps<{
@@ -46,7 +46,7 @@ defineExpose({
 </script>
 
 <template>
-    <div :class="'headeredCollapsibleContainer ' + ($props.noPadding ? 'noPadding ' : '') + (isMobileRef ? 'noHover' : '')">
+    <div :class="'headeredCollapsibleContainer ' + ($props.noPadding ? 'noPadding ' : '') + (isMobile ? 'noHover' : '')">
         <label class="headeredCollapsibleContainerHeader">
             <h2 class="headeredCollapsibleContainerTitle">{{ props.title }}</h2>
             <div class="headeredCollapsibleContainerImage"></div>

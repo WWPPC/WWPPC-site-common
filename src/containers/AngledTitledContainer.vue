@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { isMobileRef } from '#/scripts/userAgent';
+import { isMobile } from '#/scripts/userAgent';
 
 defineProps<{
     title: string
@@ -14,7 +14,7 @@ defineProps<{
 </script>
 
 <template>
-    <div :class="'titledAngleContainer ' + ($props.noPadding ? 'noPadding ' : '') + (isMobileRef ? 'noHover' : '')">
+    <div :class="'titledAngleContainer ' + ($props.noPadding ? 'noPadding ' : '') + (isMobile ? 'noHover' : '')">
         <div class="titledAngleContainerBody">
             <slot></slot>
         </div>

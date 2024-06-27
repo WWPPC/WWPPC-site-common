@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { isMobileRef } from '#/scripts/userAgent';
+import { isMobile } from '#/scripts/userAgent';
 
 defineProps<{
     width?: string
@@ -13,7 +13,7 @@ defineProps<{
 </script>
 
 <template>
-    <div :class="'doubleCutCornerContainerWrapper ' + ($props.flipped ? 'doubleCutCornerContainerWrapperReversed ' : '') + (isMobileRef ? 'noHover' : '')">
+    <div :class="'doubleCutCornerContainerWrapper ' + ($props.flipped ? 'doubleCutCornerContainerWrapperReversed ' : '') + (isMobile ? 'noHover' : '')">
         <div :class="'doubleCutCornerContainer ' + ($props.noPadding ? 'noPadding ' : '') + ($props.flipped ? 'doubleCutCornerContainerReversed' : '')">
             <slot></slot>
         </div>

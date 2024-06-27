@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { AnimateInContainer } from '#/containers';
-import { isMobileRef } from '#/scripts/userAgent';
+import { isMobile } from '#/scripts/userAgent';
 
 defineProps<{
     anchor: string
@@ -17,7 +17,7 @@ export default {
 </script>
 
 <template>
-    <div :class="'centered ' + (isMobileRef ? 'invisible' : '')">
+    <div :class="'centered ' + (isMobile ? 'invisible' : '')">
         <AnimateInContainer type="fade" :delay=1000 show-on-screen>
             <div class="scrollIndicator" @click=scroll></div>
         </AnimateInContainer>

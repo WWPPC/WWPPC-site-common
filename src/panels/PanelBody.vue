@@ -2,7 +2,7 @@
 import { useRoute } from 'vue-router';
 import { setTitlePanel } from '#/scripts/title';
 import { watch, nextTick, getCurrentInstance } from 'vue';
-import { isMobileRef } from '#/scripts/userAgent';
+import { isMobile } from '#/scripts/userAgent';
 
 const route = useRoute();
 const props = defineProps<{
@@ -23,7 +23,7 @@ if ((route.params.panel === undefined && props.isDefault && route.params.catchAl
 <template>
     <Transition>
         <div class="panelBody" v-if="route.params.panel == props.name || (route.params.panel == undefined && props.isDefault && route.params.catchAll === undefined)">
-            <div :class="'panelBodySlotContainer ' + ((isMobileRef || !props.scrollSnap) ? 'noSnap' : '')">
+            <div :class="'panelBodySlotContainer ' + ((isMobile || !props.scrollSnap) ? 'noSnap' : '')">
                 <slot></slot>
             </div>
             <div class="panelBodyTransitionWipeContainer">
