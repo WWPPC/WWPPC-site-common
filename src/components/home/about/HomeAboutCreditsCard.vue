@@ -9,9 +9,11 @@ defineProps<{
     username: string
     roles: string
     codeforces?: string
+    aops?: string
     github?: string
     discord?: string
     youtube?: string
+    grade: string
     bio: string
     img: string
     external?: boolean
@@ -36,10 +38,11 @@ const funAnimation = ref(Math.random() < 0.001);
                                 {{ $props.bio }}
                             </div>
                             <div class="cardIcons">
-                                <HomeAboutCreditsCardIcon profileUrl="https://codeforces.com/profile/" :user=$props.codeforces icon="/img/codeforces-logo.svg" color="#1F8ACB"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://github.com/" :user=$props.github icon="/img/github-logo.svg" color="#F05032"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://discord.com/users/" :user=$props.discord icon="/img/discord-logo.svg" color="#5865F2"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://youtube.com/" :user=$props.youtube icon="/img/youtube-logo.svg" color="#FF0000"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://codeforces.com/profile/" :user=$props.codeforces icon="/img/codeforces-icon.svg" color="#1F8ACB"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://artofproblemsolving.com/community/user/" :user=$props.aops icon="/img/aops-icon.svg" color="#009FAD"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://github.com/" :user=$props.github icon="/img/github-icon.svg" color="#F05032"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://discord.com/users/" :user=$props.discord icon="/img/discord-icon.svg" color="#5865F2"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://youtube.com/" :user=$props.youtube icon="/img/youtube-icon.svg" color="#FF0000"></HomeAboutCreditsCardIcon>
                             </div>
                         </div>
                     </DoubleCutCornerContainer>
@@ -49,12 +52,14 @@ const funAnimation = ref(Math.random() < 0.001);
                         <div class="cardContent">
                             <img :src=$props.img class="cardImage">
                             <div class="cardName">{{ $props.name }}</div>
+                            <div class="cardGrade">{{ $props.grade }}</div>
                             <div class="cardRoles" v-html=$props.roles></div>
                             <div class="cardIcons">
-                                <HomeAboutCreditsCardIcon profileUrl="https://codeforces.com/profile/" :user=$props.codeforces icon="/img/codeforces-logo.svg" color="#1F8ACB"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://github.com/" :user=$props.github icon="/img/github-logo.svg" color="#F05032"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://discord.com/users/" :user=$props.discord icon="/img/discord-logo.svg" color="#5865F2"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://youtube.com/" :user=$props.youtube icon="/img/youtube-logo.svg" color="#FF0000"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://codeforces.com/profile/" :user=$props.codeforces icon="/img/codeforces-icon.svg" color="#1F8ACB"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://artofproblemsolving.com/community/user/" :user=$props.aops icon="/img/aops-icon.svg" color="#009FAD"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://github.com/" :user=$props.github icon="/img/github-icon.svg" color="#F05032"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://discord.com/users/" :user=$props.discord icon="/img/discord-icon.svg" color="#5865F2"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://youtube.com/" :user=$props.youtube icon="/img/youtube-icon.svg" color="#FF0000"></HomeAboutCreditsCardIcon>
                             </div>
                         </div>
                     </DoubleCutCornerContainer>
@@ -178,7 +183,7 @@ const funAnimation = ref(Math.random() < 0.001);
 
 .cardContent {
     display: grid;
-    grid-template-rows: 220px 40px 90px 30px;
+    grid-template-rows: 208px 32px 26px 84px 30px;
     justify-items: center;
     width: 280px;
     height: 380px;
@@ -198,19 +203,25 @@ const funAnimation = ref(Math.random() < 0.001);
 }
 
 .cardImage {
-    width: 212px;
-    height: 212px;
+    width: 200px;
+    height: 200px;
     border: 4px solid white;
 }
 
 .cardName {
-    margin-top: 8px;
+    margin: 4px 0px;
     width: 100%;
     text-align: center;
     text-wrap: nowrap;
     font-size: var(--font-24);
     font-weight: bold;
     color: var(--color-1);
+}
+
+.cardGrade {
+    text-align: center;
+    text-wrap: nowrap;
+    font-size: var(--font-20);
 }
 
 .cardRoles {
