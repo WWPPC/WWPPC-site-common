@@ -97,6 +97,7 @@ const funAnimation = ref(Math.random() < 0.001);
     from {
         transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg);
     }
+
     to {
         transform: rotateX(360deg) rotateY(720deg) rotateZ(360deg);
     }
@@ -209,14 +210,14 @@ const funAnimation = ref(Math.random() < 0.001);
     text-wrap: nowrap;
     font-size: var(--font-24);
     font-weight: bold;
-    color: lime;
+    color: var(--color-1);
 }
 
 .cardRoles {
     text-align: center;
     margin-top: 8px;
     font-size: var(--font-18);
-    color: lime;
+    color: var(--color-1);
 }
 
 .cardIcons {
@@ -226,7 +227,7 @@ const funAnimation = ref(Math.random() < 0.001);
 }
 
 .cardUserLink {
-    color: lime;
+    color: var(--color-1);
     line-height: 1.5em;
     cursor: pointer;
 }
