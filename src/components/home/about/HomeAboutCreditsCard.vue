@@ -14,6 +14,7 @@ defineProps<{
     youtube?: string
     bio: string
     img: string
+    external?: boolean
 }>();
 
 const router = useRouter();
@@ -30,7 +31,7 @@ const funAnimation = ref(Math.random() < 0.001);
                     <DoubleCutCornerContainer flipped class="cardFaceContainer">
                         <div class="cardContent2">
                             <div class="cardBio">
-                                <span class="cardUserLink" @click="router.push('/user/@' + $props.username)">@{{ $props.username }}</span>
+                                <span class="cardUserLink" @click="router.push(($props.external ? 'https://wwppc.tech/user/@' : '/user/@') + $props.username)">@{{ $props.username }}</span>
                                 <br>
                                 {{ $props.bio }}
                             </div>
