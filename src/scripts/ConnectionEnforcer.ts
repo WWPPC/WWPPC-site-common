@@ -47,7 +47,7 @@ export const useConnectionEnforcer = defineStore('connectionenforcer', {
                     title: 'Connect Error',
                     content: 'Could not connect to the server. Attempting to reconnect.<br>Click YES to reload.',
                     mode: ModalMode.INPUT,
-                    color: 'red'
+                    color: 'var(--color-2)'
                 });
                 serverConnection.onconnecterror(() => { m.cancel(); return true; });
                 serverConnection.once('connect', () => m.cancel());
@@ -59,7 +59,7 @@ export const useConnectionEnforcer = defineStore('connectionenforcer', {
                     title: 'Disconnected',
                     content: 'You were disconnected from the server. Attempting to reconnect.<br>Click YES to reload.',
                     mode: ModalMode.INPUT,
-                    color: 'red'
+                    color: 'var(--color-2)'
                 });
                 serverConnection.onconnecterror(() => { m.cancel(); return true; });
                 serverConnection.once('connect', () => m.cancel());
