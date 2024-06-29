@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "update": "git pull https://github.com/WWPPC/WWPPC-site-common.git main",
+        "update": "git pull https://github.com/WWPPC/WWPPC-site-common.git main && npm install",
         "type-check": "vue-tsc --build --force"
     },
     "dependencies": {
