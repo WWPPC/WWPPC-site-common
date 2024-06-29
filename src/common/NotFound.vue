@@ -1,8 +1,5 @@
 <script setup lang="ts">
 import { InputButton } from '#/inputs';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
 </script>
 
 <template>
@@ -12,9 +9,9 @@ const router = useRouter();
         &lt;span style="color: red;"&gt;IS BORKEN!!!&lt;/span&gt;
         <br>
         <br>
-        <span>
-            <InputButton text="Magical Fix Button" color="lime" width="200px" @click="router.push('/home')"></InputButton>
-        </span>
+        <RouterLink to="/home">
+            <InputButton text="Magical Fix Button" color="lime" width="200px"></InputButton>
+        </RouterLink>
     </div>
 </template>
 
