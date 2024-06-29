@@ -12,6 +12,7 @@ const props = defineProps<{
     fontSize?: string
     color?: string
     backgroundColor?: string
+    noMask?: boolean
     imgColor?: string
     imgHoverColor?: string
     imgOnly?: boolean
@@ -37,7 +38,7 @@ watch(() => props.text, () => buttonText.value = props.text);
 <template>
     <label :class="'uiIconButtonLabel ' + (props.disabled ? 'uiIconButtonLabelDisabled' : '')" :title=title>
         <input type="button" class="uiIconButton" @click=click :disabled=props.disabled>
-        <div class="uiIconButtonImage"></div>
+        <div :class="props.noMask ? 'uiIconButtonImgNoMask' : 'uiIconButtonImage'"></div>
         <span class="uiIconButtonText" v-if="!props.imgOnly">{{ buttonText }}</span>
     </label>
 </template>
@@ -72,6 +73,15 @@ watch(() => props.text, () => buttonText.value = props.text);
     mask-image: v-bind("`url('${$props.img}')`");
     background-color: v-bind("$props.imgColor ?? 'white'");
     transition: 50ms linear background-color;
+}
+
+.uiIconButtonImgNoMask {
+    width: 1.2em;
+    height: 1.2em;
+    background-size: 1.2em;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: v-bind("`url('${$props.img}')`");
 }
 
 .uiIconButtonText {
