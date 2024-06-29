@@ -42,7 +42,7 @@ onMounted(() => {
     display: inline-block;
     min-width: 128px;
     font-size: 18px;
-    color: white;
+    color: white !important;
     text-decoration: none;
     text-align: center;
     align-content: center;
