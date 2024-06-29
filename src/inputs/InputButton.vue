@@ -48,6 +48,7 @@ watch(() => props.text, () => buttonText.value = props.text);
     font: v-bind("$props.font ?? 'inherit'");
     font-size: v-bind("$props.fontSize ?? 'var(--font-16)'");
     font-family: 'Source Code Pro', Courier, monospace;
+    text-decoration: none;
     transition: 50ms ease transform, 50ms ease border-color;
     cursor: pointer;
 }

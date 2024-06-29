@@ -79,6 +79,7 @@ watch(() => props.text, () => buttonText.value = props.text);
     text-wrap: nowrap;
     white-space: nowrap;
     font-size: v-bind("$props.fontSize ?? 'var(--font-16)'");
+    text-decoration: none;
 }
 
 .uiIconButtonLabel:hover {

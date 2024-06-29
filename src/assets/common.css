@@ -108,6 +108,14 @@ a {
     color: var(--color-1);
 }
 
+a:active {
+    color: color-mix(in srgb, var(--color-1) 80%, black 20%);
+}
+
+a[no-deco] {
+    text-decoration: none;
+}
+
 code {
     padding: 0px 0.3em;
     font-family: 'Source Code Pro', Courier, monospace;

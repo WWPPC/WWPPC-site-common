@@ -1,35 +1,41 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
 defineProps<{
     target?: string
 }>();
-
-const router = useRouter();
 </script>
 
 <template>
-    <img class="wwppcLargeLogo" src="/logo.svg" @click="router.push($props.target ?? '/home/home')">
+    <RouterLink :to="$props.target ?? '/home/home'" class="navLargeLogo">
+        <img class="navLogoImg" src="/logo.svg" alt="WWPPC Logo">
+    </RouterLink>
 </template>
 
 <style scoped>
-.wwppcLargeLogo {
-    max-width: 100%;
+.navLargeLogo {
+    display: inline-block;
+    height: 100%;
+    min-height: 100%;
     max-height: 100%;
-    background-color: transparent;
     align-self: center;
     transition: 50ms linear transform, 500ms ease max-height;
     cursor: pointer;
 }
 
-.wwppcLargeLogo:hover {
+.navLargeLogo:hover {
     transform: scale(1.02);
 }
-.wwppcLargeLogo:active {
+
+.navLargeLogo:active {
     transform: scale(0.98);
 }
 
+.navLogoImg {
+    background-color: transparent;
+    height: 100%;
+}
+
 @media (max-width: 600px) {
-    .wwppcLargeLogo {
+    .navLargeLogo {
         max-height: 40%;
     }
 }

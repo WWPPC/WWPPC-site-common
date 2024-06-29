@@ -2,9 +2,8 @@
 import { AnimateInContainer, DoubleCutCornerContainer } from '#/containers';
 import HomeAboutCreditsCardIcon from './HomeAboutCreditsCardIcon.vue';
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 
-const props = defineProps<{
+defineProps<{
     name: string
     username: string
     roles: string
@@ -16,18 +15,7 @@ const props = defineProps<{
     grade: string
     bio: string
     img: string
-    external?: boolean
 }>();
-
-const router = useRouter();
-
-const openUser = () => {
-    if (props.external) {
-        window.location.replace('https://wwppc.tech/user/@' + props.username);
-    } else {
-        router.push('/user/@' + props.username);
-    }
-}
 
 const slightlyFunAnimation = ref(Math.random() < 0.001);
 const funAnimation = ref(Math.random() < 0.001);
@@ -41,16 +29,16 @@ const funAnimation = ref(Math.random() < 0.001);
                     <DoubleCutCornerContainer flipped class="cardFaceContainer">
                         <div class="cardContent2">
                             <div class="cardBio">
-                                <span class="cardUserLink" @click="openUser();">@{{ props.username }}</span>
+                                <RouterLink :to="'/user/@' + $props.username" class="cardUserLink">@{{ $props.username }}</RouterLink>
                                 <br>
-                                {{ props.bio }}
+                                {{ $props.bio }}
                             </div>
                             <div class="cardIcons">
-                                <HomeAboutCreditsCardIcon profileUrl="https://codeforces.com/profile/" :user=props.codeforces icon="/img/codeforces-icon.svg" color="#1F8ACB"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://artofproblemsolving.com/community/user/" :user=props.aops icon="/img/aops-icon.svg" color="#009FAD"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://github.com/" :user=props.github icon="/img/github-icon.svg" color="#F05032"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://discord.com/users/" :user=props.discord icon="/img/discord-icon.svg" color="#5865F2"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://youtube.com/" :user=props.youtube icon="/img/youtube-icon.svg" color="#FF0000"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://codeforces.com/profile/" :user=$props.codeforces icon="/img/codeforces-icon.svg" color="#1F8ACB"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://artofproblemsolving.com/community/user/" :user=$props.aops icon="/img/aops-icon.svg" color="#009FAD"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://github.com/" :user=$props.github icon="/img/github-icon.svg" color="#F05032"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://discord.com/users/" :user=$props.discord icon="/img/discord-icon.svg" color="#5865F2"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://youtube.com/" :user=$props.youtube icon="/img/youtube-icon.svg" color="#FF0000"></HomeAboutCreditsCardIcon>
                             </div>
                         </div>
                     </DoubleCutCornerContainer>
@@ -58,16 +46,16 @@ const funAnimation = ref(Math.random() < 0.001);
                 <div class="cardFront">
                     <DoubleCutCornerContainer class="cardFaceContainer">
                         <div class="cardContent">
-                            <img :src=props.img class="cardImage">
-                            <div class="cardName">{{ props.name }}</div>
-                            <div class="cardGrade">{{ props.grade }}</div>
-                            <div class="cardRoles" v-html=props.roles></div>
+                            <img :src=$props.img class="cardImage" :alt="$props.name">
+                            <div class="cardName">{{ $props.name }}</div>
+                            <div class="cardGrade">{{ $props.grade }}</div>
+                            <div class="cardRoles" v-html=$props.roles></div>
                             <div class="cardIcons">
-                                <HomeAboutCreditsCardIcon profileUrl="https://codeforces.com/profile/" :user=props.codeforces icon="/img/codeforces-icon.svg" color="#1F8ACB"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://artofproblemsolving.com/community/user/" :user=props.aops icon="/img/aops-icon.svg" color="#009FAD"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://github.com/" :user=props.github icon="/img/github-icon.svg" color="#F05032"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://discord.com/users/" :user=props.discord icon="/img/discord-icon.svg" color="#5865F2"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://youtube.com/" :user=props.youtube icon="/img/youtube-icon.svg" color="#FF0000"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://codeforces.com/profile/" :user=$props.codeforces icon="/img/codeforces-icon.svg" color="#1F8ACB"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://artofproblemsolving.com/community/user/" :user=$props.aops icon="/img/aops-icon.svg" color="#009FAD"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://github.com/" :user=$props.github icon="/img/github-icon.svg" color="#F05032"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://discord.com/users/" :user=$props.discord icon="/img/discord-icon.svg" color="#5865F2"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://youtube.com/" :user=$props.youtube icon="/img/youtube-icon.svg" color="#FF0000"></HomeAboutCreditsCardIcon>
                             </div>
                         </div>
                     </DoubleCutCornerContainer>
@@ -246,8 +234,6 @@ const funAnimation = ref(Math.random() < 0.001);
 }
 
 .cardUserLink {
-    color: var(--color-1);
-    line-height: 1.5em;
-    cursor: pointer;
+    text-decoration: none;
 }
 </style>

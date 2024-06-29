@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { glitchTextTransition, type AsyncTextTransition } from '#/text';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { isMobile } from '#/scripts/userAgent';
 
 const props = defineProps<{
@@ -15,13 +15,8 @@ const emit = defineEmits<{
     (e: 'click'): void
 }>();
 const route = useRoute();
-const router = useRouter();
 
-function click() {
-    emit('click');
-    if (props.link) window.location.replace(props.for);
-    else router.push(props.for);
-}
+const classList = 'panelNavButton ' + (((props.isDefault && route.params.panel == undefined) || props.for == `/${route.params.page}/${route.params.panel}`) ? 'panelNavButtonSelected ' : '') + (isMobile ? 'panelNavButtonNoHover' : '');
 
 // animations for hover
 const buttonText = ref(props.text.replace(/./g, ' '));
@@ -38,17 +33,19 @@ onMounted(() => {
 </script>
 
 <template>
-    <input type="button" :class="'panelNavButton ' + (((props.isDefault && route.params.panel == undefined) || props.for == `/${route.params.page}/${route.params.panel}`) ? 'panelNavButtonSelected ' : '') + (isMobile ? 'panelNavButtonNoHover' : '')" :value=buttonText @click=click @mouseover=mouseover :title=title>
+    <a v-if="props.link" :href="props.for" :class="classList" @mouseover="mouseover()" @click="emit('click')" :title=title>{{ buttonText }}</a>
+    <RouterLink v-else :to="props.for" :class="classList" @mouseover="mouseover()" @click="emit('click')" :title=title>{{ buttonText }}</RouterLink>
 </template>
 
 <style scoped>
 .panelNavButton {
-    appearance: none;
+    display: inline-block;
     min-width: 128px;
-    border: none;
-    border-radius: 0px;
     font-size: 18px;
     color: white;
+    text-decoration: none;
+    text-align: center;
+    align-content: center;
     background-color: transparent;
     font-family: 'Source Code Pro', Courier, monospace;
     transition: 100ms cubic-bezier(0.6, 1, 0.5, 1.6) background-color;
