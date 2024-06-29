@@ -1,11 +1,12 @@
+import { isDev } from '#/index';
+import { globalModal } from '#/modal';
 import { defineStore } from 'pinia';
 import { io } from 'socket.io-client';
 import { reactive } from 'vue';
 
 import { useAccountManager } from './AccountManager';
-import { globalModal } from '#/modal';
+import crossDomainStorage from './CrossDomainStorage';
 import recaptcha from './recaptcha';
-import { isDev } from '#/index';
 
 // send HTTP wakeup request before trying socket.io
 export const serverHostname = isDev ? 'https://localhost:8000' : 'https://server.wwppc.tech';
@@ -134,17 +135,19 @@ socket.on('getCredentials', async (session) => {
         RSA.publicKey = await window.crypto.subtle.importKey('jwk', session.key, { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
     }
     RSA.sessionID = session.session;
-    const sessionCreds = window.localStorage.getItem('sessionCredentials');
+    const sessionCreds = await crossDomainStorage.getItem('sessionCredentials');
     // autologin if possible
-    if (sessionCreds != null && RSA.sessionID.toString() === window.localStorage.getItem('sessionId')) {
+    if (sessionCreds != null && RSA.sessionID.toString() === await crossDomainStorage.getItem('sessionId')) {
         const creds = JSON.parse(sessionCreds);
         const res = await sendCredentials(creds.username, creds.password, await recaptcha.execute('autologin'));
         if (res == AccountOpResult.SUCCESS) {
             state.loggedIn = true;
             state.manualLogin = false;
         } else {
-            window.localStorage.removeItem('sessionCredentials');
-            window.localStorage.removeItem('sessionId');
+            await Promise.all([
+                crossDomainStorage.removeItem('sessionCredentials'),
+                crossDomainStorage.removeItem('sessionId')
+            ]);
         }
     }
     state.handshakeComplete = true;
@@ -175,12 +178,14 @@ export const sendCredentials = async (username: string, password: string | numbe
                 } : undefined
             });
             if (res === AccountOpResult.SUCCESS) {
-                window.localStorage.setItem('sessionCredentials', JSON.stringify({
-                    username: username,
-                    password: password2 instanceof ArrayBuffer ? Array.from(new Uint32Array(password2)) : password2,
-                }));
+                await Promise.all([
+                    crossDomainStorage.setItem('sessionCredentials', JSON.stringify({
+                        username: username,
+                        password: password2 instanceof ArrayBuffer ? Array.from(new Uint32Array(password2)) : password2,
+                    })),
+                    crossDomainStorage.setItem('sessionId', RSA.sessionID.toString())
+                ]);
                 state.encryptedPassword = password2;
-                window.localStorage.setItem('sessionId', RSA.sessionID.toString());
                 state.loggedIn = true;
                 loginResolve(undefined);
                 accountManager.username = username;

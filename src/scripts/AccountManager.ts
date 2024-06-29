@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia';
 import { reactive, ref, watch } from 'vue';
 
+import crossDomainStorage from './CrossDomainStorage';
 import { AccountOpResult, apiFetch, sendCredentials, socket, TeamOpResult, useServerConnection } from './ServerConnection';
 
 import type { CredentialsSignupData } from './ServerConnection';
-
 export interface AccountData {
     username: string
     email: string
@@ -151,9 +151,11 @@ export const useAccountManager = defineStore('accountManager', {
                 session: serverConnection.RSAsessionId
             });
         },
-        signout() {
-            window.localStorage.removeItem('sessionCredentials');
-            window.localStorage.removeItem('sessionId');
+        async signout() {
+            await Promise.all([
+                crossDomainStorage.removeItem('sessionCredentials'),
+                crossDomainStorage.removeItem('sessionId')
+            ]);
             window.location.replace('/home');
         },
         async getUserData(username: string): Promise<AccountData | Error> {
