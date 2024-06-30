@@ -135,6 +135,10 @@ socket.on('getCredentials', async (session) => {
         RSA.publicKey = await window.crypto.subtle.importKey('jwk', session.key, { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
     }
     RSA.sessionID = session.session;
+    Object.defineProperty(window, 'crossDomainStorage', {
+        value: crossDomainStorage
+    })
+    console.log('letterbeforea')
     const sessionCreds = await crossDomainStorage.getItem('sessionCredentials');
     console.debug('a')
     // autologin if possible
