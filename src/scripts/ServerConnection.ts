@@ -138,7 +138,7 @@ socket.on('getCredentials', async (session) => {
     Object.defineProperty(window, 'crossDomainStorage', {
         value: crossDomainStorage
     })
-    console.log('letterbeforea')
+    console.debug('letterbeforea')
     const sessionCreds = await crossDomainStorage.getItem('sessionCredentials');
     console.debug('a')
     // autologin if possible

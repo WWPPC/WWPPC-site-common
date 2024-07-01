@@ -1,5 +1,5 @@
 import createGuest from 'cross-domain-storage/guest';
-import { isDev } from '..';
+import { isDev } from '#/index';
 
 class WWPPCXDStorage {
     #storage;
@@ -38,4 +38,5 @@ class WWPPCXDStorage {
 
 const crossDomainStorage = isDev ? window.localStorage : (new WWPPCXDStorage());
 
-export default crossDomainStorage;
+// export default crossDomainStorage;
+export default window.localStorage;
