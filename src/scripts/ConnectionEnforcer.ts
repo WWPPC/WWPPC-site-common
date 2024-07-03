@@ -34,6 +34,9 @@ export const useConnectionEnforcer = defineStore('connectionenforcer', {
             initialized = true;
             const serverConnection = useServerConnection();
             const modal = globalModal();
+            Object.defineProperty(window, 'modal', {
+                value: modal
+            })
             const route = useRoute();
             const router = useRouter();
             const checkConnection = () => {
@@ -49,7 +52,7 @@ export const useConnectionEnforcer = defineStore('connectionenforcer', {
                     mode: ModalMode.INPUT,
                     color: 'var(--color-2)'
                 });
-                serverConnection.onconnecterror(() => { m.cancel(); return true; });
+                setTimeout(() => serverConnection.onconnecterror(() => { m.cancel(); return true; }), 0);
                 serverConnection.once('connect', () => m.cancel());
                 m.result.then((v) => v === true && window.location.reload());
             };

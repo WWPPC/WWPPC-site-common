@@ -127,7 +127,8 @@ defineExpose({
 }
 
 .headeredCollapsibleContainer:hover {
-    transform: v-bind("$props.hoverAnimation == 'lift' ? 'translateY(-8px)' : ($props.hoverAnimation == 'swell' ? 'scale(102%)' : '')");
+    transform: none;
+    transform: v-bind("$props.hoverAnimation == 'lift' ? 'translateY(-8px)' : ($props.hoverAnimation == 'swell' ? 'scale(102%)' : 'none')");
 }
 
 .noPadding>.headeredCollapsibleContainerBodyWrapper>.headeredCollapsibleContainerBody {
