@@ -5,6 +5,7 @@
     font-weight: 200, 300, 400, 500, 600, 700, 800;
     font-style: normal, italic;
     src: url(./SourceCodePro.ttf) format('truetype');
+    font-display: swap; /* https://developer.chrome.com/docs/lighthouse/performance/font-display/ */
 }
 
 @font-face {
@@ -12,4 +13,5 @@
     font-weight: 300, 400, 500, 600, 700;
     font-style: normal;
     src: url(./Jura.ttf);
+    font-display: swap; /* https://developer.chrome.com/docs/lighthouse/performance/font-display/ */
 }

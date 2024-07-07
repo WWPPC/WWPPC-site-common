@@ -1,8 +1,7 @@
-const katex = import('katex');
-
 export async function latexify(str: string): Promise<string> {
     // math rendering errors are handled by katex itself since throwOnError=false
-    const renderToString = (await katex).renderToString ?? (await katex).default.renderToString;
+    const katex = await import('katex');
+    const renderToString = katex.renderToString ?? katex.default.renderToString;
     return str.replace(/\$\$.+?\$\$/gm, (match) => {
         try {
             return renderToString(match.substring(2, match.length - 2).trim(), { throwOnError: false });
