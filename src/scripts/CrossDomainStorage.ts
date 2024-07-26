@@ -1,42 +1,73 @@
-import createGuest from 'cross-domain-storage/guest';
 import { isDev } from '#/index';
 
 class WWPPCXDStorage {
-    #storage;
+    #origin: string;
+    #contentWindow: Window;
+    #loadPromise: Promise<void>;
+
+    #listeners: { ev: string, cb: (res: any) => any }[] = [];
+    #messageCount: number = 0;
 
     constructor() {
-        this.#storage = createGuest('https://session.wwppc.tech');
+        this.#origin = isDev ? 'http://localhost:5175' : 'https://session.wwppc.tech';
+        const iframe = document.createElement('iframe');
+        iframe.src = this.#origin;
+        iframe.width = '0px';
+        iframe.height = '0px';
+        iframe.style.display = 'none';
+        iframe.style.position = 'absolute'
+        document.body.appendChild(iframe);
+        if (iframe.contentWindow == null) throw new Error('No access to embed window');
+        this.#contentWindow = iframe.contentWindow;
+        this.#loadPromise = new Promise((resolve) => {
+            iframe.onload = () => {
+                // ping the iframe and wait for response, then resolve
+                this.#contentWindow.postMessage('connect', this.#origin);
+                const handleResponse = (e: MessageEvent) => {
+                    if (e.source != this.#contentWindow || e.data !== 'connect') return;
+                    resolve();
+                    window.removeEventListener('message', handleResponse);
+                    // the actual handler
+                    window.addEventListener('message', (e) => {
+                        if (e.source != this.#contentWindow || e.data == null || e.data.ev == null) return;
+                        for (const listener of this.#listeners) {
+                            if (e.data.ev == listener.ev) {
+                                listener.cb(e.data.res);
+                                this.#listeners.splice(this.#listeners.indexOf(listener), 1);
+                                break;
+                            }
+                        }
+                    });
+                };
+                window.addEventListener('message', handleResponse);
+            };
+        });
+    }
+
+    async #message(ev: string, data: any): Promise<any> {
+        await this.#loadPromise;
+        return await new Promise((resolve) => {
+            const ev2 = ev + ':' + this.#messageCount++;
+            this.#contentWindow.postMessage({ ev: ev2, data: data }, this.#origin);
+            this.#listeners.push({ ev: ev2, cb: (res) => resolve(res) });
+        });
     }
 
     async getItem(key: string): Promise<string | null> {
-        return await new Promise((resolve, reject) => {
-            this.#storage.get(key, (err: ErrorEvent | undefined, val: string | null) => {
-                if (err) reject(err);
-                else resolve(val);
-            });
-        });
+        const res = await this.#message('get', key);
+        if (typeof res == 'string' || res === null) return res;
+        return null;
     }
 
     async setItem(key: string, value: string): Promise<void> {
-        return await new Promise((resolve, reject) => {
-            this.#storage.set(key, value, (err: ErrorEvent | undefined) => {
-                if (err) reject(err);
-                else resolve();
-            });
-        });
+        await this.#message('set', [key, value]);
     }
 
     async removeItem(key: string): Promise<void> {
-        return await new Promise((resolve, reject) => {
-            this.#storage.remove(key, (err: ErrorEvent | undefined) => {
-                if (err) reject(err);
-                else resolve();
-            });
-        });
+        await this.#message('delete', key);
     }
 }
 
 const crossDomainStorage = isDev ? window.localStorage : (new WWPPCXDStorage());
 
-// export default crossDomainStorage;
-export default window.localStorage;
+export default crossDomainStorage;
