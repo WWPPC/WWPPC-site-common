@@ -1,15 +1,14 @@
 import { isDev } from '#/index';
 
 class WWPPCXDStorage {
-    #origin: string;
-    #contentWindow: Window;
-    #loadPromise: Promise<void>;
+    readonly #origin: string = isDev ? 'http://localhost:5175' : 'https://session.wwppc.tech';
+    readonly #contentWindow: Window;
+    readonly #loadPromise: Promise<void>;
 
-    #listeners: { ev: string, cb: (res: any) => any }[] = [];
+    readonly #listeners: { ev: string, cb: (res: any) => any }[] = [];
     #messageCount: number = 0;
 
     constructor() {
-        this.#origin = isDev ? 'http://localhost:5175' : 'https://session.wwppc.tech';
         const iframe = document.createElement('iframe');
         iframe.src = this.#origin;
         iframe.width = '0px';
