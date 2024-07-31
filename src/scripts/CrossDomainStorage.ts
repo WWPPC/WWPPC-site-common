@@ -20,12 +20,9 @@ class WWPPCXDStorage {
         this.#contentWindow = iframe.contentWindow;
         this.#loadPromise = new Promise((resolve) => {
             iframe.onload = () => {
-                console.log('loaded')
                 // ping the iframe and wait for response, then resolve
                 const handleResponse = (e: MessageEvent) => {
-                    console.log('response', e.source, this.#contentWindow, e.data)
                     if (e.source != this.#contentWindow || e.data !== 'connect') return;
-                    console.log('connected')
                     resolve();
                     window.removeEventListener('message', handleResponse);
                     // the actual handler
