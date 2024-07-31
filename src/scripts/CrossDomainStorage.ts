@@ -20,10 +20,12 @@ class WWPPCXDStorage {
         this.#contentWindow = iframe.contentWindow;
         this.#loadPromise = new Promise((resolve) => {
             iframe.onload = () => {
+                console.log('loaded')
                 // ping the iframe and wait for response, then resolve
                 this.#contentWindow.postMessage('connect', this.#origin);
                 const handleResponse = (e: MessageEvent) => {
                     if (e.source != this.#contentWindow || e.data !== 'connect') return;
+                    console.log('connected')
                     resolve();
                     window.removeEventListener('message', handleResponse);
                     // the actual handler
@@ -46,6 +48,7 @@ class WWPPCXDStorage {
     async #message(ev: string, data: any): Promise<any> {
         await this.#loadPromise;
         return await new Promise((resolve) => {
+            console.log(ev, data)
             const ev2 = ev + ':' + this.#messageCount++;
             this.#contentWindow.postMessage({ ev: ev2, data: data }, this.#origin);
             this.#listeners.push({ ev: ev2, cb: (res) => resolve(res) });
