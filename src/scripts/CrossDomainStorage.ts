@@ -46,7 +46,6 @@ class WWPPCXDStorage {
     async #message(ev: string, data: any): Promise<any> {
         await this.#loadPromise;
         return await new Promise((resolve) => {
-            console.log(ev, data)
             const ev2 = ev + ':' + this.#messageCount++;
             this.#contentWindow.postMessage({ ev: ev2, data: data }, this.#origin);
             this.#listeners.push({ ev: ev2, cb: (res) => resolve(res) });
