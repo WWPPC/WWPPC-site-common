@@ -22,8 +22,8 @@ class WWPPCXDStorage {
             iframe.onload = () => {
                 console.log('loaded')
                 // ping the iframe and wait for response, then resolve
-                this.#contentWindow.postMessage('connect', this.#origin);
                 const handleResponse = (e: MessageEvent) => {
+                    console.log('response')
                     if (e.source != this.#contentWindow || e.data !== 'connect') return;
                     console.log('connected')
                     resolve();
@@ -41,6 +41,7 @@ class WWPPCXDStorage {
                     });
                 };
                 window.addEventListener('message', handleResponse);
+                this.#contentWindow.postMessage('connect', this.#origin);
             };
         });
     }
