@@ -72,29 +72,6 @@ const update = () => {
     }
     if (!showFollowing) t = props.showMillis ? '0ms' : '0s';
     text.value = t;
-    // const time = Math.abs(props.time);
-    // const millis = (time % 1000) / 1000;
-    // const seconds = (Math.floor(time / 1000) % 60) / 100;
-    // const minutes = (Math.floor(time / 60000) % 60) / 100;
-    // const hours = (Math.floor(time / 3_600_000) % 24) / 100;
-    // const days = Math.floor(time / 86_400_000) % 7;
-    // const weeks = Math.floor(time / 604_800_000) % 4;
-    // // showing weeks and months at the same time is weird
-    // if (props.type == 'clock') {
-    //     if (days != 0) text.value = `${days}d ${hours.toFixed(2).substring(2)}h ${minutes.toFixed(2).substring(2)}m ${seconds.toFixed(2).substring(2)}${props.showMillis ? '.' + millis.toFixed(3).substring(2) : ''}`;
-    //     else if (hours != 0) text.value = `${hours * 100}h ${minutes.toFixed(2).substring(2)}m ${seconds.toFixed(2).substring(2)}${props.showMillis ? '.' + millis.toFixed(3).substring(2) : ''}`;
-    //     else if (minutes != 0) text.value = `${minutes * 100}m ${seconds.toFixed(2).substring(2)}s ${props.showMillis ? millis.toFixed(3).substring(2) + 'ms' : ''}`;
-    //     else if (seconds != 0) text.value = `${seconds * 100}s ${props.showMillis ? millis.toFixed(3).substring(2) + 'ms' : ''}`;
-    //     else if (millis != 0 && props.showMillis) text.value = `${millis * 1000}ms`;
-    //     else text.value = '0' + (props.showMillis ? 'ms' : 's');
-    // } else if (props.type == 'timer') {
-    //     if (days != 0) text.value = `${days}d ${hours.toFixed(2).substring(2)}:${minutes.toFixed(2).substring(2)}:${seconds.toFixed(2).substring(2)}${props.showMillis ? '.' + millis.toFixed(3).substring(2) : ''}`;
-    //     else if (hours != 0) text.value = `${hours * 100}:${minutes.toFixed(2).substring(2)}:${seconds.toFixed(2).substring(2)}${props.showMillis ? '.' + millis.toFixed(3).substring(2) : ''}`;
-    //     else if (minutes != 0) text.value = `${minutes * 100}:${seconds.toFixed(2).substring(2)}${props.showMillis ? '.' + millis.toFixed(3).substring(2) : ''}`;
-    //     else if (seconds != 0) text.value = `${seconds * 100}${props.showMillis ? '.' + millis.toFixed(3).substring(2) : ''}`;
-    //     else if (millis != 0 && props.showMillis) text.value = `${millis.toFixed(3).substring(2)}`;
-    //     else text.value = '0' + (props.showMillis ? 'ms' : 's');
-    // }
 };
 
 watch(() => props.time, update);

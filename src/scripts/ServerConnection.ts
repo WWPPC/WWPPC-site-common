@@ -23,7 +23,7 @@ const attemptConnect = () => {
     connectAttemptHandlers.forEach((h) => h());
     fetch(serverHostname + '/wakeup').then(() => {
         socket.connect();
-        apiFetch('GET', '/config').then((config: { maxProfileImgSize: number, acceptedLanguages: string[], maxSubmissionSize: number } | Error) => {
+        apiFetch('GET', '/config').then((config) => {
             if (config instanceof Error) {
                 console.error('Failed to fetch server config!');
                 const modal = globalModal();
@@ -50,8 +50,14 @@ const state = reactive<{
     encryptedPassword: ArrayBuffer | string | null,
     serverConfig: {
         maxProfileImgSize: number,
-        acceptedLanguages: string[],
-        maxSubmissionSize: number
+        contests: {
+            [key: string]: {
+                rounds: boolean
+                submitSolver: boolean
+                acceptedSolverLanguages: string[]
+                maxSubmissionSize: number
+            }
+        }
     }
 }>({
     handshakeComplete: false,
@@ -63,17 +69,7 @@ const state = reactive<{
     encryptedPassword: null,
     serverConfig: {
         maxProfileImgSize: 65535,
-        acceptedLanguages: [
-            "java8",
-            "java17",
-            "java21",
-            "c",
-            "cpp11",
-            "cpp17",
-            "cpp20",
-            "py-3-6-9"
-        ],
-        maxSubmissionSize: 10240
+        contests: {}
     }
 });
 const RSA: {
@@ -233,9 +229,6 @@ export const useServerConnection = defineStore('serverconnection', {
         RSAsessionId: () => RSA.sessionID
     },
     actions: {
-        RSAencrypt: RSA.encrypt,
-        apiFetch: apiFetch,
-        // shorthands
         emit(event: string, ...data: any) {
             return socket.emit(event, ...data);
         },

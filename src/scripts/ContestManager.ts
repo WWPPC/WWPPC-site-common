@@ -1,0 +1,176 @@
+import { globalModal, ModalMode } from '#/modal';
+import { defineStore } from 'pinia';
+import { io, Socket as SocketIOSocket } from 'socket.io-client';
+import { reactive, ref, watch } from 'vue';
+
+import { useAccountManager } from './AccountManager';
+import { apiFetch, serverHostname, socket, useServerConnection } from './ServerConnection';
+
+export interface Contest {
+    readonly id: string
+    rounds: ContestRound[]
+    startTime: number
+    endTime: number
+}
+export interface ContestRound {
+    readonly contest: string
+    readonly number: number
+    problems: ContestProblem[]
+    startTime: number
+    endTime: number
+}
+export interface ContestProblem {
+    readonly id: string
+    readonly contest: string
+    readonly round: number
+    readonly number: number
+    name: string
+    author: string
+    content: string
+    constraints: { memory: number, time: number }
+    submissions: ContestSubmission[]
+    status: ContestProblemCompletionState
+}
+export interface ContestSubmission {
+    time: number
+    lang: string
+    scores: ContestScore[]
+    status: ContestProblemCompletionState
+}
+export interface ContestScore {
+    state: ContestScoreState
+    time: number
+    memory: number
+    subtask: number
+}
+export enum ContestScoreState {
+    CORRECT = 1,
+    INCORRECT = 2,
+    TIME_LIM_EXCEEDED = 3,
+    MEM_LIM_EXCEEDED = 4,
+    RUNTIME_ERROR = 5,
+    COMPILE_ERROR = 6
+}
+export enum ContestProblemCompletionState {
+    /**Not attempted */
+    NOT_UPLOADED = 0,
+    /**Uploaded but not graded, can still be changed */
+    UPLOADED = 1,
+    /**Submitted but not graded, submissions locked */
+    SUBMITTED = 2,
+    /**Submitted, graded, and passed all subtasks */
+    GRADED_PASS = 3,
+    /**Submitted, graded, and failed all subtasks */
+    GRADED_FAIL = 4,
+    /**Submitted, graded, passed at least one subtask and failed at least one subtask */
+    GRADED_PARTIAL = 5,
+    /**Error loading status */
+    ERROR = 6
+}
+export enum ContestUpdateSubmissionResult {
+    SUCCESS = 0,
+    FILE_TOO_LARGE = 1,
+    LANGUAGE_NOT_ACCEPTABLE = 2,
+    PROBLEM_NOT_SUBMITTABLE = 3,
+    ERROR = 4,
+    NOT_CONNECTED = 5
+}
+export const getUpdateSubmissionMessage = (res: number): string => {
+    return res == ContestUpdateSubmissionResult.SUCCESS ? 'Success' : res == ContestUpdateSubmissionResult.FILE_TOO_LARGE ? 'File too large' : res == ContestUpdateSubmissionResult.LANGUAGE_NOT_ACCEPTABLE ? 'Selected language not allowed' : res == ContestUpdateSubmissionResult.PROBLEM_NOT_SUBMITTABLE ? 'Problem not accepting submissions' : res == ContestUpdateSubmissionResult.ERROR ? 'Database error' : res == ContestUpdateSubmissionResult.NOT_CONNECTED ? 'Not connected to server' : 'Unknown response code (this is a bug?)';
+};
+
+export interface ScoreboardEntry {
+    username: string
+    score: number
+}
+
+export const completionStateString = (status: ContestProblemCompletionState) => {
+    return status == ContestProblemCompletionState.NOT_UPLOADED ? 'Not uploaded' :
+        status == ContestProblemCompletionState.UPLOADED ? 'Uploaded' :
+            status == ContestProblemCompletionState.SUBMITTED ? 'Submitted' :
+                status == ContestProblemCompletionState.GRADED_PASS ? 'Accepted' :
+                    status == ContestProblemCompletionState.GRADED_FAIL ? 'Failed' :
+                        status == ContestProblemCompletionState.GRADED_PARTIAL ? 'Partially accepted' : 'Error fetching status'
+};
+
+export class ContestHost {
+    readonly #socket: SocketIOSocket
+    readonly connected = ref(false);
+    readonly contest: Contest | null = null;
+
+    constructor(sid: string, token: string) {
+        this.#socket = io(`${serverHostname}/${sid}`, {
+            path: '/web-socketio'
+        });
+        // mild spaghetti unfortunately
+        const modal = globalModal();
+        const serverConnection = useServerConnection();
+        const accountManager = useAccountManager();
+        const onConnectError = (message: string) => {
+            console.error(`ContestHost-${sid}: Connection ${message}`);
+            this.connected.value = false;
+            modal.showModal({ title: 'ContestHost Connect Error', content: 'ContestHost could not connect to the server! Click "yes" to reload.', mode: ModalMode.INPUT, color: 'red' });
+        };
+        const onDisconnected = (message: string) => {
+            console.error(`ContestHost-${sid}: ${message}`);
+            this.connected.value = false;
+            if (serverConnection.connected) modal.showModal({ title: 'ContestHost Disconnected', content: 'ContestHost was disconnected from the server! Click "yes" to reload.', mode: ModalMode.INPUT, color: 'red' });
+        };
+        this.#socket.on('connect', async () => {
+            const success = await this.#socket.emitWithAck('auth', { username: accountManager.username, token: token });
+            if (success === true) {
+                console.info(`ContestHost-${sid}: Connected`);
+                this.connected.value = true;
+            }
+            // if it's not true the server would have disconnected the socket and this would be an error
+        });
+        this.#socket.on('connect_error', () => onConnectError('error'));
+        this.#socket.on('connect_fail', () => onConnectError('failed'));
+        this.#socket.on('disconnect', (reason) => onDisconnected('Disconnected: ' + reason));
+        this.#socket.on('timeout', () => onDisconnected('Timed out'));
+        this.#socket.on('error', (err) => onDisconnected('Error: ' + err));
+    }
+
+    async waitForContestLoad() {
+        if (state.contest != null) return;
+        await new Promise<void>((resolve) => watch(() => this.contest, () => {
+            if (state.contest != null) resolve();
+        }));
+    }
+
+    async getProblemData(round: number, number: number): Promise<ContestProblem | null> {
+        return this.contest?.rounds[round]?.problems[number] ?? null;
+    }
+    async getProblemDataId(id: string): Promise<ContestProblem | null> {
+        for (const round of (this.contest?.rounds ?? [])) {
+            const p = round.problems.find((p) => p.id === id);
+            if (p != undefined) return p;
+        }
+        return null;
+    }
+    async updateSubmission(problemId: string, lang: string, file: string): Promise<ContestUpdateSubmissionResult> {
+        if (!this.connected) return ContestUpdateSubmissionResult.NOT_CONNECTED;
+        return await this.#socket.emitWithAck('updateSubmission', { id: problemId, file, lang });
+    }
+    async getSubmissionCode(problemId: string): Promise<string> {
+        if (!this.connected) return '';
+        return await this.#socket.emitWithAck('getSubmissionCode', { id: problemId });
+    }
+}
+
+socket.on('joinContestHost', ({ type, sid, token }: { type: string, sid: string, token: string }) => {
+    state[type] = new ContestHost(sid, token);
+});
+
+const state = reactive<{
+    [key: string]: ContestHost
+}>({});
+
+export const useContestManager = defineStore('contestManager', {
+    state: () => state,
+    actions: {
+        async getContestList(): Promise<string[] | Error> {
+            return await apiFetch('GET', '/contestList');
+        }
+    }
+});
