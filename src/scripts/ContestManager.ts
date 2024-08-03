@@ -75,15 +75,6 @@ export enum ContestUpdateSubmissionResult {
     ERROR = 4,
     NOT_CONNECTED = 5
 }
-export const getUpdateSubmissionMessage = (res: number): string => {
-    return res == ContestUpdateSubmissionResult.SUCCESS ? 'Success' : res == ContestUpdateSubmissionResult.FILE_TOO_LARGE ? 'File too large' : res == ContestUpdateSubmissionResult.LANGUAGE_NOT_ACCEPTABLE ? 'Selected language not allowed' : res == ContestUpdateSubmissionResult.PROBLEM_NOT_SUBMITTABLE ? 'Problem not accepting submissions' : res == ContestUpdateSubmissionResult.ERROR ? 'Database error' : res == ContestUpdateSubmissionResult.NOT_CONNECTED ? 'Not connected to server' : 'Unknown response code (this is a bug?)';
-};
-
-export interface ScoreboardEntry {
-    username: string
-    score: number
-}
-
 export const completionStateString = (status: ContestProblemCompletionState) => {
     return status == ContestProblemCompletionState.NOT_UPLOADED ? 'Not uploaded' :
         status == ContestProblemCompletionState.UPLOADED ? 'Uploaded' :
@@ -92,6 +83,14 @@ export const completionStateString = (status: ContestProblemCompletionState) => 
                     status == ContestProblemCompletionState.GRADED_FAIL ? 'Failed' :
                         status == ContestProblemCompletionState.GRADED_PARTIAL ? 'Partially accepted' : 'Error fetching status'
 };
+export const getUpdateSubmissionMessage = (res: ContestUpdateSubmissionResult): string => {
+    return res == ContestUpdateSubmissionResult.SUCCESS ? 'Success' : res == ContestUpdateSubmissionResult.FILE_TOO_LARGE ? 'File too large' : res == ContestUpdateSubmissionResult.LANGUAGE_NOT_ACCEPTABLE ? 'Selected language not allowed' : res == ContestUpdateSubmissionResult.PROBLEM_NOT_SUBMITTABLE ? 'Problem not accepting submissions' : res == ContestUpdateSubmissionResult.ERROR ? 'Database error' : res == ContestUpdateSubmissionResult.NOT_CONNECTED ? 'Not connected to server' : 'Unknown response code (this is a bug?)';
+};
+
+export interface ScoreboardEntry {
+    username: string
+    score: number
+}
 
 export class ContestHost {
     readonly #socket: SocketIOSocket
