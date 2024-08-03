@@ -56,7 +56,7 @@ const state = reactive<{
                 submitSolver: boolean
                 acceptedSolverLanguages: string[]
                 maxSubmissionSize: number
-            }
+            } | undefined
         }
     }
 }>({
@@ -229,6 +229,7 @@ export const useServerConnection = defineStore('serverconnection', {
         RSAsessionId: () => RSA.sessionID
     },
     actions: {
+        RSAencrypt: RSA.encrypt,
         emit(event: string, ...data: any) {
             return socket.emit(event, ...data);
         },

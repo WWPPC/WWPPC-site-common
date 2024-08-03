@@ -1,7 +1,7 @@
 import { globalModal, ModalMode } from '#/modal';
 import { defineStore } from 'pinia';
 import { io, Socket as SocketIOSocket } from 'socket.io-client';
-import { reactive, ref, watch } from 'vue';
+import { reactive, watch } from 'vue';
 
 import { useAccountManager } from './AccountManager';
 import { apiFetch, serverHostname, socket, useServerConnection } from './ServerConnection';
@@ -95,8 +95,9 @@ export const completionStateString = (status: ContestProblemCompletionState) => 
 
 export class ContestHost {
     readonly #socket: SocketIOSocket
-    readonly connected = ref(false);
-    readonly contest: Contest | null = null;
+    connected = false;
+    contest: Contest | null = null;
+    scoreboard: ScoreboardEntry[] = [];
 
     constructor(sid: string, token: string) {
         this.#socket = io(`${serverHostname}/${sid}`, {
@@ -108,19 +109,19 @@ export class ContestHost {
         const accountManager = useAccountManager();
         const onConnectError = (message: string) => {
             console.error(`ContestHost-${sid}: Connection ${message}`);
-            this.connected.value = false;
+            this.connected = false;
             modal.showModal({ title: 'ContestHost Connect Error', content: 'ContestHost could not connect to the server! Click "yes" to reload.', mode: ModalMode.INPUT, color: 'red' });
         };
         const onDisconnected = (message: string) => {
             console.error(`ContestHost-${sid}: ${message}`);
-            this.connected.value = false;
+            this.connected = false;
             if (serverConnection.connected) modal.showModal({ title: 'ContestHost Disconnected', content: 'ContestHost was disconnected from the server! Click "yes" to reload.', mode: ModalMode.INPUT, color: 'red' });
         };
         this.#socket.on('connect', async () => {
             const success = await this.#socket.emitWithAck('auth', { username: accountManager.username, token: token });
             if (success === true) {
                 console.info(`ContestHost-${sid}: Connected`);
-                this.connected.value = true;
+                this.connected = true;
             }
             // if it's not true the server would have disconnected the socket and this would be an error
         });
@@ -129,6 +130,15 @@ export class ContestHost {
         this.#socket.on('disconnect', (reason) => onDisconnected('Disconnected: ' + reason));
         this.#socket.on('timeout', () => onDisconnected('Timed out'));
         this.#socket.on('error', (err) => onDisconnected('Error: ' + err));
+
+        // other listeners
+        this.#socket.on('contestData', (data: Contest) => {
+            this.contest = data;
+            console.log(state.contest);
+        });
+        this.#socket.on('scoreboard', (data: ScoreboardEntry[]) => {
+            this.scoreboard = data;
+        });
     }
 
     async waitForContestLoad() {
@@ -163,7 +173,7 @@ socket.on('joinContestHost', ({ type, sid, token }: { type: string, sid: string,
 });
 
 const state = reactive<{
-    [key: string]: ContestHost
+    [key: string]: ContestHost | undefined
 }>({});
 
 export const useContestManager = defineStore('contestManager', {

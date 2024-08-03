@@ -25,7 +25,7 @@ defineProps<{
     mask-size: 30px;
     mask-repeat: no-repeat;
     mask-position: center;
-    mask-image: v-bind("`url('${$props.icon}')`");
+    mask-image: v-bind("`${'u'}rl('${$props.icon}')`");
     background-color: white;
     transition: 50ms linear background-color;
 }
