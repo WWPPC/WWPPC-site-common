@@ -142,9 +142,9 @@ export class ContestHost {
     }
 
     async waitForContestLoad() {
-        if (state.contest != null) return;
+        if (this.contest != null) return;
         await new Promise<void>((resolve) => watch(() => this.contest, () => {
-            if (state.contest != null) resolve();
+            if (this.contest != null) resolve();
         }));
     }
 
@@ -169,12 +169,16 @@ export class ContestHost {
 }
 
 socket.on('joinContestHost', ({ type, sid, token }: { type: string, sid: string, token: string }) => {
-    state[type] = new ContestHost(sid, token);
+    state.contests[type] = new ContestHost(sid, token);
 });
 
 const state = reactive<{
-    [key: string]: ContestHost | undefined
-}>({});
+    contests: {
+        [key: string]: ContestHost | undefined
+    }
+}>({
+    contests: {}
+});
 
 export const useContestManager = defineStore('contestManager', {
     state: () => state,

@@ -75,22 +75,22 @@ const loadErrorModal = (title: string, content: string) => {
     });
 };
 const loadProblem = async () => {
-    if (route.query.ignore_server !== undefined || contestManager[contestType] === undefined) return;
+    if (route.query.ignore_server !== undefined || contestManager.contests[contestType] === undefined) return;
     if (!props.isUpsolve) {
-        await contestManager[contestType].waitForContestLoad();
+        await contestManager.contests[contestType].waitForContestLoad();
         if (route.params.problemId !== undefined) {
             if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.exec(route.params.problemId.toString())) {
                 loadErrorModal('Malformed problem ID', 'The supplied problem ID is invalid!');
                 return;
             }
-            const p = await contestManager[contestType].getProblemDataId(route.params.problemId.toString());
+            const p = await contestManager.contests[contestType].getProblemDataId(route.params.problemId.toString());
             if (p === null) {
                 loadErrorModal('Problem not found', 'The requested problem does not exist!');
                 return;
             }
             problem.value = p;
         } else if (route.params.problemRound !== undefined && route.params.problemNumber !== undefined) {
-            const p = await contestManager[contestType].getProblemData(Number(route.params.problemRound.toString()), Number(route.params.problemNumber.toString()));
+            const p = await contestManager.contests[contestType].getProblemData(Number(route.params.problemRound.toString()), Number(route.params.problemNumber.toString()));
             if (p === null) {
                 loadErrorModal('Problem not found', 'The requested problem does not exist!');
                 return;
@@ -119,7 +119,7 @@ const loadProblem = async () => {
     }
 };
 onMounted(loadProblem);
-watch(() => contestManager.contest, loadProblem);
+watch(() => contestManager.contests[contestType]?.contest, loadProblem);
 
 const updateSubmissions = () => {
     setTimeout(async () => {
@@ -171,7 +171,7 @@ const handleUpload = () => {
     }
 };
 const submitUpload = async () => {
-    if (contestManager[contestType] == undefined || languageDropdown.value?.value == undefined || languageDropdown.value?.value == '' || fileUpload.value == null || fileUpload.value.files == null) {
+    if (contestManager.contests[contestType] == undefined || languageDropdown.value?.value == undefined || languageDropdown.value?.value == '' || fileUpload.value == null || fileUpload.value.files == null) {
         return;
     }
     const file = fileUpload.value.files.item(0);
@@ -179,7 +179,7 @@ const submitUpload = async () => {
         modal.showModal({ title: 'No file selected', content: 'No file was selected!', color: 'var(--color-2)' });
         return;
     }
-    const status = await (props.isUpsolve ? upsolveManager : contestManager[contestType]).updateSubmission(problem.value.id, (languageDropdown.value.value as string), await file.text());
+    const status = await (props.isUpsolve ? upsolveManager : contestManager.contests[contestType]).updateSubmission(problem.value.id, (languageDropdown.value.value as string), await file.text());
     if (status != ContestUpdateSubmissionResult.SUCCESS) {
         modal.showModal({ title: 'Could not submit', content: getUpdateSubmissionMessage(status), color: 'var(--color-2)' })
     } else {
@@ -195,12 +195,12 @@ const submit = async () => {
     if (contestManager.config[contestType]?.submitSolver) {
         await submitUpload();
     } else {
-        if (contestManager[contestType] == undefined) return;
+        if (contestManager.contests[contestType] == undefined) return;
         if (answerInput.value.trim() == '') {
             modal.showModal({ title: 'No answer', content: 'Your answer cannot be blank!', color: 'var(--color-2)' });
             return;
         }
-        const status = await (props.isUpsolve ? upsolveManager : contestManager[contestType]).updateSubmission(problem.value.id, '', answerInput.value);
+        const status = await (props.isUpsolve ? upsolveManager : contestManager.contests[contestType]).updateSubmission(problem.value.id, '', answerInput.value);
         if (status != ContestUpdateSubmissionResult.SUCCESS) {
             modal.showModal({ title: 'Could not submit', content: getUpdateSubmissionMessage(status), color: 'var(--color-2)' })
         }
@@ -221,8 +221,8 @@ onMounted(() => {
 const showCode = ref(false);
 const submissionCode = ref('');
 const viewCode = async () => {
-    if (contestManager[contestType] == undefined) return;
-    submissionCode.value = await (props.isUpsolve ? upsolveManager : contestManager[contestType]).getSubmissionCode(problem.value.id);
+    if (contestManager.contests[contestType] == undefined) return;
+    submissionCode.value = await (props.isUpsolve ? upsolveManager : contestManager.contests[contestType]).getSubmissionCode(problem.value.id);
     showCode.value = true;
 };
 </script>
@@ -272,7 +272,7 @@ const viewCode = async () => {
                         <span>Answer:</span>
                         <InputTextBox v-model="answerInput"></InputTextBox>
                     </div>
-                    <InputButton ref="submitButton" :text="contestManager.config[contestType]?.submitSolver ? 'Upload Submission' : 'Submit'" type="submit" width="min-content" @click="submit" :disabled="languageDropdown?.value == undefined || languageDropdown?.value == '' || fileUpload?.files == null || fileUpload?.files.item(0) == null || (!props.isUpsolve && (contestManager[contestType]?.contest == null || (contestManager[contestType]?.contest?.rounds[problem.round].startTime ?? 0) > Date.now() || (contestManager[contestType]?.contest?.rounds[problem.round].endTime ?? Infinity) <= Date.now()))"></InputButton>
+                    <InputButton ref="submitButton" :text="contestManager.config[contestType]?.submitSolver ? 'Upload Submission' : 'Submit'" type="submit" width="min-content" @click="submit" :disabled="languageDropdown?.value == undefined || languageDropdown?.value == '' || fileUpload?.files == null || fileUpload?.files.item(0) == null || (!props.isUpsolve && (contestManager.contests[contestType]?.contest == null || (contestManager.contests[contestType]?.contest?.rounds[problem.round].startTime ?? 0) > Date.now() || (contestManager.contests[contestType]?.contest?.rounds[problem.round].endTime ?? Infinity) <= Date.now()))"></InputButton>
                     <div style="text-align: center; color: var(--color-3);" v-if="!serverConnection.loggedIn">
                         <i>You must be signed in to submit solutions</i>
                     </div>

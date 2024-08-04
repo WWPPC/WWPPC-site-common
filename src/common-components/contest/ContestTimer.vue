@@ -25,7 +25,7 @@ const flashColor = ref('');
 let inRound = false;
 const updateTime = () => {
     // for some reason conditional chaining doesnt count for vite typescript?
-    if (contestManager[contestType]?.contest == undefined) {
+    if (contestManager.contests[contestType]?.contest == undefined) {
         if (props.big) round.value = 'Not in contest';
         else round.value = '---';
         nextTime.value = new Date();
@@ -34,17 +34,17 @@ const updateTime = () => {
     }
     inRound = false;
     color.value = 'white';
-    round.value = contestManager[contestType].contest.id;
-    nextTime.value = new Date(contestManager[contestType].contest.endTime);
+    round.value = contestManager.contests[contestType].contest.id;
+    nextTime.value = new Date(contestManager.contests[contestType].contest.endTime);
     const now = Date.now();
-    if (now > contestManager[contestType].contest.endTime) {
+    if (now > contestManager.contests[contestType].contest.endTime) {
         if (props.big) round.value = 'Contest ended';
         else round.value = '---';
         nextTime.value = new Date();
         color.value = 'var(--color-2)';
     }
-    for (let i = contestManager[contestType].contest.rounds.length - 1; i >= 0; i--) {
-        const r = contestManager[contestType].contest.rounds[i];
+    for (let i = contestManager.contests[contestType].contest.rounds.length - 1; i >= 0; i--) {
+        const r = contestManager.contests[contestType].contest.rounds[i];
         if (now < r.startTime) {
             nextTime.value = new Date(r.startTime);
             color.value = 'white';
@@ -62,14 +62,14 @@ const updateFlash = () => {
     if (inRound) {
         if (nextTime.value.getTime() - Date.now() <= 300000) flashColor.value = 'var(--color-2)';
         else flashColor.value = 'var(--color-1)';
-    } else if (Date.now() > (contestManager[contestType]?.contest?.endTime ?? 0)) {
+    } else if (Date.now() > (contestManager.contests[contestType]?.contest?.endTime ?? 0)) {
         flashColor.value = '';
     } else {
         if (nextTime.value.getTime() - Date.now() <= 60000) flashColor.value = 'var(--color-3)';
         else flashColor.value = 'white';
     }
 };
-watch(() => contestManager.contest, updateTime);
+watch(() => contestManager.contests[contestType]?.contest, updateTime);
 onMounted(updateTime);
 setInterval(updateFlash, 1000);
 
@@ -82,7 +82,7 @@ watch(nextTime, () => emit('next', nextTime.value.getTime()));
 
 <template>
     <Transition>
-        <div :class="'timer' + ($props.big ? '2' : '')" v-if="contestManager[contestType]?.contest != null || route.query.ignore_server !== undefined" v-show="show">
+        <div :class="'timer' + ($props.big ? '2' : '')" v-if="contestManager.contests[contestType]?.contest != null || route.query.ignore_server !== undefined" v-show="show">
             <GlitchText :text="round" :class="'timerText' + ($props.big ? '2' : '')" :shadow="$props.big" :glow="$props.big" random on-visible></GlitchText>
             <TimerDisplay type="auto-timer" :to="nextTime" :class="'timerTime' + ($props.big ? '2' : '')" :shadow="$props.big" :glow="$props.big" :color="color" :flashing="flashColor != ''" :flash-color="flashColor == color ? undefined : flashColor" @zero="updateTime"></TimerDisplay>
         </div>

@@ -15,8 +15,8 @@ const contestManager = useContestManager();
 
 const scoreboard = ref<{ username: string, displayName: string, score: number }[]>([]);
 const update = async () => {
-    if (contestManager[contestType]?.scoreboard == null) scoreboard.value = [];
-    else scoreboard.value = await Promise.all(contestManager[contestType].scoreboard.map(async (s) => {
+    if (contestManager.contests[contestType]?.scoreboard == null) scoreboard.value = [];
+    else scoreboard.value = await Promise.all(contestManager.contests[contestType].scoreboard.map(async (s) => {
         const teamData = await accountManager.getTeamData(s.username);
         return {
             username: s.username,
@@ -25,7 +25,7 @@ const update = async () => {
         };
     }));
 };
-watch(() => contestManager.scoreboard, update);
+watch(() => contestManager.contests[contestType]?.scoreboard, update);
 onMounted(update);
 </script>
 
@@ -38,7 +38,7 @@ onMounted(update);
                 <RouterLink :to="'/user/@' + item.username">{{ item.displayName }}</RouterLink>
             </div>
         </div>
-        <div v-if="contestManager.scoreboard == null" style="display: flex; flex-direction: column; align-items: center;">
+        <div v-if="contestManager.contests[contestType]?.scoreboard == null" style="display: flex; flex-direction: column; align-items: center;">
             <div style="width: 10vw; height: 10vw">
                 <LoadingSpinner></LoadingSpinner>
             </div>

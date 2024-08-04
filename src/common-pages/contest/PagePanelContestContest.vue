@@ -19,45 +19,45 @@ const currentRound = ref(0);
 const roundTimes = ref<{ label: string, time: number }[]>([]);
 const updateRoundTimes = () => {
     roundTimes.value = [];
-    if (contestManager[contestType] == undefined || contestManager[contestType].contest === null || contestManager[contestType].contest.rounds.length == 0) return;
+    if (contestManager.contests[contestType] == undefined || contestManager.contests[contestType].contest === null || contestManager.contests[contestType].contest.rounds.length == 0) return;
     const times: { label: string, time: number }[] = [];
     const now = Date.now();
     currentRound.value = -1;
     times.push({
         label: 'Opening ceremonies',
-        time: contestManager[contestType].contest.rounds[0].startTime - contestManager[contestType].contest.startTime
+        time: contestManager.contests[contestType].contest.rounds[0].startTime - contestManager.contests[contestType].contest.startTime
     }, {
         label: contestManager.config[contestType]?.rounds ? 'Round 1' : 'Contest',
-        time: contestManager[contestType].contest.rounds[0].endTime - contestManager[contestType].contest.rounds[0].startTime
+        time: contestManager.contests[contestType].contest.rounds[0].endTime - contestManager.contests[contestType].contest.rounds[0].startTime
     });
-    if (now > contestManager[contestType].contest.startTime && now < contestManager[contestType].contest.rounds[0].startTime) currentRound.value = 0;
-    else if (now > contestManager[contestType].contest.rounds[0].startTime && now < contestManager[contestType].contest.rounds[0].endTime) currentRound.value = 1;
-    for (let i = 1; i < contestManager[contestType].contest.rounds.length; i++) {
+    if (now > contestManager.contests[contestType].contest.startTime && now < contestManager.contests[contestType].contest.rounds[0].startTime) currentRound.value = 0;
+    else if (now > contestManager.contests[contestType].contest.rounds[0].startTime && now < contestManager.contests[contestType].contest.rounds[0].endTime) currentRound.value = 1;
+    for (let i = 1; i < contestManager.contests[contestType].contest.rounds.length; i++) {
         times.push({
             label: 'Break',
-            time: contestManager[contestType].contest.rounds[i].startTime - contestManager[contestType].contest.rounds[i - 1].endTime
+            time: contestManager.contests[contestType].contest.rounds[i].startTime - contestManager.contests[contestType].contest.rounds[i - 1].endTime
         }, {
             label: 'Round ' + (i + 1),
-            time: contestManager[contestType].contest.rounds[i].endTime - contestManager[contestType].contest.rounds[i].startTime
+            time: contestManager.contests[contestType].contest.rounds[i].endTime - contestManager.contests[contestType].contest.rounds[i].startTime
         });
-        if (now > contestManager[contestType].contest.rounds[i - 1].endTime && now < contestManager[contestType].contest.rounds[i].startTime) currentRound.value = i * 2;
-        else if (now > contestManager[contestType].contest.rounds[i].startTime && now < contestManager[contestType].contest.rounds[i].endTime) currentRound.value = i * 2 + 1;
+        if (now > contestManager.contests[contestType].contest.rounds[i - 1].endTime && now < contestManager.contests[contestType].contest.rounds[i].startTime) currentRound.value = i * 2;
+        else if (now > contestManager.contests[contestType].contest.rounds[i].startTime && now < contestManager.contests[contestType].contest.rounds[i].endTime) currentRound.value = i * 2 + 1;
     }
     times.push({
         label: 'Closing ceremonies',
-        time: contestManager[contestType].contest.endTime - contestManager[contestType].contest.rounds[contestManager[contestType].contest.rounds.length - 1].endTime
+        time: contestManager.contests[contestType].contest.endTime - contestManager.contests[contestType].contest.rounds[contestManager.contests[contestType].contest.rounds.length - 1].endTime
     });
     if (currentRound.value == -1) currentRound.value = times.length - 1;
     roundTimes.value = times;
 };
-watch(() => contestManager[contestType]?.contest, updateRoundTimes);
+watch(() => contestManager.contests[contestType]?.contest, updateRoundTimes);
 onMounted(updateRoundTimes);
 </script>
 
 <template>
     <div class="fullBlock stretchBlock">
         <div class="timerContainer">
-            <GlitchText :text="contestManager[contestType]?.contest?.id ?? 'Not in contest'" class="timerTitle" color="var(--color-1)" font-size="var(--font-title)" shadow glow :steps=2 :delay=10 random on-visible></GlitchText>
+            <GlitchText :text="contestManager.contests[contestType]?.contest?.id ?? 'Not in contest'" class="timerTitle" color="var(--color-1)" font-size="var(--font-title)" shadow glow :steps=2 :delay=10 random on-visible></GlitchText>
             <ContestTimer big :contest="props.contest" @next="updateRoundTimes"></ContestTimer>
         </div>
         <div style="flex-grow: 1"></div>

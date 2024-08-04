@@ -18,16 +18,16 @@ const contestManager = useContestManager();
         <div class="problemListWrapper">
             <AngledTitledContainer title="Problems" height="100%">
                 <div v-if="contestManager.config[contestType]?.rounds" class="problemList">
-                    <AnimateInContainer type="slideUp" v-for="(round, index) in contestManager[contestType]?.contest?.rounds.filter((r) => r.problems.length > 0)" :key=round.number :delay="index * 200">
+                    <AnimateInContainer type="slideUp" v-for="(round, index) in contestManager.contests[contestType]?.contest?.rounds.filter((r) => r.problems.length > 0)" :key=round.number :delay="index * 200">
                         <ContestProblemListRound :data=round></ContestProblemListRound>
                     </AnimateInContainer>
                 </div>
                 <div v-else>
-                    <AnimateInContainer type="fade" v-for="(problem, index) in contestManager[contestType]?.contest?.rounds[0]?.problems" :key=problem.number :delay="index * 100">
+                    <AnimateInContainer type="fade" v-for="(problem, index) in contestManager.contests[contestType]?.contest?.rounds[0]?.problems" :key=problem.number :delay="index * 100">
                         <ContestProblemListProblem :data=problem></ContestProblemListProblem>
                     </AnimateInContainer>
                 </div>
-                <WaitCover text="Loading..." :show="contestManager.contest === null"></WaitCover>
+                <WaitCover text="Loading..." :show="contestManager.contests[contestType]?.contest == null"></WaitCover>
             </AngledTitledContainer>
         </div>
     </div>
