@@ -99,9 +99,10 @@ export class ContestHost {
     scoreboard: ScoreboardEntry[] = [];
 
     constructor(sid: string, token: string) {
-        this.#socket = io(`${serverHostname}/${sid}`, {
+        this.#socket = io(`${serverHostname}/contest-${sid}/`, {
             path: '/web-socketio'
         });
+        this.#socket.connect();
         // mild spaghetti unfortunately
         const modal = globalModal();
         const serverConnection = useServerConnection();
@@ -124,7 +125,7 @@ export class ContestHost {
             }
             // if it's not true the server would have disconnected the socket and this would be an error
         });
-        this.#socket.on('connect_error', () => onConnectError('error'));
+        this.#socket.on('connect_error', (err) => onConnectError('error: ' + err));
         this.#socket.on('connect_fail', () => onConnectError('failed'));
         this.#socket.on('disconnect', (reason) => onDisconnected('Disconnected: ' + reason));
         this.#socket.on('timeout', () => onDisconnected('Timed out'));
@@ -133,7 +134,7 @@ export class ContestHost {
         // other listeners
         this.#socket.on('contestData', (data: Contest) => {
             this.contest = data;
-            console.log(state.contest);
+            console.log(this.contest);
         });
         this.#socket.on('scoreboard', (data: ScoreboardEntry[]) => {
             this.scoreboard = data;

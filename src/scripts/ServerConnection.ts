@@ -279,7 +279,7 @@ socket.on('connect', () => {
     state.connectError = false;
     console.info(`ServerConnection: Connected to ${serverHostname}`);
 });
-socket.on('connect_error', () => onConnectError('error'));
+socket.on('connect_error', (err) => onConnectError('error: ' + err));
 socket.on('connect_fail', () => onConnectError('failed'));
 socket.on('disconnect', (reason) => onDisconnected('Disconnected: ' + reason));
 socket.on('timeout', () => onDisconnected('Timed out'));
