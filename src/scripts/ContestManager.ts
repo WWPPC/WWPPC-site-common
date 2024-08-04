@@ -92,17 +92,27 @@ export interface ScoreboardEntry {
     score: number
 }
 
-export class ContestHost {
-    readonly #socket: SocketIOSocket
+export interface ContestHostInterface {
+    connected: boolean
+    contest: Contest | null
+    scoreboard: ScoreboardEntry[]
+    waitForContestLoad(): Promise<void>
+    getProblemData(round: number, number: number): Promise<ContestProblem | null>
+    getProblemDataId(id: string): Promise<ContestProblem | null>
+    updateSubmission(problemId: string, lang: string, file: string): Promise<ContestUpdateSubmissionResult>
+    getSubmissionCode(problemId: string): Promise<string>
+}
+export class ContestHost implements ContestHostInterface {
+    private readonly socket: SocketIOSocket;
     connected = false;
     contest: Contest | null = null;
     scoreboard: ScoreboardEntry[] = [];
 
     constructor(sid: string, token: string) {
-        this.#socket = io(`${serverHostname}/contest-${sid}/`, {
+        this.socket = io(`${serverHostname}/contest-${sid}/`, {
             path: '/web-socketio'
         });
-        this.#socket.connect();
+        this.socket.connect();
         // mild spaghetti unfortunately
         const modal = globalModal();
         const serverConnection = useServerConnection();
@@ -117,26 +127,25 @@ export class ContestHost {
             this.connected = false;
             if (serverConnection.connected) modal.showModal({ title: 'ContestHost Disconnected', content: 'ContestHost was disconnected from the server! Click "yes" to reload.', mode: ModalMode.INPUT, color: 'red' });
         };
-        this.#socket.on('connect', async () => {
-            const success = await this.#socket.emitWithAck('auth', { username: accountManager.username, token: token });
+        this.socket.on('connect', async () => {
+            const success = await this.socket.emitWithAck('auth', { username: accountManager.username, token: token });
             if (success === true) {
                 console.info(`ContestHost-${sid}: Connected`);
                 this.connected = true;
             }
             // if it's not true the server would have disconnected the socket and this would be an error
         });
-        this.#socket.on('connect_error', (err) => onConnectError('error: ' + err));
-        this.#socket.on('connect_fail', () => onConnectError('failed'));
-        this.#socket.on('disconnect', (reason) => onDisconnected('Disconnected: ' + reason));
-        this.#socket.on('timeout', () => onDisconnected('Timed out'));
-        this.#socket.on('error', (err) => onDisconnected('Error: ' + err));
+        this.socket.on('connect_error', (err) => onConnectError('error: ' + err));
+        this.socket.on('connect_fail', () => onConnectError('failed'));
+        this.socket.on('disconnect', (reason) => onDisconnected('Disconnected: ' + reason));
+        this.socket.on('timeout', () => onDisconnected('Timed out'));
+        this.socket.on('error', (err) => onDisconnected('Error: ' + err));
 
         // other listeners
-        this.#socket.on('contestData', (data: Contest) => {
+        this.socket.on('contestData', (data: Contest) => {
             this.contest = data;
-            console.log(this.contest);
         });
-        this.#socket.on('scoreboard', (data: ScoreboardEntry[]) => {
+        this.socket.on('scoreboard', (data: ScoreboardEntry[]) => {
             this.scoreboard = data;
         });
     }
@@ -160,21 +169,21 @@ export class ContestHost {
     }
     async updateSubmission(problemId: string, lang: string, file: string): Promise<ContestUpdateSubmissionResult> {
         if (!this.connected) return ContestUpdateSubmissionResult.NOT_CONNECTED;
-        return await this.#socket.emitWithAck('updateSubmission', { id: problemId, file, lang });
+        return await this.socket.emitWithAck('updateSubmission', { id: problemId, file, lang });
     }
     async getSubmissionCode(problemId: string): Promise<string> {
         if (!this.connected) return '';
-        return await this.#socket.emitWithAck('getSubmissionCode', { id: problemId });
+        return await this.socket.emitWithAck('getSubmissionCode', { id: problemId });
     }
 }
 
 socket.on('joinContestHost', ({ type, sid, token }: { type: string, sid: string, token: string }) => {
-    state.contests[type] = new ContestHost(sid, token);
+    state.contests[type] = reactive(new ContestHost(sid, token));
 });
 
 const state = reactive<{
     contests: {
-        [key: string]: ContestHost | undefined
+        [key: string]: ContestHostInterface | undefined
     }
 }>({
     contests: {}
