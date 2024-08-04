@@ -77,6 +77,7 @@ const loadErrorModal = (title: string, content: string) => {
 const loadProblem = async () => {
     if (route.query.ignore_server !== undefined || contestManager.contests[contestType] === undefined) return;
     if (!props.isUpsolve) {
+        console.log('why borken')
         await contestManager.contests[contestType].waitForContestLoad();
         console.log('loaded')
         if (route.params.problemId !== undefined) {
@@ -85,15 +86,15 @@ const loadProblem = async () => {
                 return;
             }
             const p = await contestManager.contests[contestType].getProblemDataId(route.params.problemId.toString());
-        console.log('problemi di')
-        if (p === null) {
+            console.log('problemi di')
+            if (p === null) {
                 loadErrorModal('Problem not found', 'The requested problem does not exist!');
                 return;
             }
             problem.value = p;
         } else if (route.params.problemRound !== undefined && route.params.problemNumber !== undefined) {
             const p = await contestManager.contests[contestType].getProblemData(Number(route.params.problemRound.toString()), Number(route.params.problemNumber.toString()));
-        console.log('numberner')
+            console.log('numberner')
             if (p === null) {
                 loadErrorModal('Problem not found', 'The requested problem does not exist!');
                 return;
