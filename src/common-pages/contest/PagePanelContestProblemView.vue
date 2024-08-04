@@ -75,7 +75,9 @@ const loadErrorModal = (title: string, content: string) => {
     });
 };
 const loadProblem = async () => {
+    console.log('load')
     if (route.query.ignore_server !== undefined || contestManager.contests[contestType] === undefined) return;
+    console.log('buh')
     if (!props.isUpsolve) {
         await contestManager.contests[contestType].waitForContestLoad();
         if (route.params.problemId !== undefined) {
@@ -119,7 +121,6 @@ const loadProblem = async () => {
     }
 };
 onMounted(loadProblem);
-watch(() => contestManager.contests[contestType], loadProblem);
 watch(() => contestManager.contests[contestType]?.contest, loadProblem);
 watch(() => route.params.problemId + ' ' + route.params.problemRound + ' ' + route.params.problemNumber, loadProblem);
 
