@@ -120,8 +120,7 @@ const loadProblem = async () => {
 };
 onMounted(loadProblem);
 watch(() => contestManager.contests[contestType]?.contest, loadProblem);
-watch(() => contestManager.contests[contestType], () => console.log('buh'));
-watch(() => contestManager.contests[contestType]?.contest, () => console.log('buh2'));
+watch(() => route.params.problemId + ' ' + route.params.problemRound + ' ' + route.params.problemNumber, loadProblem);
 
 const updateSubmissions = () => {
     setTimeout(async () => {
@@ -231,7 +230,7 @@ const viewCode = async () => {
 
 <template>
     <div style="margin-left: -4px;">
-        <RouterLink :to="props.isUpsolve ? ('./archive/' + route.params.archiveContest) : './problemList'" no-deco>
+        <RouterLink :to="((route.params.problemId !== undefined || route.params.problemNumber !== undefined) ? '.' : '') + (props.isUpsolve ? ('./archive/' + route.params.archiveContest) : './problemList')" no-deco>
             <InputIconButton :text="`Back to ${props.isUpsolve ? route.params.archiveContest : 'Problem List'}`" img="/assets/arrow-left.svg" color="var(--color-1)"></InputIconButton>
         </RouterLink>
     </div>
