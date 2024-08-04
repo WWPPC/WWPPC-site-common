@@ -120,12 +120,12 @@ export class ContestHost implements ContestHostInterface {
         const onConnectError = (message: string) => {
             console.error(`ContestHost-${sid}: Connection ${message}`);
             this.connected = false;
-            modal.showModal({ title: 'ContestHost Connect Error', content: 'ContestHost could not connect to the server! Click "yes" to reload.', mode: ModalMode.INPUT, color: 'red' });
+            modal.showModal({ title: 'ContestHost Connect Error', content: 'ContestHost could not connect to the server! Click "yes" to reload.', mode: ModalMode.INPUT, color: 'var(--color-2)' });
         };
         const onDisconnected = (message: string) => {
             console.error(`ContestHost-${sid}: ${message}`);
             this.connected = false;
-            if (serverConnection.connected) modal.showModal({ title: 'ContestHost Disconnected', content: 'ContestHost was disconnected from the server! Click "yes" to reload.', mode: ModalMode.INPUT, color: 'red' });
+            if (serverConnection.connected) modal.showModal({ title: 'ContestHost Disconnected', content: 'ContestHost was disconnected from the server! Click "yes" to reload.', mode: ModalMode.INPUT, color: 'var(--color-2)' });
         };
         this.socket.on('connect', async () => {
             const success = await this.socket.emitWithAck('auth', { username: accountManager.username, token: token });
