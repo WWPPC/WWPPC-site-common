@@ -154,7 +154,13 @@ export class ContestHost implements ContestHostInterface {
 
     async waitForContestLoad() {
         if (this.contest != null) return;
-        await new Promise<void>((resolve) => socket.once('contestData', () => resolve()));
+        await new Promise<void>((resolve) => {
+            console.log('what')
+            socket.once('contestData', () => {
+                resolve()
+                console.log('egevnetn')
+        });
+        });
     }
 
     async getProblemData(round: number, number: number): Promise<ContestProblem | null> {
