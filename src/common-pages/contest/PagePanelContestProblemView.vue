@@ -71,7 +71,7 @@ const loadErrorModal = (title: string, content: string) => {
         content: content + '<br>Click <code>OK</code> to return to problem list.',
         color: 'var(--color-2)'
     }).result.then(() => {
-        router.push(`/contest/problemList`);
+        router.push(`./problemList`);
     });
 };
 const loadProblem = async () => {
@@ -120,6 +120,8 @@ const loadProblem = async () => {
 };
 onMounted(loadProblem);
 watch(() => contestManager.contests[contestType]?.contest, loadProblem);
+watch(() => contestManager.contests[contestType], () => console.log('buh'));
+watch(() => contestManager.contests[contestType]?.contest, () => console.log('buh2'));
 
 const updateSubmissions = () => {
     setTimeout(async () => {

@@ -4,13 +4,13 @@ import { InputButton } from '#/inputs';
 
 <template>
     <div class="notFound">
-        <span style="color: red; font-size: var(--font-32);">BUG: 404 Not Found</span>
+        <span style="color: var(--color-2); font-size: var(--font-32);">BUG: 404 Not Found</span>
         <br>
         &lt;span style="color: red;"&gt;IS BORKEN!!!&lt;/span&gt;
         <br>
         <br>
         <RouterLink to="/home">
-            <InputButton text="Magical Fix Button" color="lime" width="200px"></InputButton>
+            <InputButton text="Magical Fix Button" color="var(--color-1)" width="200px"></InputButton>
         </RouterLink>
     </div>
 </template>
