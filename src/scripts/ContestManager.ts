@@ -126,6 +126,7 @@ export class ContestHost implements ContestHostInterface {
             console.error(`ContestHost-${sid}: ${message}`);
             this.connected = false;
             if (serverConnection.connected) modal.showModal({ title: 'ContestHost Disconnected', content: 'ContestHost was disconnected from the server! Click "yes" to reload.', mode: ModalMode.INPUT, color: 'var(--color-2)' });
+            this.socket.disconnect();
         };
         this.socket.on('connect', async () => {
             const success = await this.socket.emitWithAck('auth', { username: accountManager.username, token: token });

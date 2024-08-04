@@ -34,7 +34,7 @@ onMounted(() => {
         <span class="contestProblemListProblemName"><b>{{ nameText }}</b></span>
         <span class="contestProblemListProblemAuthor"><i>{{ authorText }}</i></span>
         <span class="contestProblemListProblemButton">
-            <RouterLink :to="props.archive ? `/contest/archiveView/${props.data.contest}/${props.data.round}/${props.data.number}` : `/contest/problemView/${props.data.round}_${props.data.number}`" no-deco>
+            <RouterLink :to="props.archive ? `../archiveView/${props.data.contest}/${props.data.round}/${props.data.number}` : `../problemView/${props.data.round}_${props.data.number}`" no-deco>
                 <InputLinkButton text="View" width="100px" height="36px" border></InputLinkButton>
             </RouterLink>
         </span>
