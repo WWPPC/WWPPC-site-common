@@ -3,6 +3,7 @@ import { AnimateInContainer, AngledTitledContainer } from '#/containers';
 import ContestProblemListRound from '#/common-components/contest/problemList/ContestProblemListRound.vue';
 import { useContestManager } from '#/scripts/ContestManager';
 import WaitCover from '#/common/WaitCover.vue';
+import ContestProblemListProblem from '#/common-components/contest/problemList/ContestProblemListProblem.vue';
 
 const props = defineProps<{
     contest: string
@@ -16,9 +17,14 @@ const contestManager = useContestManager();
     <div class="problemListWrapperWrapper centered">
         <div class="problemListWrapper">
             <AngledTitledContainer title="Problems" height="100%">
-                <div class="problemList">
-                    <AnimateInContainer v-for="(round, index) in contestManager[contestType]?.contest?.rounds.filter((r) => r.problems.length > 0)" :key=round.number type="slideUp" :delay="index * 200">
+                <div v-if="contestManager.config[contestType]?.rounds" class="problemList">
+                    <AnimateInContainer type="slideUp" v-for="(round, index) in contestManager[contestType]?.contest?.rounds.filter((r) => r.problems.length > 0)" :key=round.number :delay="index * 200">
                         <ContestProblemListRound :data=round></ContestProblemListRound>
+                    </AnimateInContainer>
+                </div>
+                <div v-else>
+                    <AnimateInContainer type="fade" v-for="(problem, index) in contestManager[contestType]?.contest?.rounds[0]?.problems" :key=problem.number :delay="index * 100">
+                        <ContestProblemListProblem :data=problem></ContestProblemListProblem>
                     </AnimateInContainer>
                 </div>
                 <WaitCover text="Loading..." :show="contestManager.contest === null"></WaitCover>

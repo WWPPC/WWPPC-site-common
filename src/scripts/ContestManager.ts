@@ -177,6 +177,12 @@ const state = reactive<{
 
 export const useContestManager = defineStore('contestManager', {
     state: () => state,
+    getters: {
+        config: () => {
+            const serverConnection = useServerConnection();
+            return serverConnection.serverConfig.contests
+        }
+    },
     actions: {
         async getContestList(): Promise<string[] | Error> {
             return await apiFetch('GET', '/contestList');

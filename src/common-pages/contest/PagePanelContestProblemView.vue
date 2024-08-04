@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { setTitlePanel } from '#/scripts/title';
 import { DoubleCutCornerContainer, TitledCutCornerContainer, AnimateInContainer } from '#/containers';
-import { InputButton, InputCopyButton, InputFileUpload, InputIconButton } from '#/inputs';
+import { InputButton, InputCopyButton, InputFileUpload, InputIconButton, InputTextBox } from '#/inputs';
 import InputDropdown from '#/inputs/InputDropdown.vue'; // this is required for spaghetti fix
 import WaitCover from '#/common/WaitCover.vue';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
@@ -140,18 +140,18 @@ watch(() => problem.value.name, () => {
 const problemName = autoGlitchTextTransition(() => problem.value.name, 40, 1, 20);
 const problemSubtitle1 = autoGlitchTextTransition(() => {
     if (problem.value.contest === undefined) return `By ${problem.value.author}`;
-    return `${problem.value.contest} ${problem.value.round + 1}-${problem.value.number + 1}; by ${problem.value.author}`;
+    return `${problem.value.contest} ${contestManager.config[contestType]?.rounds ? `${problem.value.round + 1}-` : ''}${problem.value.number + 1}; by ${problem.value.author}`;
 }, 40, 1, 20);
 const problemSubtitle2 = autoGlitchTextTransition(() => `${problem.value.constraints.memory}MB, ${problem.value.constraints.time}ms&emsp;|&emsp;${completionStateString(problem.value.status)}`, 40, 1, 20);
 
 // uploads
 const fileUpload = ref<InstanceType<typeof InputFileUpload>>();
 const languageDropdown = ref<InstanceType<typeof InputDropdown>>();
-const submit = ref<InstanceType<typeof InputButton>>();
+const submitButton = ref<InstanceType<typeof InputButton>>();
 const handleUpload = () => {
     const file: File | undefined | null = fileUpload.value?.files?.item(0);
     if (fileUpload.value == undefined || file == undefined) return;
-    if (file.size > (serverConnection.serverConfig.contests[contestType]?.maxSubmissionSize ?? 0)) {
+    if (file.size > (contestManager.config[contestType]?.maxSubmissionSize ?? 0)) {
         fileUpload.value.resetFileList();
         modal.showModal({
             title: 'File size too large',
@@ -187,6 +187,25 @@ const submitUpload = async () => {
     }
     fileUpload.value.resetFileList();
     languageDropdown.value.value = '';
+};
+
+// other uploads
+const answerInput = ref('');
+const submit = async () => {
+    if (contestManager.config[contestType]?.submitSolver) {
+        await submitUpload();
+    } else {
+        if (contestManager[contestType] == undefined) return;
+        if (answerInput.value.trim() == '') {
+            modal.showModal({ title: 'No answer', content: 'Your answer cannot be blank!', color: 'red' });
+            return;
+        }
+        const status = await (props.isUpsolve ? upsolveManager : contestManager[contestType]).updateSubmission(problem.value.id, '', answerInput.value);
+        if (status != ContestUpdateSubmissionResult.SUCCESS) {
+            modal.showModal({ title: 'Could not submit', content: getUpdateSubmissionMessage(status), color: 'red' })
+        }
+        answerInput.value = '';
+    }
 };
 
 // thing for katex
@@ -235,19 +254,25 @@ const viewCode = async () => {
                         <span v-else>
                             You can submit and test anytime, but only the last submission is scored. You cannot submit after a round ends.
                         </span>
-                        <br>
-                        <i>Java and Python submissions have double the stated time limit.</i>
+                        <span v-if="contestManager.config[contestType]?.submitSolver">
+                            <br>
+                            <i>Java and Python submissions have double the stated time limit.</i>
+                        </span>
                     </p>
                 </div>
                 <br>
                 <form class="problemViewSubmitForm" action="javascript:void(0)">
-                    <div class="problemViewSubmitFormInner">
+                    <div class="problemViewSubmitFormInner" v-if="contestManager.config[contestType]?.submitSolver">
                         <span>Source code:</span>
                         <InputFileUpload ref="fileUpload" @input=handleUpload accept=".c,.cpp,.py,.java"></InputFileUpload>
                         <span>Language:</span>
-                        <InputDropdown ref="languageDropdown" :items="serverConnection.serverConfig.contests[contestType]?.acceptedSolverLanguages.map((a) => ({ text: a, value: a })) ?? []" required></InputDropdown>
+                        <InputDropdown ref="languageDropdown" :items="contestManager.config[contestType]?.acceptedSolverLanguages.map((a) => ({ text: a, value: a })) ?? []" required></InputDropdown>
                     </div>
-                    <InputButton ref="submit" text="Upload Submission" type="submit" width="min-content" @click=submitUpload :disabled="languageDropdown?.value == undefined || languageDropdown?.value == '' || fileUpload?.files == null || fileUpload?.files.item(0) == null || (!props.isUpsolve && (contestManager[contestType]?.contest == null || (contestManager[contestType]?.contest?.rounds[problem.round].startTime ?? 0) > Date.now() || (contestManager[contestType]?.contest?.rounds[problem.round].endTime ?? Infinity) <= Date.now()))"></InputButton>
+                    <div class="problemViewSubmitFormInner" v-else>
+                        <span>Answer:</span>
+                        <InputTextBox v-model="answerInput"></InputTextBox>
+                    </div>
+                    <InputButton ref="submitButton" :text="contestManager.config[contestType]?.submitSolver ? 'Upload Submission' : 'Submit'" type="submit" width="min-content" @click="submit" :disabled="languageDropdown?.value == undefined || languageDropdown?.value == '' || fileUpload?.files == null || fileUpload?.files.item(0) == null || (!props.isUpsolve && (contestManager[contestType]?.contest == null || (contestManager[contestType]?.contest?.rounds[problem.round].startTime ?? 0) > Date.now() || (contestManager[contestType]?.contest?.rounds[problem.round].endTime ?? Infinity) <= Date.now()))"></InputButton>
                     <div style="text-align: center; color: yellow;" v-if="!serverConnection.loggedIn">
                         <i>You must be signed in to submit solutions</i>
                     </div>

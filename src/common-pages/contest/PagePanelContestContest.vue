@@ -27,7 +27,7 @@ const updateRoundTimes = () => {
         label: 'Opening ceremonies',
         time: contestManager[contestType].contest.rounds[0].startTime - contestManager[contestType].contest.startTime
     }, {
-        label: 'Round 1',
+        label: contestManager.config[contestType]?.rounds ? 'Round 1' : 'Contest',
         time: contestManager[contestType].contest.rounds[0].endTime - contestManager[contestType].contest.rounds[0].startTime
     });
     if (now > contestManager[contestType].contest.startTime && now < contestManager[contestType].contest.rounds[0].startTime) currentRound.value = 0;
