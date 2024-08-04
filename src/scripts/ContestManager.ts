@@ -154,6 +154,7 @@ export class ContestHost implements ContestHostInterface {
     async waitForContestLoad() {
         if (this.contest != null) return;
         await new Promise<void>((resolve) => watch(() => this.contest, () => {
+            console.log('a')
             if (this.contest != null) resolve();
         }));
     }
