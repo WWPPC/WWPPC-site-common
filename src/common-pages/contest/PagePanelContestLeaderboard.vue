@@ -30,7 +30,7 @@ onMounted(update);
 </script>
 
 <template>
-    <GlitchText text="Leaderboards" class="leaderboardTitle" font-size="var(--font-title)" color="lime" shadow glow :steps=2 :delay=10 random on-visible></GlitchText>
+    <GlitchText text="Leaderboards" class="leaderboardTitle" font-size="var(--font-title)" color="var(--color-1)" shadow glow :steps=2 :delay=10 random on-visible></GlitchText>
     <div class="centered">
         <div class="leaderboard">
             <div class="leaderboardItem" v-for="(item, i) of scoreboard" :key="i">
