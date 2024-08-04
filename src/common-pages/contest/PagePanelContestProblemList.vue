@@ -22,12 +22,12 @@ const contestManager = useContestManager();
                         <ContestProblemListRound :data=round></ContestProblemListRound>
                     </AnimateInContainer>
                 </div>
-                <div v-else>
+                <div v-else class="problemList">
                     <AnimateInContainer type="fade" v-for="(problem, index) in contestManager.contests[contestType]?.contest?.rounds[0]?.problems" :key=problem.number :delay="index * 100">
                         <ContestProblemListProblem :data=problem></ContestProblemListProblem>
                     </AnimateInContainer>
                 </div>
-                <WaitCover text="Loading..." :show="contestManager.contests[contestType]?.contest == null"></WaitCover>
+                <WaitCover text="Loading..." :show="contestManager.contests[contestType] == null || contestManager.contests[contestType]!.contest == null"></WaitCover>
             </AngledTitledContainer>
         </div>
     </div>
