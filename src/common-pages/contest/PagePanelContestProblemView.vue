@@ -69,7 +69,7 @@ const loadErrorModal = (title: string, content: string) => {
     modal.showModal({
         title: title,
         content: content + '<br>Click <code>OK</code> to return to problem list.',
-        color: 'red'
+        color: 'var(--color-2)'
     }).result.then(() => {
         router.push(`/contest/problemList`);
     });
@@ -156,7 +156,7 @@ const handleUpload = () => {
         modal.showModal({
             title: 'File size too large',
             content: 'The maximum file size for submissions is 10kB',
-            color: 'red'
+            color: 'var(--color-2)'
         });
         return;
     }
@@ -176,14 +176,14 @@ const submitUpload = async () => {
     }
     const file = fileUpload.value.files.item(0);
     if (file == null) {
-        modal.showModal({ title: 'No file selected', content: 'No file was selected!', color: 'red' });
+        modal.showModal({ title: 'No file selected', content: 'No file was selected!', color: 'var(--color-2)' });
         return;
     }
     const status = await (props.isUpsolve ? upsolveManager : contestManager[contestType]).updateSubmission(problem.value.id, (languageDropdown.value.value as string), await file.text());
     if (status != ContestUpdateSubmissionResult.SUCCESS) {
-        modal.showModal({ title: 'Could not submit', content: getUpdateSubmissionMessage(status), color: 'red' })
+        modal.showModal({ title: 'Could not submit', content: getUpdateSubmissionMessage(status), color: 'var(--color-2)' })
     } else {
-        modal.showModal({ title: 'Submission uploaded', content: 'Grading will happen soon', color: 'lime' });
+        modal.showModal({ title: 'Submission uploaded', content: 'Grading will happen soon', color: 'var(--color-1)' });
     }
     fileUpload.value.resetFileList();
     languageDropdown.value.value = '';
@@ -197,12 +197,12 @@ const submit = async () => {
     } else {
         if (contestManager[contestType] == undefined) return;
         if (answerInput.value.trim() == '') {
-            modal.showModal({ title: 'No answer', content: 'Your answer cannot be blank!', color: 'red' });
+            modal.showModal({ title: 'No answer', content: 'Your answer cannot be blank!', color: 'var(--color-2)' });
             return;
         }
         const status = await (props.isUpsolve ? upsolveManager : contestManager[contestType]).updateSubmission(problem.value.id, '', answerInput.value);
         if (status != ContestUpdateSubmissionResult.SUCCESS) {
-            modal.showModal({ title: 'Could not submit', content: getUpdateSubmissionMessage(status), color: 'red' })
+            modal.showModal({ title: 'Could not submit', content: getUpdateSubmissionMessage(status), color: 'var(--color-2)' })
         }
         answerInput.value = '';
     }
@@ -230,7 +230,7 @@ const viewCode = async () => {
 <template>
     <div style="margin-left: -4px;">
         <RouterLink :to="props.isUpsolve ? ('/contest/archive/' + route.params.archiveContest) : '/contest/problemList'" no-deco>
-            <InputIconButton :text="`Back to ${props.isUpsolve ? route.params.archiveContest : 'Problem List'}`" img="/assets/arrow-left.svg" color="lime"></InputIconButton>
+            <InputIconButton :text="`Back to ${props.isUpsolve ? route.params.archiveContest : 'Problem List'}`" img="/assets/arrow-left.svg" color="var(--color-1)"></InputIconButton>
         </RouterLink>
     </div>
     <div class="problemViewPanel">
@@ -273,7 +273,7 @@ const viewCode = async () => {
                         <InputTextBox v-model="answerInput"></InputTextBox>
                     </div>
                     <InputButton ref="submitButton" :text="contestManager.config[contestType]?.submitSolver ? 'Upload Submission' : 'Submit'" type="submit" width="min-content" @click="submit" :disabled="languageDropdown?.value == undefined || languageDropdown?.value == '' || fileUpload?.files == null || fileUpload?.files.item(0) == null || (!props.isUpsolve && (contestManager[contestType]?.contest == null || (contestManager[contestType]?.contest?.rounds[problem.round].startTime ?? 0) > Date.now() || (contestManager[contestType]?.contest?.rounds[problem.round].endTime ?? Infinity) <= Date.now()))"></InputButton>
-                    <div style="text-align: center; color: yellow;" v-if="!serverConnection.loggedIn">
+                    <div style="text-align: center; color: var(--color-3);" v-if="!serverConnection.loggedIn">
                         <i>You must be signed in to submit solutions</i>
                     </div>
                 </form>
@@ -301,7 +301,7 @@ const viewCode = async () => {
                         </div>
                     </div>
                 </AnimateInContainer>
-                <div style="text-align: center; color: yellow;" v-if="!serverConnection.loggedIn">
+                <div style="text-align: center; color: var(--color-3);" v-if="!serverConnection.loggedIn">
                     <i>You must be signed in to submit solutions</i>
                 </div>
                 <div v-else-if="problem.submissions.length == 0" style="text-align: center;"><i>You have not submitted any solutions yet.</i></div>
@@ -317,7 +317,7 @@ const viewCode = async () => {
                     </codeblock>
                     <InputCopyButton :value="submissionCode" class="submissionCodeCopy"></InputCopyButton>
                 </TitledCutCornerContainer>
-                <InputIconButton text="" img="/assets/close.svg" img-only img-hover-color="red" title="Close" class="submissionCodeClose" @click="showCode = false"></InputIconButton>
+                <InputIconButton text="" img="/assets/close.svg" img-only img-hover-color="var(--color-2)" title="Close" class="submissionCodeClose" @click="showCode = false"></InputIconButton>
             </div>
         </div>
     </Transition>

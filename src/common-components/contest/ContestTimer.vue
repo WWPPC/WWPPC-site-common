@@ -41,7 +41,7 @@ const updateTime = () => {
         if (props.big) round.value = 'Contest ended';
         else round.value = '---';
         nextTime.value = new Date();
-        color.value = 'red';
+        color.value = 'var(--color-2)';
     }
     for (let i = contestManager[contestType].contest.rounds.length - 1; i >= 0; i--) {
         const r = contestManager[contestType].contest.rounds[i];
@@ -52,7 +52,7 @@ const updateTime = () => {
             if (props.big) round.value = `Round ${r.number + 1}`;
             else round.value = `Round ${r.number + 1}`;
             nextTime.value = new Date(r.endTime);
-            color.value = 'lime';
+            color.value = 'var(--color-1)';
             inRound = true;
         }
     }
@@ -60,12 +60,12 @@ const updateTime = () => {
 };
 const updateFlash = () => {
     if (inRound) {
-        if (nextTime.value.getTime() - Date.now() <= 300000) flashColor.value = 'red';
-        else flashColor.value = 'lime';
+        if (nextTime.value.getTime() - Date.now() <= 300000) flashColor.value = 'var(--color-2)';
+        else flashColor.value = 'var(--color-1)';
     } else if (Date.now() > (contestManager[contestType]?.contest?.endTime ?? 0)) {
         flashColor.value = '';
     } else {
-        if (nextTime.value.getTime() - Date.now() <= 60000) flashColor.value = 'yellow';
+        if (nextTime.value.getTime() - Date.now() <= 60000) flashColor.value = 'var(--color-3)';
         else flashColor.value = 'white';
     }
 };

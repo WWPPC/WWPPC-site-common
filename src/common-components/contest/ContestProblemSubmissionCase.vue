@@ -16,7 +16,7 @@ const showModal = () => {
     modal.showModal({
         title: 'Test Case ' + (props.number + 1),
         content: `Time: ${props.case.time}ms | Memory: ${props.case.memory}MB<br>Subtask: ${props.case.subtask}<br>Verdict: ${submissionVerdictLong()}`,
-        color: props.case.state == ContestScoreState.CORRECT ? 'lime' : 'red'
+        color: props.case.state == ContestScoreState.CORRECT ? 'var(--color-1)' : 'var(--color-2)'
     });
 };
 </script>
@@ -38,9 +38,9 @@ const showModal = () => {
     min-width: 64px;
     height: 64px;
     border-radius: 4px;
-    background-color: v-bind("$props.case.state == ContestScoreState.CORRECT ? '#0A0' : '#A00'");
+    background-color: v-bind("$props.case.state == ContestScoreState.CORRECT ? 'color-mix(srgb, var(--color-1) 80%, black 20%)' : 'color-mix(srgb, var(--color-2) 80%, black 20%)'");
     border: 2px solid;
-    border-color: v-bind("$props.case.state == ContestScoreState.CORRECT ? 'lime' : 'red'");
+    border-color: v-bind("$props.case.state == ContestScoreState.CORRECT ? 'var(--color-1)' : 'var(--color-2)'");
     cursor: pointer;
 }
 
