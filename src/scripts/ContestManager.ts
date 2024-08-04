@@ -145,6 +145,7 @@ export class ContestHost implements ContestHostInterface {
         // other listeners
         this.socket.on('contestData', (data: Contest) => {
             this.contest = reactive(data);
+            console.log('change')
         });
         this.socket.on('scoreboard', (data: ScoreboardEntry[]) => {
             this.scoreboard = reactive(data);
@@ -153,6 +154,7 @@ export class ContestHost implements ContestHostInterface {
 
     async waitForContestLoad() {
         if (this.contest != null) return;
+        watch(() => this.contest, () => console.log('help'))
         await new Promise<void>((resolve) => watch(() => this.contest, () => {
             console.log('a')
             if (this.contest != null) resolve();
