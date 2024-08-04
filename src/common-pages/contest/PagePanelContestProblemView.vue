@@ -119,6 +119,7 @@ const loadProblem = async () => {
     }
 };
 onMounted(loadProblem);
+watch(() => contestManager.contests[contestType], loadProblem);
 watch(() => contestManager.contests[contestType]?.contest, loadProblem);
 watch(() => route.params.problemId + ' ' + route.params.problemRound + ' ' + route.params.problemNumber, loadProblem);
 
