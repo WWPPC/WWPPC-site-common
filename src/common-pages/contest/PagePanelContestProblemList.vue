@@ -4,6 +4,7 @@ import ContestProblemListRound from '#/common-components/contest/problemList/Con
 import { useContestManager } from '#/scripts/ContestManager';
 import WaitCover from '#/common/WaitCover.vue';
 import ContestProblemListProblem from '#/common-components/contest/problemList/ContestProblemListProblem.vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps<{
     contest: string
@@ -11,6 +12,10 @@ const props = defineProps<{
 const contestType = props.contest;
 
 const contestManager = useContestManager();
+
+// screw this im spaghettiing
+const show = ref(contestManager.contests[contestType]?.contest != null);
+watch(() => contestManager.contests[contestType]?.contest, () => show.value = contestManager.contests[contestType]?.contest != null);
 </script>
 
 <template>
@@ -27,7 +32,7 @@ const contestManager = useContestManager();
                         <ContestProblemListProblem :data=problem></ContestProblemListProblem>
                     </AnimateInContainer>
                 </div>
-                <WaitCover text="Loading..." :show="contestManager.contests[contestType] == null || contestManager.contests[contestType]!.contest == null"></WaitCover>
+                <WaitCover text="Loading..." :show="show"></WaitCover>
             </AngledTitledContainer>
         </div>
     </div>
