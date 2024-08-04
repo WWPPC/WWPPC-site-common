@@ -156,7 +156,7 @@ export class ContestHost implements ContestHostInterface {
         if (this.contest != null) return;
         await new Promise<void>((resolve) => {
             console.log('what')
-            socket.once('contestData', () => {
+            this.socket.once('contestData', () => {
                 resolve()
                 console.log('egevnetn')
         });
