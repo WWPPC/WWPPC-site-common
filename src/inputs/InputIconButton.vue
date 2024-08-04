@@ -70,7 +70,7 @@ watch(() => props.text, () => buttonText.value = props.text);
     mask-size: 1.2em;
     mask-repeat: no-repeat;
     mask-position: center;
-    mask-image: v-bind("`${'u'}rl('${$props.img}')`");
+    mask-image: v-bind("`url('${$props.img}')`");
     background-color: v-bind("$props.imgColor ?? 'white'");
     transition: 50ms linear background-color;
 }
@@ -81,7 +81,7 @@ watch(() => props.text, () => buttonText.value = props.text);
     background-size: 1.2em;
     background-repeat: no-repeat;
     background-position: center;
-    background-image: v-bind("`${'u'}rl('${$props.img}')`");
+    background-image: v-bind("`url('${$props.img}')`");
 }
 
 .uiIconButtonText {

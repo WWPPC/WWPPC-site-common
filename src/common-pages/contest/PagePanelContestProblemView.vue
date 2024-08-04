@@ -262,7 +262,7 @@ const viewCode = async () => {
                             <span style="margin-left: 8px;">{{ completionStateString(submission.status) }} ({{ submission.lang }} - {{ new Date(submission.time).toLocaleString() }})</span>
                             <button v-if="index == 0" class="submissionOpenCode" @click="viewCode()" title="View submission code">
                                 <!-- actually stupid -->
-                                <img src="#p/assets/open.svg">
+                                <img src="../../../public/assets/open.svg">
                             </button>
                         </label>
                         <input type="checkbox" class="submissionCheckbox" :id="'submissionCheckbox' + index">

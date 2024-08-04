@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { reactive, ref, watch } from 'vue';
 
 import crossDomainStorage from './CrossDomainStorage';
-import { AccountOpResult, apiFetch, sendCredentials, socket, TeamOpResult, useServerConnection } from './ServerConnection';
+import { apiFetch, sendCredentials, socket, useServerConnection } from './ServerConnection';
 
 import type { CredentialsSignupData } from './ServerConnection';
 export interface AccountData {
@@ -29,6 +29,33 @@ export interface TeamData {
     teamMembers: string[]
     teamJoinCode: string | null
 }
+
+export enum AccountOpResult {
+    SUCCESS = 0,
+    ALREADY_EXISTS = 1,
+    NOT_EXISTS = 2,
+    INCORRECT_CREDENTIALS = 3,
+    ERROR = 4,
+    SESSION_EXPIRED = 5,
+    NOT_CONNECTED = 6
+}
+export enum TeamOpResult {
+    SUCCESS = 0,
+    NOT_EXISTS = 1,
+    CONTEST_CONFLICT = 2,
+    CONTEST_MEMBER_LIMIT = 3,
+    CONTEST_ALREADY_EXISTS = 4,
+    INCORRECT_CREDENTIALS = 5,
+    NOT_ALLOWED = 6,
+    ERROR = 7,
+    NOT_CONNECTED = 8
+}
+export const getAccountOpMessage = (res: AccountOpResult): string => {
+    return res == AccountOpResult.SUCCESS ? 'Success' : res == AccountOpResult.ALREADY_EXISTS ? 'Account already exists' : res == AccountOpResult.NOT_EXISTS ? 'Account not found' : res == AccountOpResult.INCORRECT_CREDENTIALS ? 'Incorrect credentials' : res == AccountOpResult.ERROR ? 'Internal error' : res == AccountOpResult.SESSION_EXPIRED ? 'Session expired (reload?)' : res == AccountOpResult.NOT_CONNECTED ? 'Not connected to server' : 'Unknown response code (this is a bug?)';
+};
+export const getTeamOpMessage = (res: TeamOpResult): string => {
+    return res == TeamOpResult.SUCCESS ? 'Success' : res == TeamOpResult.NOT_EXISTS ? 'Account, team, or contest not found' : res == TeamOpResult.CONTEST_CONFLICT ? 'Conflict with other registration' : res == TeamOpResult.CONTEST_MEMBER_LIMIT ? 'Too many team members' : res == TeamOpResult.CONTEST_ALREADY_EXISTS ? 'Already registered' : res == TeamOpResult.NOT_ALLOWED ? 'Not allowed (unspecified)' : res == TeamOpResult.ERROR ? 'Internal error' : res == TeamOpResult.NOT_CONNECTED ? 'Not connected to server' : 'Unknown response code (this is a bug?)';
+};
 
 type ExtendedAccountData = AccountData & TeamData;
 

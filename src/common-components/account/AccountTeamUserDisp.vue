@@ -4,8 +4,7 @@ import { InputButton } from '#/inputs';
 import LoadingSpinner from '#/common/LoadingSpinner.vue';
 import { globalModal, ModalMode } from '#/modal';
 import { onMounted, ref, watch } from 'vue';
-import { getTeamOpMessage, TeamOpResult } from '#/scripts/ServerConnection';
-import { type AccountData, useAccountManager } from '#/scripts/AccountManager';
+import { type AccountData, getTeamOpMessage, TeamOpResult, useAccountManager } from '#/scripts/AccountManager';
 import recaptcha from '#/scripts/recaptcha';
 
 const props = defineProps<{

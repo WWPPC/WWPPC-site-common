@@ -87,7 +87,7 @@ watch(() => props.text, () => buttonText.value = props.text);
     background-position: left;
     background-repeat: repeat-x;
     background-size: 50% 100%;
-    background-image: url(#p/assets/arrow-right.svg);
+    background-image: url(/assets/arrow-right.svg);
     transition: 200ms ease background-position;
 }
 
