@@ -77,11 +77,11 @@ onMounted(updateRoundTimes);
             <AnimateInContainer type="slideUp" style="grid-column: span 2;">
                 <TitledCutCornerContainer title="Instructions" height="100%" align="center" hover-animation="lift">
                     <div class="centered">
-                        <div>
+                        <div v-if="contestManager.config[contestType]?.submitSolver">
                             <h3>General Instructions</h3>
                             <p style="font-size: var(--font-20);">
                             <ul>
-                                <li>Problems are submittable <b>ONLY during</b> rounds</li>
+                                <li v-if="contestManager.config[contestType]?.rounds">Problems are submittable <b>ONLY during</b> rounds</li>
                                 <li>Work quickly, scores are based on the <b>number</b> of problems solved</li>
                                 <li>Subtasks are weighted based on the number of people who solve them</li>
                                 <li><b>All</b> cases per subtask must pass for subtask points to be earned</li>
@@ -99,6 +99,24 @@ onMounted(updateRoundTimes);
                                 <li>C/C++: Programs are compiled with the gcc/g++ <code>-O2</code> and <code>-static</code> flags</li>
                             </ul>
                             </p>
+                        </div>
+                        <div v-else>
+                            <h3>General Instructions</h3>
+                            <p style="font-size: var(--font-20);">
+                            <ul>
+                                <li v-if="contestManager.config[contestType]?.rounds">Problems are submittable <b>ONLY during</b> rounds</li>
+                                <li>Work quickly, scores are based on the <b>number</b> of problems solved</li>
+                                <li>Solutions are pasted as strings into a solution box, whitespace sensitive</li>
+                                <li>Submissions are across your <b>ENTIRE TEAM</b></li>
+                                <li>Not all problems are meant to be solved within the time limit</li>
+                                <li>Time penalties are small - they are meant to be tiebreakers</li>
+                            </ul>
+                            </p>
+                            <!-- <h3>Technical Details</h3>
+                            <p style="font-size: var(--font-20);">
+                            <ul>
+                            </ul>
+                            </p> -->
                         </div>
                     </div>
                 </TitledCutCornerContainer>
