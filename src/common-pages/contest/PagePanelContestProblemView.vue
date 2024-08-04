@@ -75,24 +75,25 @@ const loadErrorModal = (title: string, content: string) => {
     });
 };
 const loadProblem = async () => {
-    console.log('load')
     if (route.query.ignore_server !== undefined || contestManager.contests[contestType] === undefined) return;
-    console.log('buh')
     if (!props.isUpsolve) {
         await contestManager.contests[contestType].waitForContestLoad();
+        console.log('loaded')
         if (route.params.problemId !== undefined) {
             if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.exec(route.params.problemId.toString())) {
                 loadErrorModal('Malformed problem ID', 'The supplied problem ID is invalid!');
                 return;
             }
             const p = await contestManager.contests[contestType].getProblemDataId(route.params.problemId.toString());
-            if (p === null) {
+        console.log('problemi di')
+        if (p === null) {
                 loadErrorModal('Problem not found', 'The requested problem does not exist!');
                 return;
             }
             problem.value = p;
         } else if (route.params.problemRound !== undefined && route.params.problemNumber !== undefined) {
             const p = await contestManager.contests[contestType].getProblemData(Number(route.params.problemRound.toString()), Number(route.params.problemNumber.toString()));
+        console.log('numberner')
             if (p === null) {
                 loadErrorModal('Problem not found', 'The requested problem does not exist!');
                 return;
