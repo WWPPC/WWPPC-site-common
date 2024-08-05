@@ -4,6 +4,7 @@ import ContestProblemListRound from '#/common-components/contest/problemList/Con
 import { useContestManager } from '#/scripts/ContestManager';
 import WaitCover from '#/common/WaitCover.vue';
 import ContestProblemListProblem from '#/common-components/contest/problemList/ContestProblemListProblem.vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 const props = defineProps<{
     contest: string
@@ -11,6 +12,14 @@ const props = defineProps<{
 const contestType = props.contest;
 
 const contestManager = useContestManager();
+
+// spaghetti
+const loading = ref(true);
+onMounted(async () => {
+    await contestManager.contests[contestType]?.waitForContestLoad();
+    loading.value = false;
+});
+onUnmounted(() => loading.value = true);
 </script>
 
 <template>
