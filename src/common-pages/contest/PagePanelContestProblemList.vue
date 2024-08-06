@@ -36,7 +36,7 @@ onUnmounted(() => loading.value = true);
                         <ContestProblemListProblem :data=problem></ContestProblemListProblem>
                     </AnimateInContainer>
                 </div>
-                <WaitCover text="Loading..." :show="contestManager.contests[contestType]?.contest != null"></WaitCover>
+                <WaitCover text="Loading..." :show="loading"></WaitCover>
             </AngledTitledContainer>
         </div>
     </div>
