@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { glitchTextTransition, type AsyncTextTransition } from '#/text';
 import { useRoute } from 'vue-router';
 import { isMobile } from '#/scripts/userAgent';
@@ -16,7 +16,11 @@ const emit = defineEmits<{
 }>();
 const route = useRoute();
 
-const classList = 'panelNavButton ' + (((props.isDefault && route.params.panel == undefined) || props.for == `/${route.params.page}/${route.params.panel}`) ? 'panelNavButtonSelected ' : '') + (isMobile ? 'panelNavButtonNoHover' : '');
+const classList = ref('');
+const setClassList = () => classList.value = 'panelNavButton ' + (((props.isDefault && route.params.panel == undefined) || props.for == `/${route.params.page}/${route.params.panel}`) ? 'panelNavButtonSelected ' : '') + (isMobile ? 'panelNavButtonNoHover' : '');
+watch(() => route.params.page, setClassList);
+watch(() => route.params.panel, setClassList);
+onMounted(setClassList);
 
 // animations for hover
 const buttonText = ref(props.text.replace(/./g, ' '));
