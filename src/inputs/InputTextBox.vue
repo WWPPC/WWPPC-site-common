@@ -20,7 +20,7 @@ function input() {
     emit('input', text.value);
 }
 onMounted(() => {
-    text.value = props.defaultValue ?? '';
+    if (text.value == '') text.value = props.defaultValue ?? '';
 });
 defineExpose({
     value: text

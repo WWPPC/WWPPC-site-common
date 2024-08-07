@@ -22,7 +22,7 @@ function input() {
     emit('input', selected.value);
 }
 onMounted(() => {
-    selected.value = props.default ?? (props.multiple ? [] : '');
+    selected.value = selected.value == '' ? props.default ?? (props.multiple ? [] : '') : selected.value;
 });
 defineExpose({
     value: selected,

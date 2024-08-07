@@ -6,7 +6,7 @@ import OnScreenHook from '#/common/OnScreenHook.vue';
 import { AnimateInContainer, CutCornerContainer, PairedGridContainer, TitledCutCornerContainer, TitledDoubleCutCornerContainer } from '#/containers';
 import { useRoute } from 'vue-router';
 import { experienceMaps, gradeMaps, languageMaps, type TeamData, useAccountManager, type AccountData } from '#/scripts/AccountManager';
-import { nextTick, onMounted, reactive, ref, watch } from 'vue';
+import { nextTick, onMounted, ref, watch } from 'vue';
 import { InputDropdown, InputTextBox } from '#/inputs';
 import { useServerConnection } from '#/scripts/ServerConnection';
 import { autoGlitchTextTransition } from '#/text';
@@ -46,25 +46,18 @@ watch(() => route.params, () => {
     if (route.params.page != 'user' || route.query.ignore_server !== undefined) return;
     loadUserData();
 });
-// spaghetti
 const username = autoGlitchTextTransition(() => '@' + (userData.value?.username ?? ''), 40, 1, 10, 3, true);
 const displayName = autoGlitchTextTransition(() => userData.value?.displayName ?? '', 40, 1, 10, 3, true);
-const displayedData = reactive({
-    name: '',
-    school: '',
-    grade: '',
-    experience: '',
-    languages: ['']
-});
 const biography = autoGlitchTextTransition(() => userData.value?.bio ?? '', 40, 2, 10);
 const teamName = autoGlitchTextTransition(() => teamData.value?.teamName ?? '', 40, 1, 10, 3, true);
 const teamBio = autoGlitchTextTransition(() => teamData.value?.teamBio ?? '', 40, 2, 10);
+const grade = ref('');
+const experience = ref('');
+const languages = ref<string[]>([]);
 watch(userData, () => {
-    displayedData.name = userData.value?.firstName + ' ' + userData.value?.lastName;
-    displayedData.school = userData.value?.school ?? '';
-    displayedData.grade = userData.value?.grade + '';
-    displayedData.experience = userData.value?.experience + '';
-    displayedData.languages = userData.value?.languages ?? [];
+    grade.value = userData.value?.grade.toString() ?? '';
+    experience.value = userData.value?.experience.toString() ?? '';
+    languages.value = userData.value?.languages ?? [];
     if (userData.value) setTitlePanel(userData.value.displayName);
 });
 onMounted(loadUserData);
@@ -81,15 +74,15 @@ const largeHeader = ref(true);
                 <TitledCutCornerContainer title="Profile" hover-animation="lift" align="center" height="100%" style="grid-row: span 2;" flipped>
                     <PairedGridContainer style="font-size: var(--font-small);">
                         <span>Name:</span>
-                        <InputTextBox v-model="displayedData.name" width="var(--fwidth)" disabled></InputTextBox>
+                        <InputTextBox :value="userData?.firstName + ' ' + userData?.lastName" width="var(--fwidth)" disabled></InputTextBox>
                         <span>School:</span>
-                        <InputTextBox v-model="displayedData.school" width="var(--fwidth)" disabled></InputTextBox>
+                        <InputTextBox :value="userData?.school" width="var(--fwidth)" disabled></InputTextBox>
                         <span>Grade Level:</span>
-                        <InputDropdown v-model="displayedData.grade" width="var(--fwidth)" :items="gradeMaps" disabled></InputDropdown>
+                        <InputDropdown v-model="grade" width="var(--fwidth)" :items="gradeMaps" disabled></InputDropdown>
                         <span>Experience Level:</span>
-                        <InputDropdown v-model="displayedData.experience" width="var(--fwidth)" :items="experienceMaps" disabled></InputDropdown>
+                        <InputDropdown v-model="experience" width="var(--fwidth)" :items="experienceMaps" disabled></InputDropdown>
                         <span>Known Languages:</span>
-                        <InputDropdown v-model="displayedData.languages" width="var(--fwidth)" height="6em" :items="languageMaps" multiple disabled></InputDropdown>
+                        <InputDropdown v-model="languages" width="var(--fwidth)" height="6em" :items="languageMaps" multiple disabled></InputDropdown>
                     </PairedGridContainer>
                 </TitledCutCornerContainer>
                 <TitledDoubleCutCornerContainer title="Biography" hover-animation="lift" align="center" height="100%" flipped>
