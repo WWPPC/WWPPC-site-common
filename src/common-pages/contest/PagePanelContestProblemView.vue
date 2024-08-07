@@ -212,11 +212,11 @@ const submit = async () => {
 // submit button spaghetti
 const disableSubmit = ref(true);
 const updateSubmitButton = () => {
-    disableSubmit.value = languageDropdown.value == undefined || languageDropdown.value?.value == ''
-        || fileUpload.value?.files == null || fileUpload.value?.files.item(0) == null
+    disableSubmit.value = (contestManager.config[contestType]?.submitSolver && (languageDropdown.value == undefined || languageDropdown.value?.value == '' || fileUpload.value?.files == null || fileUpload.value?.files.item(0) == null))
+        || (!contestManager.config[contestType]?.submitSolver && answerInput.value.trim() != '')
         || (!props.isUpsolve && (contestManager.contests[contestType]?.contest == null
-        || (contestManager.contests[contestType]?.contest?.rounds[problem.value.round].startTime ?? 0) > Date.now()
-        || (contestManager.contests[contestType]?.contest?.rounds[problem.value.round].endTime ?? Infinity) <= Date.now()));
+            || (contestManager.contests[contestType]?.contest?.rounds[problem.value.round].startTime ?? 0) > Date.now()
+            || (contestManager.contests[contestType]?.contest?.rounds[problem.value.round].endTime ?? Infinity) <= Date.now()));
 };
 watch(() => languageDropdown.value?.value, updateSubmitButton);
 watch(() => fileUpload.value?.files, updateSubmitButton);
