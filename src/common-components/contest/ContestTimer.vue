@@ -24,7 +24,6 @@ const color = ref('white');
 const flashColor = ref('');
 let inRound = false;
 const updateTime = () => {
-    // for some reason conditional chaining doesnt count for vite typescript?
     if (contestManager.contests[contestType]?.contest == undefined) {
         if (props.big) round.value = 'Not in contest';
         else round.value = '---';
@@ -49,7 +48,7 @@ const updateTime = () => {
             nextTime.value = new Date(r.startTime);
             color.value = 'white';
         } else if (now < r.endTime) {
-            if (props.big) round.value = `Round ${r.number + 1}`;
+            if (contestManager.config[contestType]?.rounds) round.value = 'Contest';
             else round.value = `Round ${r.number + 1}`;
             nextTime.value = new Date(r.endTime);
             color.value = 'var(--color-1)';

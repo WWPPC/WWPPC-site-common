@@ -209,6 +209,19 @@ const submit = async () => {
     }
 };
 
+// submit button spaghetti
+const disableSubmit = ref(true);
+const updateSubmitButton = () => {
+    disableSubmit.value = languageDropdown.value == undefined || languageDropdown.value?.value == ''
+        || fileUpload.value?.files == null || fileUpload.value?.files.item(0) == null
+        || (!props.isUpsolve && (contestManager.contests[contestType]?.contest == null
+        || (contestManager.contests[contestType]?.contest?.rounds[problem.value.round].startTime ?? 0) > Date.now()
+        || (contestManager.contests[contestType]?.contest?.rounds[problem.value.round].endTime ?? Infinity) <= Date.now()));
+};
+watch(() => languageDropdown.value?.value, updateSubmitButton);
+watch(() => fileUpload.value?.files, updateSubmitButton);
+setInterval(updateSubmitButton, 1000);
+
 // thing for katex
 const problemContent = ref('');
 watch(problem, () => {
@@ -273,7 +286,7 @@ const viewCode = async () => {
                         <span>Answer:</span>
                         <InputTextBox v-model="answerInput"></InputTextBox>
                     </div>
-                    <InputButton ref="submitButton" :text="contestManager.config[contestType]?.submitSolver ? 'Upload Submission' : 'Submit'" type="submit" width="min-content" @click="submit" :disabled="languageDropdown?.value == undefined || languageDropdown?.value == '' || fileUpload?.files == null || fileUpload?.files.item(0) == null || (!props.isUpsolve && (contestManager.contests[contestType]?.contest == null || (contestManager.contests[contestType]?.contest?.rounds[problem.round].startTime ?? 0) > Date.now() || (contestManager.contests[contestType]?.contest?.rounds[problem.round].endTime ?? Infinity) <= Date.now()))"></InputButton>
+                    <InputButton ref="submitButton" :text="contestManager.config[contestType]?.submitSolver ? 'Upload Submission' : 'Submit'" type="submit" width="min-content" @click="submit" :disabled="disableSubmit"></InputButton>
                     <div style="text-align: center; color: var(--color-3);" v-if="!serverConnection.loggedIn">
                         <i>You must be signed in to submit solutions</i>
                     </div>
