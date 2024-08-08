@@ -1,4 +1,4 @@
-import { globalModal, ModalMode } from '#/modal';
+import { globalModal } from '#/modal';
 import { defineStore } from 'pinia';
 import { io, Socket as SocketIOSocket } from 'socket.io-client';
 import { reactive } from 'vue';
@@ -115,17 +115,24 @@ export class ContestHost implements ContestHostInterface {
         this.socket.connect();
         // mild spaghetti unfortunately
         const modal = globalModal();
-        const serverConnection = useServerConnection();
         const accountManager = useAccountManager();
         const onConnectError = (message: string) => {
             console.error(`ContestHost-${sid}: Connection ${message}`);
             this.connected = false;
-            modal.showModal({ title: 'ContestHost Connect Error', content: 'ContestHost could not connect to the server!', mode: ModalMode.INPUT, color: 'var(--color-2)' });
+            modal.showModal({
+                title: 'ContestHost Connect Error',
+                content: 'ContestHost could not connect to the server.',
+                color: 'var(--color-2)'
+            });
         };
         const onDisconnected = (message: string) => {
             console.error(`ContestHost-${sid}: ${message}`);
             this.connected = false;
-            if (serverConnection.connected) modal.showModal({ title: 'ContestHost Disconnected', content: 'ContestHost was disconnected from the server!', mode: ModalMode.INPUT, color: 'var(--color-2)' });
+            modal.showModal({
+                title: 'ContestHost Disconnected',
+                content: 'ContestHost was disconnected from the server.',
+                color: 'var(--color-2)'
+            });
             this.socket.disconnect();
         };
         this.socket.on('connect', async () => {
@@ -145,6 +152,7 @@ export class ContestHost implements ContestHostInterface {
         // other listeners
         this.socket.on('contestData', (data: Contest) => {
             this.contest = reactive(data);
+            console.log(data.rounds[0].problems[0])
         });
         this.socket.on('scoreboard', (data: ScoreboardEntry[]) => {
             this.scoreboard = reactive(data);

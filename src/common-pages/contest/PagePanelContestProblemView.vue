@@ -124,6 +124,8 @@ watch(() => route.params.problemId, loadProblem);
 watch(() => route.params.problemRound, loadProblem);
 watch(() => route.params.problemNumber, loadProblem);
 
+watch(() => problem.value.submissions, () => console.log(problem.value.submissions))
+
 const updateSubmissions = () => {
     setTimeout(async () => {
         if (problemId == undefined) return;
