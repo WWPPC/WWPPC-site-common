@@ -3,7 +3,7 @@ const props = defineProps<{
     title?: string
     disabled?: boolean
 }>();
-const checked = defineModel<boolean>({ default: false });
+const checked = defineModel({ default: false });
 const emit = defineEmits<{
     (e: 'input', checked: boolean): any
 }>();

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
-const timestamp = defineModel<number>({ default: Date.now() });
+const timestamp = defineModel({ default: Date.now() });
 const props = defineProps<{
     timezoneOffset?: number // this should be the value given by Date.prototype.getTimezoneOffset()
 }>();

@@ -12,7 +12,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: 'input', value: number): any
 }>();
-const number = defineModel<number>({ default: 0 });
+const number = defineModel({ default: 0 });
 function input() {
     emit('input', number.value);
 }
