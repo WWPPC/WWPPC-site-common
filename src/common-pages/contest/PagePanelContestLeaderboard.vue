@@ -39,6 +39,7 @@ watch(() => contestManager.contests[contestType], () => contestManager.contests[
             <div class="leaderboardItem" v-for="(item, i) of scoreboard" :key="i">
                 {{ i + 1 }}.
                 <RouterLink :to="'/user/@' + item.username">{{ item.displayName }}</RouterLink>
+                - {{ item.score }} points
             </div>
         </div>
         <div v-if="contestManager.contests[contestType]?.scoreboard == null" style="display: flex; flex-direction: column; align-items: center;">
