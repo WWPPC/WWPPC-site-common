@@ -15,20 +15,6 @@ const props = defineProps<{
 }>();
 
 const show = ref(props.startCollapsed == false);
-const body = ref<HTMLDivElement>();
-const boxHeight = ref(0);
-
-onBeforeUpdate(async () => {
-    await nextTick();
-    boxHeight.value = body.value?.getBoundingClientRect().height ?? 0;
-});
-onMounted(async () => {
-    await nextTick();
-    boxHeight.value = body.value?.getBoundingClientRect().height ?? 0;
-});
-window.addEventListener('resize', () => {
-    boxHeight.value = body.value?.getBoundingClientRect().height ?? 0;
-});
 
 const emit = defineEmits<{
     (e: 'open'): any
@@ -43,6 +29,26 @@ watch(show, () => {
 defineExpose({
     show
 });
+</script>
+<script lang="ts">
+export default {
+    data() {
+        return {
+            boxHeight: 0,
+            createdObserver: false
+        }
+    },
+    mounted() {
+        // VUE WHY REFS NOT WORK AT ALL
+        if (this.createdObserver) return;
+        this.createdObserver = true;
+        const observer = new ResizeObserver(() => {
+            this.boxHeight = (this.$refs.body as any).scrollHeight ?? 0;
+        });
+        observer.observe((this.$refs.body as any));
+        this.boxHeight = (this.$refs.body as any).scrollHeight ?? 0;
+    }
+}
 </script>
 
 <template>

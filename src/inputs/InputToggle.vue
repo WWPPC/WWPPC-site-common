@@ -26,9 +26,10 @@ defineExpose({
 .uiToggleLabel {
     display: inline-block;
     position: relative;
-    bottom: 6px;
+    bottom: 7px;
     width: 60px;
     height: 32px;
+    margin-top: 7px;
 }
 
 .uiToggleInput {
