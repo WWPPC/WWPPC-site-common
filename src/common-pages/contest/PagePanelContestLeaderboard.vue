@@ -29,7 +29,12 @@ watch(() => contestManager.contests[contestType]?.scoreboard, update);
 onMounted(update);
 
 // buh
-watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onBuh(update));
+const scoreboardIsNull = ref(true);
+onMounted(() => scoreboardIsNull.value = contestManager.contests[contestType]?.scoreboard == null);
+watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onBuh(() => {
+    update();
+    scoreboardIsNull.value = contestManager.contests[contestType]?.scoreboard == null;
+}));
 </script>
 
 <template>
@@ -42,7 +47,7 @@ watch(() => contestManager.contests[contestType], () => contestManager.contests[
                 - {{ item.score }} points
             </div>
         </div>
-        <div v-if="contestManager.contests[contestType]?.scoreboard == null" style="display: flex; flex-direction: column; align-items: center;">
+        <div v-if="scoreboardIsNull" style="display: flex; flex-direction: column; align-items: center;">
             <div style="width: 10vw; height: 10vw">
                 <LoadingSpinner></LoadingSpinner>
             </div>
