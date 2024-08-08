@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { isMobile } from '#/scripts/userAgent';
-import { nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps<{
     title: string
@@ -14,21 +14,8 @@ const props = defineProps<{
     noPadding?: boolean
 }>();
 
-const show = ref(props.startCollapsed == false);
+const show = ref(!props.startCollapsed);
 const body = ref<HTMLDivElement>();
-const boxHeight = ref(0);
-
-onBeforeUpdate(async () => {
-    await nextTick();
-    boxHeight.value = body.value?.getBoundingClientRect().height ?? 0;
-});
-onMounted(async () => {
-    await nextTick();
-    boxHeight.value = body.value?.getBoundingClientRect().height ?? 0;
-});
-window.addEventListener('resize', () => {
-    boxHeight.value = body.value?.getBoundingClientRect().height ?? 0;
-});
 
 const emit = defineEmits<{
     (e: 'open'): any
@@ -109,9 +96,9 @@ defineExpose({
 
 .headeredCollapsibleContainerBodyWrapper {
     width: 100%;
-    max-height: v-bind("show ? ($props.height ?? (boxHeight + 'px')) : '0px'");
-    height: v-bind("$props.height ?? (boxHeight + 'px')");
-    transition: v-bind("Math.round(Math.sqrt(boxHeight * 200)) + 'ms'") ease max-height;
+    max-height: v-bind("show ? ($props.height ?? ((body?.getBoundingClientRect().height ?? 0) + 'px')) : '0px'");
+    height: v-bind("$props.height ?? ((body?.getBoundingClientRect().height ?? 0) + 'px')");
+    transition: v-bind("Math.round(Math.sqrt((body?.getBoundingClientRect().height ?? 0) * 200)) + 'ms'") ease max-height;
     will-change: max-height;
     overflow: hidden;
 }
