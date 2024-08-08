@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { isMobile } from '#/scripts/userAgent';
-import { nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps<{
     title: string
@@ -43,10 +43,10 @@ export default {
         if (this.createdObserver) return;
         this.createdObserver = true;
         const observer = new ResizeObserver(() => {
-            this.boxHeight = (this.$refs.body as any).scrollHeight ?? 0;
+            this.boxHeight = (this.$refs.body as any)?.scrollHeight ?? 0;
         });
         observer.observe((this.$refs.body as any));
-        this.boxHeight = (this.$refs.body as any).scrollHeight ?? 0;
+        this.boxHeight = (this.$refs.body as any)?.scrollHeight ?? 0;
     }
 }
 </script>
