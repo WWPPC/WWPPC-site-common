@@ -39,7 +39,7 @@ watch(() => props.text, () => buttonText.value = props.text);
     box-sizing: border-box;
     width: v-bind("$props.width ?? 'unset'");
     height: v-bind("$props.height ?? 'min-content'");
-    margin: 0px 0px;
+    margin: 0px 4px;
     padding: 0.125em 0.4em;
     border: 4px solid white;
     border-radius: 0px;
