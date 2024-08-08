@@ -27,6 +27,9 @@ const update = async () => {
 };
 watch(() => contestManager.contests[contestType]?.scoreboard, update);
 onMounted(update);
+
+// buh
+watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onBuh(update));
 </script>
 
 <template>

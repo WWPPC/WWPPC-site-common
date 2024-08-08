@@ -102,6 +102,7 @@ export interface ContestHostInterface {
     updateSubmission(problemId: string, lang: string, file: string): Promise<ContestUpdateSubmissionResult>
     getSubmissionCode(problemId: string): Promise<string>
     onSpaghetti(cb: () => any): Promise<void>
+    onBuh(cb: () => any): Promise<void>
 }
 export class ContestHost implements ContestHostInterface {
     private readonly socket: SocketIOSocket;
@@ -156,7 +157,6 @@ export class ContestHost implements ContestHostInterface {
         });
         this.socket.on('scoreboard', (data: ScoreboardEntry[]) => {
             this.scoreboard = reactive(data);
-            console.log(this.scoreboard)
         });
     }
 
@@ -186,6 +186,9 @@ export class ContestHost implements ContestHostInterface {
 
     async onSpaghetti(cb: () => any) {
         this.socket.on('contestData', () => cb());
+    }
+    async onBuh(cb: () => any) {
+        this.socket.on('scoreboard', () => cb());
     }
 }
 
