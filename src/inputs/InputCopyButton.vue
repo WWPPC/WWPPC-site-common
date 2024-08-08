@@ -19,6 +19,6 @@ const copy = () => {
     width: 1em;
     height: 1em;
     margin-top: 0.2em;
-    cursor: copy;
+    cursor: pointer;
 }
 </style>

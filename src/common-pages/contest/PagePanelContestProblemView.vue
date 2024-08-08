@@ -559,7 +559,7 @@ const viewCode = async () => {
 .submissionCodeClose {
     position: absolute;
     top: 13px;
-    right: 4px;
+    right: 8px;
 }
 
 .submissionCode {
