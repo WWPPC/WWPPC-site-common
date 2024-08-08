@@ -144,10 +144,10 @@ export class ContestHost implements ContestHostInterface {
 
         // other listeners
         this.socket.on('contestData', (data: Contest) => {
-            this.contest = data;
+            this.contest = reactive(data);
         });
         this.socket.on('scoreboard', (data: ScoreboardEntry[]) => {
-            this.scoreboard = data;
+            this.scoreboard = reactive(data);
         });
     }
 

@@ -38,7 +38,7 @@ const showModal = () => {
     min-width: 64px;
     height: 64px;
     border-radius: 4px;
-    background-color: v-bind("$props.case.state == ContestScoreState.CORRECT ? 'color-mix(srgb, var(--color-1) 80%, black 20%)' : 'color-mix(srgb, var(--color-2) 80%, black 20%)'");
+    background-color: v-bind("$props.case.state == ContestScoreState.CORRECT ? 'color-mix(in srgb, var(--color-1) 50%, transparent 50%)' : 'color-mix(in srgb, var(--color-2) 50%, transparent 50%)'");
     border: 2px solid;
     border-color: v-bind("$props.case.state == ContestScoreState.CORRECT ? 'var(--color-1)' : 'var(--color-2)'");
     cursor: pointer;

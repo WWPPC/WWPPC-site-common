@@ -120,7 +120,9 @@ const loadProblem = async () => {
 };
 onMounted(loadProblem);
 watch(() => contestManager.contests[contestType]?.contest, loadProblem);
-watch(() => route.params.problemId + ' ' + route.params.problemRound + ' ' + route.params.problemNumber, loadProblem);
+watch(() => route.params.problemId, loadProblem);
+watch(() => route.params.problemRound, loadProblem);
+watch(() => route.params.problemNumber, loadProblem);
 
 const updateSubmissions = () => {
     setTimeout(async () => {
