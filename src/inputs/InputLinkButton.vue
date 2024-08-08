@@ -45,7 +45,7 @@ watch(() => props.text, () => buttonText.value = props.text);
     width: v-bind("$props.width ?? 'min-content'");
     height: v-bind("$props.height ?? 'min-content'");
     border: 4px solid white;
-    margin: 0px 4px;
+    margin: 0px 0px;
     padding: 0.125em 0.2em;
     background-color: v-bind("$props.backgroundColor ?? 'black'");
     color: v-bind("$props.color ?? 'white'");

@@ -124,8 +124,6 @@ watch(() => route.params.problemId, loadProblem);
 watch(() => route.params.problemRound, loadProblem);
 watch(() => route.params.problemNumber, loadProblem);
 
-watch(() => problem.value.submissions, () => console.log(problem.value.submissions))
-
 const updateSubmissions = () => {
     setTimeout(async () => {
         if (problemId == undefined) return;
@@ -227,6 +225,9 @@ watch(() => fileUpload.value?.files, updateSubmitButton);
 watch(() => answerInput.value, updateSubmitButton);
 setInterval(updateSubmitButton, 1000);
 
+// MASSIVE SPAGHETTI BECAUSE CONTEST ISNT REACTIVE ANYMORE
+watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onSpaghetti(loadProblem));
+
 // thing for katex
 const problemContent = ref('');
 watch(problem, () => {
@@ -247,7 +248,7 @@ const viewCode = async () => {
 </script>
 
 <template>
-    <div style="margin-left: -4px;">
+    <div style="margin-left: -4px; width: min-content;">
         <RouterLink :to="((route.params.problemId !== undefined || route.params.problemNumber !== undefined) ? '.' : '') + (props.isUpsolve ? ('./archive/' + route.params.archiveContest) : './problemList')" no-deco>
             <InputIconButton :text="`Back to ${props.isUpsolve ? route.params.archiveContest : 'Problem List'}`" img="/assets/arrow-left.svg" color="var(--color-1)"></InputIconButton>
         </RouterLink>
