@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-
 const props = defineProps<{
-    defaultValue?: string
     title?: string
     width?: string
     height?: string
@@ -21,9 +18,6 @@ const text = defineModel({ default: '' });
 function input() {
     emit('input', text.value);
 }
-onMounted(() => {
-    if (text.value == '') text.value = props.defaultValue ?? '';
-});
 defineExpose({
     value: text
 });

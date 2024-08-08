@@ -8,6 +8,7 @@ import InputNumberBox from '#/inputs/InputNumberBox.vue';
 import InputTextArea from '#/inputs/InputTextArea.vue';
 import InputTextBox from '#/inputs/InputTextBox.vue';
 import InputToggle from '#/inputs/InputToggle.vue';
+import InputTime from '#/inputs/InputTime.vue';
 
 export {
     InputButton,
@@ -19,5 +20,6 @@ export {
     InputNumberBox,
     InputTextArea,
     InputTextBox,
-    InputToggle
+    InputToggle,
+    InputTime
 }
