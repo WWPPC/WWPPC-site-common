@@ -20,6 +20,10 @@ onMounted(async () => {
     loading.value = false;
 });
 onUnmounted(() => loading.value = true);
+onMounted(() => {
+    // cAn'T aSsIgN tO sElF
+    if (contestManager.contests[contestType] != undefined) contestManager.contests[contestType].contest = contestManager.contests[contestType + '']!.contest;
+})
 </script>
 
 <template>

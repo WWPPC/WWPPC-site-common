@@ -230,7 +230,7 @@ watch(() => contestManager.contests[contestType], () => contestManager.contests[
 
 // thing for katex
 const problemContent = ref('');
-watch(problem, () => {
+watch(() => problem.value.content, () => {
     latexify(problem.value.content).then((html) => problemContent.value = html);
 });
 onMounted(() => {
