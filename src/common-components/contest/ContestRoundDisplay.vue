@@ -76,6 +76,7 @@ onMounted(updateRoundTimes);
     content: ' ';
     position: absolute;
     top: calc(var(--actual-width) * -0.4);
+    left: 0px;
     width: 100%;
     height: calc(100% + calc(var(--actual-width) * 0.8));
     box-shadow: 0px 0px calc(var(--actual-width) * 0.4) calc(var(--actual-width) * 0.2) black inset;
