@@ -13,7 +13,7 @@ const contestType = props.contest;
 const accountManager = useAccountManager();
 const contestManager = useContestManager();
 
-const scoreboard = ref<{ username: string, displayName: string, score: number }[]>([]);
+const scoreboard = ref<{ username: string, displayName: string, score: number, penalty: number }[]>([]);
 const update = async () => {
     if (contestManager.contests[contestType]?.scoreboard == null) scoreboard.value = [];
     else scoreboard.value = await Promise.all(contestManager.contests[contestType].scoreboard.map(async (s) => {
@@ -21,7 +21,8 @@ const update = async () => {
         return {
             username: s.username,
             displayName: (teamData instanceof Error) ? s.username : teamData.teamName,
-            score: Math.round(s.score * 1000) / 1000
+            score: Math.ceil(s.score),
+            penalty: Math.floor((Math.ceil(s.score)-s.score)*1000000)
         };
     }));
 };
@@ -44,7 +45,7 @@ watch(() => contestManager.contests[contestType], () => contestManager.contests[
             <div class="leaderboardItem" v-for="(item, i) of scoreboard" :key="i">
                 {{ i + 1 }}.
                 <RouterLink :to="'/user/@' + item.username">{{ item.displayName }}</RouterLink>
-                - {{ item.score }} points
+                - {{ item.score }} solved, {{ item.penalty }} penalty
             </div>
         </div>
         <div v-if="scoreboardIsNull" style="display: flex; flex-direction: column; align-items: center;">
