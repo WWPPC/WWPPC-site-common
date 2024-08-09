@@ -3,7 +3,10 @@ import { ref, watch } from 'vue';
 
 const timestamp = defineModel<number>({ default: Date.now() });
 const props = defineProps<{
-    timezoneOffset?: number // this should be the value given by Date.prototype.getTimezoneOffset()
+    timezoneOffset?: number // this should be the value given by new Date().getTimezoneOffset()
+    width?: string
+    height?: string
+    font?: string
 }>();
 
 //buh and possibly flaky reactivity
@@ -18,11 +21,46 @@ watch(datetime, () => {
 </script>
 
 <template>
-    <input type="datetime-local" v-model="datetime">
+    <input type="datetime-local" class="uiTime" v-model="datetime">
 </template>
 
 <style scoped>
-input {
+.uiTime {
+    box-sizing: border-box;
+    width: v-bind("$props.width ?? 'unset'");
+    height: v-bind("$props.height ?? '32px'");
     margin: 0px 4px;
+    padding: 0px 4px;
+    border: 4px solid white;
+    border-radius: 0px;
+    background-color: black;
+    color: white;
+    font: v-bind("$props.font ?? '14px inherit'");
+    font-family: 'Source Code Pro', Courier, monospace;
+    transition: 50ms linear border-color;
+}
+
+.uiTime:hover {
+    border-color: var(--color-1);
+}
+
+.uiTime:focus {
+    border-color: var(--color-2);
+}
+
+.uiTimeHighlightInvalid.uiTime:invalid {
+    border-color: var(--color-3);
+}
+
+/* Safari, Chrome */
+::-webkit-datetime-edit-year-field:focus,
+::-webkit-datetime-edit-month-field:focus,
+::-webkit-datetime-edit-week-field:focus,
+::-webkit-datetime-edit-day-field:focus,
+::-webkit-datetime-edit-hour-field:focus,
+::-webkit-datetime-edit-minute-field:focus,
+::-webkit-datetime-edit-second-field:focus,
+::-webkit-datetime-edit-ampm-field:focus {
+    background-color: color-mix(in hsl, var(--color-1) 70%, transparent 30%);
 }
 </style>
