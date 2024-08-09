@@ -1,4 +1,6 @@
 import 'katex/dist/katex.min.css';
+import '#/assets/common.css';
+import '#/assets/fonts.css';
 
 import recaptcha from '#/scripts/recaptcha';
 
