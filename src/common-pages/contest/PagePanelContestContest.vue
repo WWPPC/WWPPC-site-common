@@ -19,33 +19,34 @@ const currentRound = ref(0);
 const roundTimes = ref<{ label: string, time: number }[]>([]);
 const updateRoundTimes = () => {
     roundTimes.value = [];
-    if (contestManager.contests[contestType] == undefined || contestManager.contests[contestType].contest === null || contestManager.contests[contestType].contest.rounds.length == 0) return;
+    const contest = contestManager.contests[contestType];
+    if (contest == undefined || contest.contest == null || contest.contest.rounds.length == 0) return;
     const times: { label: string, time: number }[] = [];
     const now = Date.now();
     currentRound.value = -1;
     times.push({
         label: 'Opening ceremonies',
-        time: contestManager.contests[contestType].contest.rounds[0].startTime - contestManager.contests[contestType].contest.startTime
+        time: contest.contest.rounds[0].startTime - contest.contest.startTime
     }, {
         label: contestManager.config[contestType]?.rounds ? 'Round 1' : 'Contest',
-        time: contestManager.contests[contestType].contest.rounds[0].endTime - contestManager.contests[contestType].contest.rounds[0].startTime
+        time: contest.contest.rounds[0].endTime - contest.contest.rounds[0].startTime
     });
-    if (now > contestManager.contests[contestType].contest.startTime && now < contestManager.contests[contestType].contest.rounds[0].startTime) currentRound.value = 0;
-    else if (now > contestManager.contests[contestType].contest.rounds[0].startTime && now < contestManager.contests[contestType].contest.rounds[0].endTime) currentRound.value = 1;
-    for (let i = 1; i < contestManager.contests[contestType].contest.rounds.length; i++) {
+    if (now > contest.contest.startTime && now < contest.contest.rounds[0].startTime) currentRound.value = 0;
+    else if (now > contest.contest.rounds[0].startTime && now < contest.contest.rounds[0].endTime) currentRound.value = 1;
+    for (let i = 1; i < contest.contest.rounds.length; i++) {
         times.push({
             label: 'Break',
-            time: contestManager.contests[contestType].contest.rounds[i].startTime - contestManager.contests[contestType].contest.rounds[i - 1].endTime
+            time: contest.contest.rounds[i].startTime - contest.contest.rounds[i - 1].endTime
         }, {
             label: 'Round ' + (i + 1),
-            time: contestManager.contests[contestType].contest.rounds[i].endTime - contestManager.contests[contestType].contest.rounds[i].startTime
+            time: contest.contest.rounds[i].endTime - contest.contest.rounds[i].startTime
         });
-        if (now > contestManager.contests[contestType].contest.rounds[i - 1].endTime && now < contestManager.contests[contestType].contest.rounds[i].startTime) currentRound.value = i * 2;
-        else if (now > contestManager.contests[contestType].contest.rounds[i].startTime && now < contestManager.contests[contestType].contest.rounds[i].endTime) currentRound.value = i * 2 + 1;
+        if (now > contest.contest.rounds[i - 1].endTime && now < contest.contest.rounds[i].startTime) currentRound.value = i * 2;
+        else if (now > contest.contest.rounds[i].startTime && now < contest.contest.rounds[i].endTime) currentRound.value = i * 2 + 1;
     }
     times.push({
         label: 'Closing ceremonies',
-        time: contestManager.contests[contestType].contest.endTime - contestManager.contests[contestType].contest.rounds[contestManager.contests[contestType].contest.rounds.length - 1].endTime
+        time: contest.contest.endTime - contest.contest.rounds[contest.contest.rounds.length - 1].endTime
     });
     if (currentRound.value == -1) currentRound.value = times.length - 1;
     roundTimes.value = times;

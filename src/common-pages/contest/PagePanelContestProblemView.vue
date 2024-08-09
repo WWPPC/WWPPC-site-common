@@ -89,6 +89,7 @@ const loadProblem = async () => {
                 return;
             }
             problem.value = p;
+            latexify(problem.value.content).then((html) => problemContent.value = html);
         } else if (route.params.problemRound !== undefined && route.params.problemNumber !== undefined) {
             const p = await contestManager.contests[contestType].getProblemData(Number(route.params.problemRound.toString()), Number(route.params.problemNumber.toString()));
             if (p === null) {
@@ -96,6 +97,7 @@ const loadProblem = async () => {
                 return;
             }
             problem.value = p;
+            latexify(problem.value.content).then((html) => problemContent.value = html);
         } else if (route.query.ignore_server === undefined) {
             loadErrorModal('No problem ID', 'No problem ID was supplied!');
         }
@@ -115,6 +117,7 @@ const loadProblem = async () => {
             status: ContestProblemCompletionState.NOT_UPLOADED
         };
         problemId = p.id;
+        latexify(problem.value.content).then((html) => problemContent.value = html);
         updateSubmissions();
     }
 };
@@ -226,11 +229,17 @@ watch(() => answerInput.value, updateSubmitButton);
 setInterval(updateSubmitButton, 1000);
 
 // MASSIVE SPAGHETTI BECAUSE CONTEST ISNT REACTIVE ANYMORE
-watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onSpaghetti(loadProblem));
+watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onSpaghetti(() => {
+    loadProblem();
+    const buh = problem.value.submissions;
+    problem.value.submissions = [];
+    problem.value.submissions = buh;
+    latexify(problem.value.content).then((html) => problemContent.value = html);
+}));
 
 // thing for katex
 const problemContent = ref('');
-watch(problem, () => {
+watch(() => problem.value.content, () => {
     latexify(problem.value.content).then((html) => problemContent.value = html);
 });
 onMounted(() => {
