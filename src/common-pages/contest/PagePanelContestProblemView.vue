@@ -229,7 +229,13 @@ watch(() => answerInput.value, updateSubmitButton);
 setInterval(updateSubmitButton, 1000);
 
 // MASSIVE SPAGHETTI BECAUSE CONTEST ISNT REACTIVE ANYMORE
-watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onSpaghetti(loadProblem));
+watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onSpaghetti(() => {
+    loadProblem();
+    const buh = problem.value.submissions;
+    problem.value.submissions = [];
+    problem.value.submissions = buh;
+    latexify(problem.value.content).then((html) => problemContent.value = html);
+}));
 
 // thing for katex
 const problemContent = ref('');
