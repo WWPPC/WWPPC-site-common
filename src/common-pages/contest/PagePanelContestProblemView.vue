@@ -89,6 +89,7 @@ const loadProblem = async () => {
                 return;
             }
             problem.value = p;
+            latexify(problem.value.content).then((html) => problemContent.value = html);
         } else if (route.params.problemRound !== undefined && route.params.problemNumber !== undefined) {
             const p = await contestManager.contests[contestType].getProblemData(Number(route.params.problemRound.toString()), Number(route.params.problemNumber.toString()));
             if (p === null) {
@@ -96,6 +97,7 @@ const loadProblem = async () => {
                 return;
             }
             problem.value = p;
+            latexify(problem.value.content).then((html) => problemContent.value = html);
         } else if (route.query.ignore_server === undefined) {
             loadErrorModal('No problem ID', 'No problem ID was supplied!');
         }
@@ -115,6 +117,7 @@ const loadProblem = async () => {
             status: ContestProblemCompletionState.NOT_UPLOADED
         };
         problemId = p.id;
+        latexify(problem.value.content).then((html) => problemContent.value = html);
         updateSubmissions();
     }
 };
