@@ -4,7 +4,7 @@ import ContestProblemListRound from '#/common-components/contest/problemList/Con
 import { type Contest, useContestManager } from '#/scripts/ContestManager';
 import WaitCover from '#/common/WaitCover.vue';
 import ContestProblemListProblem from '#/common-components/contest/problemList/ContestProblemListProblem.vue';
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 
 const props = defineProps<{
     contest: string
@@ -22,7 +22,7 @@ onMounted(async () => {
 onUnmounted(() => loading.value = true);
 const buh = ref<Contest | null>(null);
 watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onSpaghetti(() => {
-    if (contestManager.contests[contestType] != undefined) buh.value = contestManager.contests[contestType].contest;
+    if (contestManager.contests[contestType]?.contest) buh.value = reactive(contestManager.contests[contestType].contest);
 }));
 </script>
 
