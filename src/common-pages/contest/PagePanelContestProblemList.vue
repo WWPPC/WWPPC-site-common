@@ -21,9 +21,11 @@ onMounted(async () => {
 });
 onUnmounted(() => loading.value = true);
 const buh = ref<Contest | null>(null);
-watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onSpaghetti(() => {
+const makeUselessCopyOfDataToTriggerReactivityBecauseVueIsBrokenAndReactivityDoesntWorkAtAll = () => {
     if (contestManager.contests[contestType]?.contest) buh.value = reactive(contestManager.contests[contestType].contest);
-}));
+};
+watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onSpaghetti(makeUselessCopyOfDataToTriggerReactivityBecauseVueIsBrokenAndReactivityDoesntWorkAtAll));
+onMounted(makeUselessCopyOfDataToTriggerReactivityBecauseVueIsBrokenAndReactivityDoesntWorkAtAll);
 </script>
 
 <template>
