@@ -6,13 +6,14 @@
         }
     ],
     "compilerOptions": {
-        "noEmit": true,
         "paths": {
             "#/*": [
                 "./src/*"
             ]
         },
-        "isolatedModules": true
+        "typeRoots": [
+            "node_modules/@types"
+        ]
     },
     "allowJS": true
 }
