@@ -197,9 +197,7 @@ socket.on('joinContestHost', ({ type, sid, token }: { type: string, sid: string,
 });
 
 const state = reactive<{
-    contests: {
-        [key: string]: ContestHostInterface | undefined
-    }
+    contests: Record<string, ContestHostInterface | undefined>
 }>({
     contests: {}
 });
