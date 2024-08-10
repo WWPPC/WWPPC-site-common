@@ -232,12 +232,16 @@ watch(() => answerInput.value, updateSubmitButton);
 setInterval(updateSubmitButton, 1000);
 
 // MASSIVE SPAGHETTI BECAUSE CONTEST ISNT REACTIVE ANYMORE
+const a = ref(true);
 watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onSpaghetti(async () => {
     loadProblem();
-    const buh = problem.value.submissions;
-    problem.value.submissions = [];
+    // const buh = problem.value.submissions;
+    // problem.value.submissions = [];
+    // await nextTick();
+    // problem.value.submissions = buh;
+    a.value = false;
     await nextTick();
-    problem.value.submissions = buh;
+    a.value = true;
     // latexify(problem.value.content).then((html) => problemContent.value = html);
 }));
 
@@ -312,7 +316,7 @@ const viewCode = async () => {
                     </div>
                 </form>
             </DoubleCutCornerContainer>
-            <DoubleCutCornerContainer flipped>
+            <DoubleCutCornerContainer flipped v-if="a">
                 <h3 class="submissionsHeader">Previous submissions</h3>
                 <AnimateInContainer type="fade" v-for="(submission, index) in problem.submissions" :key="submission.time" :delay="index * 50">
                     <div class="submissionContainer">
