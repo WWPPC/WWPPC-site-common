@@ -7,7 +7,7 @@ import WaitCover from '#/common/WaitCover.vue';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
 import ContestProblemSubmissionCase from '#/common-components/contest/ContestProblemSubmissionCase.vue';
 import { autoGlitchTextTransition } from '#/text';
-import { onMounted, ref, watch } from 'vue';
+import { nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
 import { useServerConnection } from '#/scripts/ServerConnection';
@@ -120,6 +120,9 @@ const loadProblem = async () => {
         latexify(problem.value.content).then((html) => problemContent.value = html);
         updateSubmissions();
     }
+    await nextTick();
+    latexify(problem.value.content).then((html) => problemContent.value = html);
+    setTimeout(() => latexify(problem.value.content).then((html) => problemContent.value = html), 1000);
 };
 onMounted(loadProblem);
 watch(() => contestManager.contests[contestType]?.contest, loadProblem);
@@ -206,7 +209,7 @@ const submit = async () => {
             modal.showModal({ title: 'No answer', content: 'Your answer cannot be blank!', color: 'var(--color-2)' });
             return;
         }
-        const status = await (props.isUpsolve ? upsolveManager : contestManager.contests[contestType]).updateSubmission(problem.value.id, '', answerInput.value);
+        const status = await (props.isUpsolve ? upsolveManager : contestManager.contests[contestType]).updateSubmission(problem.value.id, 'Text', answerInput.value);
         if (status != ContestUpdateSubmissionResult.SUCCESS) {
             modal.showModal({ title: 'Could not submit', content: getUpdateSubmissionMessage(status), color: 'var(--color-2)' })
         }

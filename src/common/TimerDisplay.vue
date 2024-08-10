@@ -26,24 +26,24 @@ onMounted(() => {
     update = setInterval(() => {
         const time = Math.abs(props.to.getTime() - Date.now());
         if (props.type == 'clock') {
-            const seconds = ((time / 1000) % 60).toFixed(0).padStart(2, '0');
-            const minutes = ((time / 60000) % 60).toFixed(0).padStart(2, '0');
-            const hours = ((time / 3600000) % 24).toFixed(0).padStart(2, '0');
-            const days = ((time / 86400000) * (props.countUp ? -1 : 1)).toFixed(0);
+            const seconds = (Math.floor(time / 1000) % 60).toFixed(0).padStart(2, '0');
+            const minutes = (Math.floor(time / 60000) % 60).toFixed(0).padStart(2, '0');
+            const hours = (Math.floor(time / 3600000) % 24).toFixed(0).padStart(2, '0');
+            const days = (Math.floor(time / 86400000) * (props.countUp ? -1 : 1)).toFixed(0);
             text.value = `${days}d ${hours}h ${minutes}m ${seconds}s`;
         } else if (props.type == 'timer') {
-            const seconds = ((time / 1000) % 60).toFixed(0).padStart(2, '0');
-            const minutes = ((time / 60000) % 60).toFixed(0).padStart(2, '0');
-            const hours = ((time / 3600000) * (props.countUp ? -1 : 1)).toFixed(0);
+            const seconds = (Math.floor(time / 1000) % 60).toFixed(0).padStart(2, '0');
+            const minutes = (Math.floor(time / 60000) % 60).toFixed(0).padStart(2, '0');
+            const hours = (Math.floor(time / 3600000) * (props.countUp ? -1 : 1)).toFixed(0);
             text.value = `${hours}:${minutes}:${seconds}`;
         } else if (props.type == 'min-timer') {
-            const seconds = ((time / 1000) % 60).toFixed(0).padStart(2, '0');
-            const minutes = ((time / 60000) * (props.countUp ? -1 : 1)).toFixed(0);
+            const seconds = (Math.floor(time / 1000) % 60).toFixed(0).padStart(2, '0');
+            const minutes = (Math.floor(time / 60000) * (props.countUp ? -1 : 1)).toFixed(0);
             text.value = `${minutes}:${seconds}`;
         } else if (props.type == 'auto-timer') {
-            const seconds = ((time / 1000) % 60).toFixed(0).padStart(2, '0');
-            const minutes = ((time / 60000) % 60).toFixed(0).padStart(2, '0');
-            const hours = ((time / 3600000) * (props.countUp ? -1 : 1)).toFixed(0);
+            const seconds = (Math.floor(time / 1000) % 60).toFixed(0).padStart(2, '0');
+            const minutes = (Math.floor(time / 60000) % 60).toFixed(0).padStart(2, '0');
+            const hours = (Math.floor(time / 3600000) * (props.countUp ? -1 : 1)).toFixed(0);
             if (hours != '0') text.value = `${hours}:${minutes}:${seconds}`;
             else text.value = `${minutes}:${seconds}`;
         } else if (props.type == 'age') {
