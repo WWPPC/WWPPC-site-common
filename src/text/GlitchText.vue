@@ -28,22 +28,22 @@ export default {
         if (this.activated) return;
         this.activated = true;
         let running: AsyncTextTransition | null = null;
-        const runGlitch = () => {
+        const runGlitch = (startGlitched: boolean) => {
             if (running) running.cancel();
             if (this.$props.random) {
-                running = randomGlitchTextTransition(this.dispText, this.$props.text, (t) => { this.dispText = t; }, 20, this.$props.steps, true, this.$props.delay);
+                running = randomGlitchTextTransition(this.dispText, this.$props.text, (t) => { this.dispText = t; }, 20, this.$props.steps, startGlitched, this.$props.delay);
             } else {
-                running = glitchTextTransition(this.dispText, this.$props.text, (t) => { this.dispText = t; }, 20, 1, this.$props.text.length + (this.$props.delay ?? 0), this.$props.steps, true);
+                running = glitchTextTransition(this.dispText, this.$props.text, (t) => { this.dispText = t; }, 20, 1, this.$props.text.length + (this.$props.delay ?? 0), this.$props.steps, startGlitched);
             }
         };
         if (this.$props.onVisible) {
             const observer = new IntersectionObserver(([entry]) => {
-                if (entry.isIntersecting) runGlitch();
+                if (entry.isIntersecting) runGlitch(true);
             }, { threshold: 0 });
             observer.observe(this.$el);
         }
-        watch(() => this.$props.text, runGlitch);
-        runGlitch();
+        watch(() => this.$props.text, () => runGlitch(false));
+        runGlitch(true);
     },
 }
 </script>
