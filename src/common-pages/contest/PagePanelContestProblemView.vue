@@ -120,6 +120,7 @@ const loadProblem = async () => {
         latexify(problem.value.content).then((html) => problemContent.value = html);
         updateSubmissions();
     }
+    latexify(problem.value.content).then((html) => problemContent.value = html);
 };
 onMounted(loadProblem);
 watch(() => contestManager.contests[contestType]?.contest, loadProblem);
@@ -206,7 +207,7 @@ const submit = async () => {
             modal.showModal({ title: 'No answer', content: 'Your answer cannot be blank!', color: 'var(--color-2)' });
             return;
         }
-        const status = await (props.isUpsolve ? upsolveManager : contestManager.contests[contestType]).updateSubmission(problem.value.id, '', answerInput.value);
+        const status = await (props.isUpsolve ? upsolveManager : contestManager.contests[contestType]).updateSubmission(problem.value.id, 'Text', answerInput.value);
         if (status != ContestUpdateSubmissionResult.SUCCESS) {
             modal.showModal({ title: 'Could not submit', content: getUpdateSubmissionMessage(status), color: 'var(--color-2)' })
         }
