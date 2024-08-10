@@ -107,12 +107,9 @@ socket.on('getCredentials', async (session) => {
     Object.defineProperty(window, 'crossDomainStorage', {
         value: crossDomainStorage
     })
-    console.debug('letterbeforea')
     const sessionCreds = await crossDomainStorage.getItem('sessionCredentials');
-    console.debug('a')
     // autologin if possible
     if (sessionCreds != null && RSA.sessionID.toString() === await crossDomainStorage.getItem('sessionId')) {
-        console.debug('b')
         const creds = JSON.parse(sessionCreds);
         const res = await sendCredentials(creds.username, creds.password, await recaptcha.execute('autologin'));
         if (res == AccountOpResult.SUCCESS) {
@@ -124,7 +121,6 @@ socket.on('getCredentials', async (session) => {
                 crossDomainStorage.removeItem('sessionId')
             ]);
         }
-        console.debug('c')
     }
     state.handshakeComplete = true;
     handshakeResolve(undefined);
@@ -154,7 +150,6 @@ export const sendCredentials = async (username: string, password: string | numbe
                 } : undefined
             });
             if (res === AccountOpResult.SUCCESS) {
-                console.debug('y')
                 await Promise.all([
                     crossDomainStorage.setItem('sessionCredentials', JSON.stringify({
                         username: username,
@@ -162,7 +157,6 @@ export const sendCredentials = async (username: string, password: string | numbe
                     })),
                     crossDomainStorage.setItem('sessionId', RSA.sessionID.toString())
                 ]);
-                console.debug('z')
                 state.encryptedPassword = password2;
                 state.loggedIn = true;
                 loginResolve(undefined);
