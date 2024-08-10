@@ -11,7 +11,7 @@ import { nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
 import { useServerConnection } from '#/scripts/ServerConnection';
-import { completionStateString, type ContestProblem, ContestProblemCompletionState, ContestUpdateSubmissionResult, getUpdateSubmissionMessage, useContestManager } from '#/scripts/ContestManager';
+import { completionStateString, type ContestProblem, ContestProblemCompletionState, type ContestSubmission, ContestUpdateSubmissionResult, getUpdateSubmissionMessage, useContestManager } from '#/scripts/ContestManager';
 import { useUpsolveManager } from '#/scripts/UpsolveManager';
 import latexify from '#/scripts/katexify';
 
@@ -233,13 +233,12 @@ setInterval(updateSubmitButton, 1000);
 
 // MASSIVE SPAGHETTI BECAUSE CONTEST ISNT REACTIVE ANYMORE
 const a = ref(true);
+const b = ref<ContestSubmission[]>([]);
 watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onSpaghetti(async () => {
     loadProblem();
-    // const buh = problem.value.submissions;
-    // problem.value.submissions = [];
-    // await nextTick();
-    // problem.value.submissions = buh;
     a.value = false;
+    await nextTick();
+    b.value = problem.value.submissions;
     await nextTick();
     a.value = true;
     // latexify(problem.value.content).then((html) => problemContent.value = html);
@@ -318,7 +317,7 @@ const viewCode = async () => {
             </DoubleCutCornerContainer>
             <DoubleCutCornerContainer flipped v-if="a">
                 <h3 class="submissionsHeader">Previous submissions</h3>
-                <AnimateInContainer type="fade" v-for="(submission, index) in problem.submissions" :key="submission.time" :delay="index * 50">
+                <AnimateInContainer type="fade" v-for="(submission, index) in b" :key="submission.time" :delay="index * 50">
                     <div class="submissionContainer">
                         <label class="submissionTitle" :for="'submissionCheckbox' + index">
                             <ContestProblemStatusCircle :status="submission.status"></ContestProblemStatusCircle>
