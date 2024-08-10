@@ -232,16 +232,19 @@ watch(() => answerInput.value, updateSubmitButton);
 setInterval(updateSubmitButton, 1000);
 
 // MASSIVE SPAGHETTI BECAUSE CONTEST ISNT REACTIVE ANYMORE
-const a = ref(true);
-const b = ref<ContestSubmission[]>([]);
-watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onSpaghetti(async () => {
-    loadProblem();
+const aaa = async () => {
+    await nextTick();
     a.value = false;
     await nextTick();
     b.value = problem.value.submissions;
     await nextTick();
     a.value = true;
-    // latexify(problem.value.content).then((html) => problemContent.value = html);
+};
+const a = ref(true);
+const b = ref<ContestSubmission[]>([]);
+watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onSpaghetti(() => {
+    loadProblem();
+    aaa();
 }));
 
 // thing for katex
@@ -250,14 +253,9 @@ const problemContent = ref<HTMLDivElement>();
 watch(() => problem.value.content, () => {
     latexify(problem.value.content).then((html) => {if (problemContent.value) problemContent.value.innerHTML = html});
 });
-onMounted(async () => {
-    await nextTick();
-    a.value = false;
-    await nextTick();
-    b.value = problem.value.submissions;
-    await nextTick();
-    a.value = true;
-});
+onMounted(aaa);
+watch(problem, aaa);
+watch(() => problem.value.submissions, aaa);
 
 // view submission code
 const showCode = ref(false);
