@@ -19,6 +19,7 @@ const loading = ref(true);
 onMounted(async () => {
     await contestManager.contests[contestType]?.waitForContestLoad();
     loading.value = false;
+    makeUselessCopyOfDataToTriggerReactivityBecauseVueIsBrokenAndReactivityDoesntWorkAtAll();
 });
 onUnmounted(() => loading.value = true);
 const buh = ref<Contest | null>(null);
