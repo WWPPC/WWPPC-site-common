@@ -121,6 +121,7 @@ const loadProblem = async () => {
         updateSubmissions();
     }
     latexify(problem.value.content).then((html) => problemContent.value = html);
+    setTimeout(() => latexify(problem.value.content).then((html) => problemContent.value = html), 1000);
 };
 onMounted(loadProblem);
 watch(() => contestManager.contests[contestType]?.contest, loadProblem);
