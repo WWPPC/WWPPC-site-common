@@ -4,7 +4,7 @@ import ContestProblemListRound from '#/common-components/contest/problemList/Con
 import { type Contest, useContestManager } from '#/scripts/ContestManager';
 import WaitCover from '#/common/WaitCover.vue';
 import ContestProblemListProblem from '#/common-components/contest/problemList/ContestProblemListProblem.vue';
-import { onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 
 const props = defineProps<{
     contest: string
@@ -14,6 +14,7 @@ const contestType = props.contest;
 const contestManager = useContestManager();
 
 // spaghetti
+const spam = ref(true);
 const loading = ref(true);
 onMounted(async () => {
     await contestManager.contests[contestType]?.waitForContestLoad();
@@ -21,8 +22,12 @@ onMounted(async () => {
 });
 onUnmounted(() => loading.value = true);
 const buh = ref<Contest | null>(null);
-const makeUselessCopyOfDataToTriggerReactivityBecauseVueIsBrokenAndReactivityDoesntWorkAtAll = () => {
+const makeUselessCopyOfDataToTriggerReactivityBecauseVueIsBrokenAndReactivityDoesntWorkAtAll = async () => {
     if (contestManager.contests[contestType]?.contest) buh.value = reactive(contestManager.contests[contestType].contest);
+    await nextTick();
+    spam.value = false;
+    await nextTick();
+    spam.value = true;
 };
 watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onSpaghetti(makeUselessCopyOfDataToTriggerReactivityBecauseVueIsBrokenAndReactivityDoesntWorkAtAll));
 onMounted(makeUselessCopyOfDataToTriggerReactivityBecauseVueIsBrokenAndReactivityDoesntWorkAtAll);
@@ -30,7 +35,7 @@ onMounted(makeUselessCopyOfDataToTriggerReactivityBecauseVueIsBrokenAndReactivit
 
 <template>
     <div class="problemListWrapperWrapper centered">
-        <div class="problemListWrapper">
+        <div class="problemListWrapper" v-if="spam">
             <AngledTitledContainer title="Problems" height="100%">
                 <div v-if="contestManager.config[contestType]?.rounds" class="problemList">
                     <AnimateInContainer type="slideUp" v-for="(round, index) in buh?.rounds.filter((r) => r.problems.length > 0)" :key=round.number :delay="index * 200">
