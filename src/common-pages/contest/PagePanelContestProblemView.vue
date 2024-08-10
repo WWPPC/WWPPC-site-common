@@ -250,8 +250,13 @@ const problemContent = ref<HTMLDivElement>();
 watch(() => problem.value.content, () => {
     latexify(problem.value.content).then((html) => {if (problemContent.value) problemContent.value.innerHTML = html});
 });
-onMounted(() => {
-    // latexify(problem.value.content).then((html) => problemContent.value = html);
+onMounted(async () => {
+    await nextTick();
+    a.value = false;
+    await nextTick();
+    b.value = problem.value.submissions;
+    await nextTick();
+    a.value = true;
 });
 
 // view submission code
