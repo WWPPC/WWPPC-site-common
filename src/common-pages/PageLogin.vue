@@ -49,7 +49,7 @@ const attemptedRecovery = ref(false);
 const attemptLogin = async () => {
     if (usernameInput.value.trim() == '' || passwordInput.value == '') return;
     if (!validateCredentials(usernameInput.value, passwordInput.value)) {
-        modal.showModal({ title: 'Invalid username or password', content: 'Username must be less than or equal to 16 characters and contain only lowercase alphanumeric (a-z, 0-9) and "-" and "_" characters.', color: 'red' });
+        modal.showModal({ title: 'Invalid username or password', content: 'Username must be less than or equal to 16 characters and contain only lowercase alphanumeric (a-z, 0-9) and "-" and "_" characters.', color: 'var(--color-2)' });
         return;
     }
     showLoginWait.value = true;
@@ -57,12 +57,12 @@ const attemptLogin = async () => {
     const res = await accountManager.login(usernameInput.value, passwordInput.value, token);
     showLoginWait.value = false;
     if (res == 0) router.push({ path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home', query: { clearQuery: 1 } });
-    else modal.showModal({ title: 'Could not log in:', content: getAccountOpMessage(res), color: 'red' });
+    else modal.showModal({ title: 'Could not log in:', content: getAccountOpMessage(res), color: 'var(--color-2)' });
 };
 const toSignUp = () => {
     if (usernameInput.value.trim() == '' || passwordInput.value == '') return;
     if (!validateCredentials(usernameInput.value, passwordInput.value)) {
-        modal.showModal({ title: 'Invalid username or password', content: 'Username must be less than or equal to 16 characters and contain only lowercase alphanumeric (a-z, 0-9) and "-" and "_" characters.', color: 'red' });
+        modal.showModal({ title: 'Invalid username or password', content: 'Username must be less than or equal to 16 characters and contain only lowercase alphanumeric (a-z, 0-9) and "-" and "_" characters.', color: 'var(--color-2)' });
         return;
     }
     firstNameInput.value = '';
@@ -89,7 +89,7 @@ const attemptSignup = async () => {
     });
     showLoginWait.value = false;
     if (res == 0) router.push({ path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home', query: { clearQuery: 1 } });
-    else modal.showModal({ title: 'Could not sign up:', content: getAccountOpMessage(res), color: 'red' });
+    else modal.showModal({ title: 'Could not sign up:', content: getAccountOpMessage(res), color: 'var(--color-2)' });
 };
 const toRecovery = async () => {
     emailInput.value = '';
@@ -101,12 +101,13 @@ const attemptRecovery = async () => {
     const token = await recaptcha.execute('recoverpassword');
     const res = await accountManager.requestRecovery(usernameInput.value, emailInput.value, token);
     showRecoveryWait.value = false;
-    if (res == 0) {
-        modal.showModal({ title: 'Recovery email sent', content: 'The recovery email was sent and should arrive in your inbox within 10 minutes.' });
+    if (res == AccountOpResult.SUCCESS) {
+        modal.showModal({ title: 'Recovery email sent', content: 'The recovery email was sent and should arrive in your inbox within 10 minutes.', color: 'var(--color-1)' });
         attemptedRecovery.value = true;
     } else modal.showModal({
         title: 'Could not send recovery email:',
-        content: res == AccountOpResult.ALREADY_EXISTS ? 'An email was already sent recently' : res == AccountOpResult.NOT_EXISTS ? 'Account not found' : res == AccountOpResult.INCORRECT_CREDENTIALS ? 'Inputted email does not match account record' : res == AccountOpResult.ERROR ? 'Internal error' : res == AccountOpResult.NOT_CONNECTED ? 'Not connected to server' : 'Unknown error (this is a bug?)'
+        content: res == AccountOpResult.ALREADY_EXISTS ? 'An email was already sent recently' : res == AccountOpResult.NOT_EXISTS ? 'Account not found' : res == AccountOpResult.INCORRECT_CREDENTIALS ? 'Inputted email does not match account record' : res == AccountOpResult.SESSION_EXPIRED ? 'Session expired' : res == AccountOpResult.ERROR ? 'Internal error' : res == AccountOpResult.CAPTCHA_FAILED ? 'ReCAPTCHA check failed' : res == AccountOpResult.NOT_CONNECTED ? 'Not connected to server' : 'Unknown error (this is a bug?)',
+        color: 'var(--color-2)'
     });
 };
 </script>
@@ -145,7 +146,7 @@ const attemptRecovery = async () => {
                         <div class="fullBlock loginScroll" v-show="page == 1">
                             <div class="centered">
                                 <div class="loginVertical">
-                                    <InputButton @click="page = 0" text="Cancel" style="margin-top: 8px;" width="160px" color="red" title="Go back to login page"></InputButton>
+                                    <InputButton @click="page = 0" text="Cancel" style="margin-top: 8px;" width="160px" color="var(--color-2)" title="Go back to login page"></InputButton>
                                     <h1 class="loginVerticalHeader2">Sign Up</h1>
                                     <form class="loginVertical" action="javascript:void(0)" @submit=attemptSignup>
                                         <span style="margin-bottom: 8px;" class="nowrap">
@@ -182,7 +183,7 @@ const attemptRecovery = async () => {
                         <div class="fullBlock loginScroll" v-show="page == 2">
                             <div class="centered">
                                 <div class="loginVertical">
-                                    <InputButton @click="page = 0" text="Cancel" style="margin-top: 8px;" width="160px" color="red" title="Go back to login page"></InputButton>
+                                    <InputButton @click="page = 0" text="Cancel" style="margin-top: 8px;" width="160px" color="var(--color-2)" title="Go back to login page"></InputButton>
                                     <h1 class="loginVerticalHeader2">Account Recovery</h1>
                                     <p style="text-align: center; font-size: var(--font-small);">
                                         Enter your email to reset your password.
@@ -260,7 +261,7 @@ const attemptRecovery = async () => {
 }
 
 .loginForgotPassword {
-    color: lime;
+    color: var(--color-1);
     text-decoration: underline;
     cursor: pointer;
     margin-top: 8px;
