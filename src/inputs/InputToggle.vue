@@ -1,6 +1,8 @@
 <script setup lang="ts">
 const props = defineProps<{
     title?: string
+    color1?: string
+    color2?: string
     disabled?: boolean
 }>();
 const checked = defineModel({ default: false });
@@ -44,7 +46,7 @@ defineExpose({
     left: 4px;
     width: 44px;
     height: 12px;
-    background-color: red;
+    background-color: v-bind("$props.color1 ?? 'var(--color-2)'");
     border: 4px solid white;
     transition: 0.1s linear;
     cursor: pointer;
@@ -64,7 +66,7 @@ defineExpose({
 }
 
 .uiToggleInput:checked+.uiToggleSlider {
-    background-color: lime;
+    background-color: v-bind("$props.color1 ?? 'var(--color-1)'");
 }
 
 .uiToggleInput:checked+.uiToggleSlider::before {

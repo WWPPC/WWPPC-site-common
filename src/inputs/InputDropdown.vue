@@ -11,6 +11,10 @@ const props = defineProps<{
     groupedItems?: { label: string, items: DropdownItem[] }[]
     width?: string
     height?: string
+    font?: string
+    fontSize?: string
+    color?: string
+    backgroundColor?: string
     default?: string
     multiple?: boolean
 }>();
@@ -54,27 +58,28 @@ defineExpose({
     margin: 0px 4px;
     border: 4px solid white;
     border-radius: 0px;
-    color: white;
-    background-color: black;
+    background-color: v-bind("$props.backgroundColor ?? 'black'");
+    color: v-bind("$props.color ?? 'white'");
+    font: v-bind("$props.font ?? 'inherit'");
+    font-size: v-bind("$props.fontSize ?? 'var(--font-16)'");
     font-family: 'Source Code Pro', Courier, monospace;
-    font-size: var(--font-16);
     transition: 50ms linear border-color;
     cursor: pointer;
 }
 
 .uiDropdown option {
     padding: 0px 4px;
-    background-color: black;
+    background-color: v-bind("$props.backgroundColor ?? 'black'");
     font-size: var(--font-16);
     cursor: pointer;
 }
 
 .uiDropdown option:nth-child(odd) {
-    background-color: #151515;
+    background-color: color-mix(in srgb, v-bind("$props.backgroundColor ?? 'black'") 75%, #808080 25%);
 }
 
 .uiDropdown option:hover {
-    background-color: #333;
+    background-color: color-mix(in srgb, v-bind("$props.backgroundColor ?? 'black'") 50%, #808080 50%);
 }
 
 .uiDropdown option:checked {
@@ -83,7 +88,7 @@ defineExpose({
 
 .uiDropdown optgroup {
     padding: 0px 4px;
-    background-color: #222;
+    background-color: color-mix(in srgb, v-bind("$props.backgroundColor ?? 'black'") 60%, #808080 40%);
     font-weight: bold;
 }
 
@@ -107,15 +112,15 @@ defineExpose({
 }
 
 .uiDropdown:disabled option {
-    color: white;
+    color: v-bind("$props.color ?? 'white'");
     cursor: not-allowed;
 }
 
 .uiDropdown:disabled option:hover {
-    background-color: black !important;
+    background-color: v-bind("$props.backgroundColor ?? 'black'") !important;
 }
 
 .uiDropdown:disabled option:nth-child(odd):hover {
-    background-color: #151515 !important;
+    background-color: color-mix(in srgb, v-bind("$props.backgroundColor ?? 'black'") 75%, #808080 25%) !important;
 }
 </style>

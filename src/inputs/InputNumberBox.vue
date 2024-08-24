@@ -8,6 +8,9 @@ const props = defineProps<{
     width?: string
     height?: string
     font?: string
+    fontSize?: string
+    color?: string
+    backgroundColor?: string
 }>();
 const emit = defineEmits<{
     (e: 'input', value: number): any
@@ -34,10 +37,10 @@ defineExpose({
     padding: 0px 4px;
     border: 4px solid white;
     border-radius: 0px;
-    background-color: black;
-    color: white;
-    font: v-bind("$props.font ?? '14px inherit'");
-    font-family: 'Source Code Pro', Courier, monospace;
+    background-color: v-bind("$props.backgroundColor ?? 'black'");
+    color: v-bind("$props.color ?? 'white'");
+    font: v-bind("$props.font ?? 'inherit'");
+    font-size: v-bind("$props.fontSize ?? 'var(--font-16)'");
     transition: 50ms linear border-color;
 }
 

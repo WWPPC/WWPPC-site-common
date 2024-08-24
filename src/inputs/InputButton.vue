@@ -69,4 +69,4 @@ watch(() => props.text, () => buttonText.value = props.text);
     opacity: 1;
     cursor: not-allowed;
 }
-</style>../TextTransitions
+</style>

@@ -8,6 +8,9 @@ const props = defineProps<{
     maxWidth?: string
     maxHeight?: string
     font?: string
+    fontSize?: string
+    color?: string
+    backgroundColor?: string
     placeholder?: string
     resize?: 'vertical' | 'horizontal' | 'both' | 'none'
 }>();
@@ -40,9 +43,10 @@ defineExpose({
     padding: 0px 4px;
     border: 4px solid white;
     border-radius: 0px;
-    background-color: black;
-    color: white;
-    font: v-bind("$props.font ?? '14px inherit'");
+    background-color: v-bind("$props.backgroundColor ?? 'black'");
+    color: v-bind("$props.color ?? 'white'");
+    font: v-bind("$props.font ?? 'inherit'");
+    font-size: v-bind("$props.fontSize ?? 'var(--font-16)'");
     font-family: 'Source Code Pro', Courier, monospace;
     transition: 50ms linear border-color;
     resize: v-bind("$props.resize ?? 'both'");

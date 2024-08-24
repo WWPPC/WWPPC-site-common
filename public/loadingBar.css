@@ -1,9 +1,3 @@
-
-body {
-    background-color: black;
-    color: white;
-}
-
 a {
     color: var(--color-1) !important;
 }
@@ -16,6 +10,7 @@ a {
     height: 100vh;
     text-align: center;
     background-color: black;
+    color: white;
     transition: 200ms linear opacity;
     z-index: 1000;
     cursor: wait;
