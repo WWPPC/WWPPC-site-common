@@ -130,7 +130,7 @@ const attemptRecovery = async () => {
                                     <img src="/logo.svg" class="loginLogoFloater">
                                     <h1 class="loginVerticalHeader">Log In</h1>
                                     <form class="loginVertical" action="javascript:void(0)">
-                                        <InputTextBox v-model="usernameInput" placeholder="Username" style="margin-bottom: 8px;" width="208px" title="Username" maxlength="16" autocomplete="username" autocapitalize="off" pattern="[a-z0-9\-_]*" highlight-invalid required></InputTextBox>
+                                        <InputTextBox v-model="usernameInput" placeholder="Username" style="margin-bottom: 8px;" width="208px" title="Username (alphanumeric and/or dash/underscore)" maxlength="16" autocomplete="username" autocapitalize="off" pattern="[a-z0-9\-_]*" highlight-invalid required></InputTextBox>
                                         <InputTextBox v-model="passwordInput" placeholder="Password" type="password" style="margin-bottom: 8px;" width="208px" title="Password" maxlength="1024" autocomplete="current-password" required></InputTextBox>
                                         <span>
                                             <InputButton text="Log In" type="submit" @click="attemptLogin" width="100px" title="Log in" glitchOnMount :disabled=showLoginWait></InputButton>
