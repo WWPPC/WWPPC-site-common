@@ -53,6 +53,11 @@ if ((route.params.panel === undefined && props.isDefault && route.params.catchAl
 .fullBlock:last-child {
     margin-bottom: 0px;
 }
+
+.stretchBlock {
+    display: flex;
+    flex-direction: column;
+}
 </style>
 
 <style scoped>

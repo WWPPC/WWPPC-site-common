@@ -9,6 +9,7 @@ defineProps<{
     align?: 'left' | 'center' | 'right'
     fontSize?: string
     hoverAnimation?: 'lift' | 'swell'
+    flipped?: boolean
     noPadding?: boolean
 }>();
 </script>
@@ -45,7 +46,7 @@ defineProps<{
     position: absolute;
     top: 0px;
     padding: 8px 12px;
-    text-align: v-bind("$props.align ?? 'left'");
+    text-align: v-bind("$props.align ?? ($props.flipped ? 'right' : 'left')");
     font-size: v-bind("$props.fontSize ?? 'initial'");
 }
 
@@ -57,8 +58,8 @@ defineProps<{
     display: block;
     position: absolute;
     top: 0px;
-    left: calc(-50% - 4px);
-    width: calc(100% / cos(3deg) + 2px);
+    left: calc(-50% - 8px);
+    width: calc(100% / cos(3deg) + 80px * tan(3deg) + 4px);
     height: 80px;
     border-bottom: 4px solid;
     border-color: v-bind("$props.borderColor ?? 'white'");
