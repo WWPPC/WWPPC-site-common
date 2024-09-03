@@ -141,14 +141,14 @@ export interface ModalParams {
                 </span>
                 <div class="modalButtons">
                     <span v-if="modal.mode == ModalMode.INPUT">
-                        <InputButton text="NO" @click=modalReject width="5em" color="red" font="bold var(--font-16) 'Source Code Pro'"></InputButton>
-                        <InputButton text="YES" @click=modalResolve width="5em" color="lime" font="bold var(--font-16) 'Source Code Pro'"></InputButton>
+                        <InputButton text="NO" @click=modalReject width="5em" color="var(--color-2)" font="bold var(--font-16) 'Source Code Pro'"></InputButton>
+                        <InputButton text="YES" @click=modalResolve width="5em" color="var(--color-1)" font="bold var(--font-16) 'Source Code Pro'"></InputButton>
                     </span>
                     <span v-else>
                         <span v-if="modal.mode == ModalMode.QUERY || modal.mode == ModalMode.CONFIRM">
-                            <InputButton text="CANCEL" @click=modalReject width="5em" color="red" font="bold var(--font-16) 'Source Code Pro'"></InputButton>
+                            <InputButton text="CANCEL" @click=modalReject width="5em" color="var(--color-2)" font="bold var(--font-16) 'Source Code Pro'"></InputButton>
                         </span>
-                        <InputButton text="OK" @click=modalResolve width="5em" color="lime" font="bold var(--font-16) 'Source Code Pro'"></InputButton>
+                        <InputButton text="OK" @click=modalResolve width="5em" color="var(--color-1)" font="bold var(--font-16) 'Source Code Pro'"></InputButton>
                     </span>
                 </div>
             </div>
