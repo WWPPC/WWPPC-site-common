@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { nextTick, ref } from 'vue';
 import LoadingSpinner from './LoadingSpinner.vue';
 
 defineProps<{
@@ -8,23 +7,23 @@ defineProps<{
 }>();
 </script>
 <script lang="ts">
-const size = ref(0);
 export default {
-    async mounted() {
-        const resize = async () => {
-            await nextTick();
-            if (this.$el?.getBoundingClientRect == undefined) return;
-            const rect = this.$el.getBoundingClientRect();
-            size.value = Math.min(rect.width * 0.25, rect.height * 0.25);
+    data() {
+        return {
+            size: 0,
+            createdObserver: false
         }
-        window.addEventListener('resize', resize);
-        resize();
     },
-    async beforeUpdate() {
-        await nextTick();
-        if (this.$el?.getBoundingClientRect == undefined) return;
+    mounted() {
+        if (this.createdObserver) return;
+        this.createdObserver = true;
+        const observer = new ResizeObserver(() => {
+            const rect = this.$el.getBoundingClientRect();
+            this.size = Math.min(rect.width * 0.25, rect.height * 0.25);
+        });
+        observer.observe(this.$el);
         const rect = this.$el.getBoundingClientRect();
-        size.value = Math.min(rect.width * 0.25, rect.height * 0.25);
+        this.size = Math.min(rect.width * 0.25, rect.height * 0.25);
     }
 }
 </script>
@@ -61,9 +60,9 @@ export default {
 }
 
 .waitCoverSpinnerWrapper {
-    width: v-bind("size + 'px'");
-    height: v-bind("size + 'px'");
-    margin-bottom: calc(v-bind("size + 'px'") * 0.25);
+    width: v-bind("$data.size + 'px'");
+    height: v-bind("$data.size + 'px'");
+    margin-bottom: calc(v-bind("$data.size + 'px'") * 0.25);
 }
 
 .waitCoverText {

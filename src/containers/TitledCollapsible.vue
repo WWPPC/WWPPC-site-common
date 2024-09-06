@@ -39,7 +39,6 @@ export default {
         }
     },
     mounted() {
-        // VUE WHY REFS NOT WORK AT ALL
         if (this.createdObserver) return;
         this.createdObserver = true;
         const observer = new ResizeObserver(() => {
