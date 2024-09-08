@@ -16,6 +16,7 @@ const props = defineProps<{
     imgColor?: string
     imgHoverColor?: string
     imgOnly?: boolean
+    type?: 'button' | 'submit'
     disabled?: boolean
     glitchOnMount?: boolean
 }>();
@@ -37,7 +38,7 @@ watch(() => props.text, () => buttonText.value = props.text);
 
 <template>
     <label :class="'uiIconButtonLabel ' + (props.disabled ? 'uiIconButtonLabelDisabled' : '')" :title=title>
-        <input type="button" class="uiIconButton" @click=click :disabled=props.disabled>
+        <input :type="$props.type ?? 'button'" class="uiIconButton" @click=click :disabled=props.disabled>
         <div :class="props.noMask ? 'uiIconButtonImgNoMask' : 'uiIconButtonImage'"></div>
         <span class="uiIconButtonText" v-if="!props.imgOnly">{{ buttonText }}</span>
     </label>
@@ -51,7 +52,7 @@ watch(() => props.text, () => buttonText.value = props.text);
     height: v-bind("$props.height ?? 'min-content'");
     border: 4px solid white;
     margin: 0px 4px;
-    padding: 0.125em 0.4em;
+    padding: v-bind("$props.imgOnly ? '0.125em 0.125em' : '0.125em 0.4em'");
     background-color: v-bind("$props.backgroundColor ?? 'black'");
     color: v-bind("$props.color ?? 'white'");
     font: v-bind("$props.font ?? 'inherit'");

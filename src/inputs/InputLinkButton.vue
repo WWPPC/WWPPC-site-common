@@ -11,6 +11,7 @@ const props = defineProps<{
     fontSize?: string
     color?: string
     backgroundColor?: string
+    type?: 'button' | 'submit'
     disabled?: boolean
     glitchOnMount?: boolean
 }>();
@@ -32,7 +33,7 @@ watch(() => props.text, () => buttonText.value = props.text);
 
 <template>
     <label :class="'uiLinkButtonLabel ' + (props.disabled ? 'uiLinkButtonLabelDisabled' : '')" :title=title>
-        <input type="button" class="uiLinkButton" @click=click :disabled=props.disabled>
+        <input :type="$props.type ?? 'button'" class="uiLinkButton" @click=click :disabled=props.disabled>
         <span class="uiLinkButtonText">{{ buttonText }}</span>
         <div class="uiLinkButtonArrow"></div>
     </label>
