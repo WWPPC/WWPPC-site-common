@@ -15,7 +15,7 @@ body {
     scroll-behavior: smooth;
 }
 
-* {
+:root {
     --font-16: max(10px, min(16px, 4vw, 8vh));
     --font-18: max(10px, min(18px, 4vw, 9vh));
     --font-20: max(10px, min(20px, 5vw, 10vh));
