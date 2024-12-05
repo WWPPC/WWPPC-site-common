@@ -52,6 +52,7 @@ export enum TeamOpResult {
     CAPTCHA_FAILED = 8,
     NOT_CONNECTED = 9
 }
+// we will be replacing this with http code to error message
 export const getAccountOpMessage = (res: AccountOpResult): string => {
     return res == AccountOpResult.SUCCESS ? 'Success' : res == AccountOpResult.ALREADY_EXISTS ? 'Account already exists' : res == AccountOpResult.NOT_EXISTS ? 'Account not found' : res == AccountOpResult.INCORRECT_CREDENTIALS ? 'Incorrect credentials' : res == AccountOpResult.ERROR ? 'Internal error' : res == AccountOpResult.SESSION_EXPIRED ? 'Session expired (reload?)' : res == AccountOpResult.CAPTCHA_FAILED ? 'ReCAPTCHA check failed' : res == AccountOpResult.NOT_CONNECTED ? 'Not connected to server' : 'Unknown response code (this is a bug?)';
 };
