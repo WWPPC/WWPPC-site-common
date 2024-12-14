@@ -17,6 +17,7 @@ export default {
     mounted() {
         if (this.createdObserver) return;
         this.createdObserver = true;
+        console.log(this.$el)
         const observer = new ResizeObserver(() => {
             const rect = this.$el.getBoundingClientRect();
             this.size = Math.min(rect.width * 0.25, rect.height * 0.25);
@@ -29,34 +30,39 @@ export default {
 </script>
 
 <template>
-    <Transition name="wait-cover">
-        <div class="waitCoverContainer" v-if=$props.show>
-            <div class="waitCoverSpinnerWrapper">
-                <LoadingSpinner></LoadingSpinner>
+    <div class="waitCoverContainerWrapper">
+        <Transition name="wait-cover">
+            <div class="waitCoverContainer" v-if=$props.show>
+                <div class="waitCoverSpinnerWrapper">
+                    <LoadingSpinner></LoadingSpinner>
+                </div>
+                <div class="waitCoverText">
+                    {{ $props.text }}
+                </div>
             </div>
-            <div class="waitCoverText">
-                {{ $props.text }}
-            </div>
-        </div>
-    </Transition>
+        </Transition>
+    </div>
 </template>
 
 <style scoped>
-.waitCoverContainer {
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
+.waitCoverContainerWrapper {
     position: fixed;
     bottom: 0px;
     left: 0px;
     width: 100%;
     height: 100%;
-    width: 100%;
-    height: 100%;
+    pointer-events: none;
+}
+
+.waitCoverContainer {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(2px);
     justify-content: center;
     align-items: center;
+    pointer-events: all;
 }
 
 .waitCoverSpinnerWrapper {
