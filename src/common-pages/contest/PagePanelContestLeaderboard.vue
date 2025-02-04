@@ -22,7 +22,7 @@ const update = async () => {
             username: s.username,
             displayName: (teamData instanceof Error) ? s.username : teamData.teamName,
             score: Math.ceil(s.score),
-            penalty: Math.floor((Math.ceil(s.score) - s.score) * 1000000)
+            penalty: Math.floor((Math.ceil(s.score) - s.score) * 1000000) // penalty is stored as the fractional part of the score, see scorer.ts
         };
     }));
 };
