@@ -18,12 +18,49 @@ defineProps<{
 }>();
 
 const slightlyFunAnimation = ref(Math.random() < 0.001);
+const slightlyFunAnimationString = 'rotateY(165deg) rotateY(5deg)';
 const funAnimation = ref(Math.random() < 0.001);
+
+let transformDegrees = 0;
+const hoverTransform = ref(slightlyFunAnimation.value ? slightlyFunAnimationString : '');
+const unhoverTransform = ref('');
+
+let mouseX = -1;
+let lastMouseX = -1;
+const onMouseMove = (event : MouseEvent) => {
+    if (mouseX == -1) {
+        lastMouseX = mouseX;
+        mouseX = event.clientX;
+        if (hoverTransform.value !== slightlyFunAnimationString) {
+            hoverTransform.value = `rotateY(${transformDegrees}deg)`;
+        }
+    } else if (lastMouseX == -1) {
+        lastMouseX = mouseX;
+        mouseX = event.clientX;
+        if (hoverTransform.value !== slightlyFunAnimationString) {
+            transformDegrees += lastMouseX != -1 ? lastMouseX > mouseX ? -180 : 180 : 0;
+            hoverTransform.value = `rotateY(${transformDegrees}deg)`;
+        }
+    } else {
+        lastMouseX = mouseX;
+        mouseX = event.clientX;
+    }
+}
+const onMouseLeave = (event : MouseEvent) => {
+    if (hoverTransform.value !== slightlyFunAnimationString) {
+        if (lastMouseX != -1) {
+            transformDegrees += lastMouseX != -1 ? lastMouseX > mouseX ? -180 : 180 : 0;
+            unhoverTransform.value = `rotateY(${transformDegrees}deg)`;
+        }
+        console.log("Buh", lastMouseX, mouseX, hoverTransform.value);
+    }
+    mouseX = lastMouseX = -1;
+}
 </script>
 
 <template>
     <AnimateInContainer type="slideUp" show-on-screen single>
-        <div class="cardContainer">
+        <div class="cardContainer" @mousemove=onMouseMove @mouseleave=onMouseLeave>
             <div class="card">
                 <div class="cardBack">
                     <DoubleCutCornerContainer flipped class="cardFaceContainer">
@@ -82,12 +119,13 @@ const funAnimation = ref(Math.random() < 0.001);
     position: relative;
     width: 312px;
     height: 412px;
+    transform: v-bind("unhoverTransform");
     transition: v-bind("slightlyFunAnimation ? '3000ms cubic-bezier(1, 0, 1, 1) transform' : '500ms ease transform'");
     transform-style: preserve-3d;
 }
 
 .cardContainer:hover>.card {
-    transform: v-bind("slightlyFunAnimation ? 'rotateY(165deg) rotateY(5deg)' : 'rotateY(180deg)'");
+    transform: v-bind("hoverTransform");
     animation-name: spinny-carrier;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
@@ -121,6 +159,7 @@ const funAnimation = ref(Math.random() < 0.001);
 .cardBack {
     width: 312px;
     height: 412px;
+    backface-visibility: hidden;
 }
 
 .cardFront {
