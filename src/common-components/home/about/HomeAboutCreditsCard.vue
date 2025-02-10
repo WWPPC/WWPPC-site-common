@@ -3,7 +3,7 @@ import { AnimateInContainer, DoubleCutCornerContainer } from '#/containers';
 import HomeAboutCreditsCardIcon from './HomeAboutCreditsCardIcon.vue';
 import { ref } from 'vue';
 
-defineProps<{
+const props = defineProps<{
     name: string
     username: string
     roles: string
@@ -15,8 +15,9 @@ defineProps<{
     grade: string
     bio: string
     img: string
+    width?: string
+    height?: string
 }>();
-
 const slightlyFunAnimation = ref(Math.random() < 0.001);
 const slightlyFunAnimationString = 'rotateY(165deg) rotateY(5deg)';
 const funAnimation = ref(Math.random() < 0.001);
@@ -46,13 +47,12 @@ const onMouseMove = (event : MouseEvent) => {
         mouseX = event.clientX;
     }
 }
-const onMouseLeave = (event : MouseEvent) => {
+const onMouseLeave = () => {
     if (hoverTransform.value !== slightlyFunAnimationString) {
         if (lastMouseX != -1) {
             transformDegrees += lastMouseX != -1 ? lastMouseX > mouseX ? -180 : 180 : 0;
             unhoverTransform.value = `rotateY(${transformDegrees}deg)`;
         }
-        console.log("Buh", lastMouseX, mouseX, hoverTransform.value);
     }
     mouseX = lastMouseX = -1;
 }
@@ -63,7 +63,7 @@ const onMouseLeave = (event : MouseEvent) => {
         <div class="cardContainer" @mousemove=onMouseMove @mouseleave=onMouseLeave>
             <div class="card">
                 <div class="cardBack">
-                    <DoubleCutCornerContainer flipped class="cardFaceContainer">
+                    <DoubleCutCornerContainer flipped class="cardFaceContainer" v-bind:width="$props.width" v-bind:height="$props.height">
                         <div class="cardContent2">
                             <div class="cardBio">
                                 <RouterLink :to="'/user/@' + $props.username" class="cardUserLink">@{{ $props.username }}</RouterLink>
@@ -81,12 +81,14 @@ const onMouseLeave = (event : MouseEvent) => {
                     </DoubleCutCornerContainer>
                 </div>
                 <div class="cardFront">
-                    <DoubleCutCornerContainer class="cardFaceContainer">
+                    <DoubleCutCornerContainer class="cardFaceContainer" v-bind:width="$props.width" v-bind:height="$props.height">
                         <div class="cardContent">
-                            <img :src=$props.img class="cardImage" :alt="$props.name">
-                            <div class="cardName">{{ $props.name }}</div>
-                            <div class="cardGrade">{{ $props.grade }}</div>
-                            <div class="cardRoles" v-html=$props.roles></div>
+                            <div class="cardContentBody">
+                                <img :src=$props.img class="cardImage" :alt="$props.name">
+                                <div class="cardName">{{ $props.name }}</div>
+                                <div class="cardGrade">{{ $props.grade }}</div>
+                                <div class="cardRoles" v-html=$props.roles></div>
+                            </div>
                             <div class="cardIcons">
                                 <HomeAboutCreditsCardIcon profileUrl="https://codeforces.com/profile/" :user=$props.codeforces icon="/img/codeforces-icon.svg" color="#1F8ACB"></HomeAboutCreditsCardIcon>
                                 <HomeAboutCreditsCardIcon profileUrl="https://artofproblemsolving.com/community/user/" :user=$props.aops icon="/img/aops-icon.svg" color="#009FAD"></HomeAboutCreditsCardIcon>
@@ -111,14 +113,14 @@ const onMouseLeave = (event : MouseEvent) => {
 <style scoped>
 .cardContainer {
     perspective: 1000px;
-    width: 312px;
-    height: 412px;
+    width: v-bind("$props.width ?? '312px'");
+    height: v-bind("$props.height ?? '412px'");
 }
 
 .card {
     position: relative;
-    width: 312px;
-    height: 412px;
+    width: v-bind("$props.width ?? '312px'");
+    height: v-bind("$props.height ?? '412px'");
     transform: v-bind("unhoverTransform");
     transition: v-bind("slightlyFunAnimation ? '3000ms cubic-bezier(1, 0, 1, 1) transform' : '500ms ease transform'");
     transform-style: preserve-3d;
@@ -157,8 +159,8 @@ const onMouseLeave = (event : MouseEvent) => {
 
 .cardFront,
 .cardBack {
-    width: 312px;
-    height: 412px;
+    width: v-bind("$props.width ?? '312px'");
+    height: v-bind("$props.height ?? '412px'");;
     backface-visibility: hidden;
 }
 
@@ -183,22 +185,22 @@ const onMouseLeave = (event : MouseEvent) => {
 
 .cardTop,
 .cardBottom {
-    width: 280px;
+    width: calc(v-bind("$props.width ?? '312px'") - 32px);
     transform: translateZ(-10px) rotateX(90deg) translateX(32px);
 }
 
 .cardBottom {
-    transform: translateZ(-10px) rotateX(90deg) translateZ(-412px);
+    transform: translateZ(-10px) rotateX(90deg) translateZ(calc(-1 * v-bind("$props.height ?? '412px'")));
 }
 
 .cardLeft,
 .cardRight {
-    width: 380px;
+    width: calc(v-bind("$props.height ?? '412px'") - 32px);
     transform: translateZ(-10px) rotateX(90deg) rotateY(90deg) translateX(32px);
 }
 
 .cardRight {
-    transform: translateZ(-10px) rotateX(90deg) rotateY(90deg) translateZ(312px);
+    transform: translateZ(-10px) rotateX(90deg) rotateY(90deg) translateZ(calc(v-bind("$props.width ?? '312px'") - 32px));
 }
 
 .cardCorner1,
@@ -208,28 +210,35 @@ const onMouseLeave = (event : MouseEvent) => {
 }
 
 .cardCorner2 {
-    transform: translateZ(-10px) rotateX(90deg) translateZ(-412px) translateX(280px) rotateY(-45deg);
+    transform: translateZ(-10px) rotateX(90deg) translateZ(calc(-1 * v-bind("$props.height ?? '412px'"))) translateX(calc(v-bind("$props.width ?? '312px'") - 32px)) rotateY(-45deg);
 }
 
 .cardFaceContainer {
-    width: 312px;
-    height: 412px;
+    width: v-bind("$props.width ?? '312px'");
+    height: v-bind("$props.height ?? '412px'");;
 }
 
 .cardContent {
     display: grid;
-    grid-template-rows: 208px 32px 26px 84px 30px;
+    grid-template-rows: 92% 8%;
     justify-items: center;
-    width: 280px;
-    height: 380px;
+    width: calc(v-bind("$props.width ?? '312px'") - 32px);
+    height: calc(v-bind("$props.height ?? '412px'") - 32px);
+}
+
+.cardContentBody {
+    display: grid;
+    grid-template-rows: 50% min-content min-content min-content;
+    justify-items: center;
+    width: calc(v-bind("$props.width ?? '312px'") - 32px);
 }
 
 .cardContent2 {
     display: grid;
-    grid-template-rows: 350px 30px;
+    grid-template-rows: minmax(max-content, 92%) 8%;
     justify-items: center;
-    width: 280px;
-    height: 380px;
+    width: calc(v-bind("$props.width ?? '312px'") - 32px);
+    height: calc(v-bind("$props.height ?? '412px'") - 32px);
 }
 
 .cardBio {
@@ -238,8 +247,8 @@ const onMouseLeave = (event : MouseEvent) => {
 }
 
 .cardImage {
-    width: 200px;
-    height: 200px;
+    width: auto;
+    height: calc(100% - 8px);
     border: 4px solid white;
 }
 
@@ -247,7 +256,6 @@ const onMouseLeave = (event : MouseEvent) => {
     margin: 4px 0px;
     width: 100%;
     text-align: center;
-    text-wrap: nowrap;
     font-size: var(--font-24);
     font-weight: bold;
     color: var(--color-1);
@@ -255,7 +263,6 @@ const onMouseLeave = (event : MouseEvent) => {
 
 .cardGrade {
     text-align: center;
-    text-wrap: nowrap;
     font-size: var(--font-20);
 }
 
