@@ -126,13 +126,13 @@ const onMouseLeave = () => {
     transform-style: preserve-3d;
 }
 
-/* .cardContainer:hover>.card {
+.cardContainer:hover>.card {
     transform: v-bind("hoverTransform");
     animation-name: spinny-carrier;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
     animation-duration: v-bind("funAnimation ? '500ms' : ''");
-} */
+}
 
 @keyframes spinny-carrier {
     from {
