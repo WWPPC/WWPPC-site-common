@@ -113,26 +113,26 @@ const onMouseLeave = () => {
 <style scoped>
 .cardContainer {
     perspective: 1000px;
-    width: v-bind("$props.width ?? '312px'");
+    width: v-bind("$props.width ?? '322px'");
     height: v-bind("$props.height ?? '412px'");
 }
 
 .card {
     position: relative;
-    width: v-bind("$props.width ?? '312px'");
+    width: v-bind("$props.width ?? '322px'");
     height: v-bind("$props.height ?? '412px'");
     transform: v-bind("unhoverTransform");
     transition: v-bind("slightlyFunAnimation ? '3000ms cubic-bezier(1, 0, 1, 1) transform' : '500ms ease transform'");
     transform-style: preserve-3d;
 }
 
-.cardContainer:hover>.card {
+/* .cardContainer:hover>.card {
     transform: v-bind("hoverTransform");
     animation-name: spinny-carrier;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
     animation-duration: v-bind("funAnimation ? '500ms' : ''");
-}
+} */
 
 @keyframes spinny-carrier {
     from {
@@ -159,7 +159,7 @@ const onMouseLeave = () => {
 
 .cardFront,
 .cardBack {
-    width: v-bind("$props.width ?? '312px'");
+    width: v-bind("$props.width ?? '322px'");
     height: v-bind("$props.height ?? '412px'");;
     backface-visibility: hidden;
 }
@@ -185,7 +185,7 @@ const onMouseLeave = () => {
 
 .cardTop,
 .cardBottom {
-    width: calc(v-bind("$props.width ?? '312px'") - 32px);
+    width: calc(v-bind("$props.width ?? '322px'") - 32px);
     transform: translateZ(-10px) rotateX(90deg) translateX(32px);
 }
 
@@ -200,7 +200,7 @@ const onMouseLeave = () => {
 }
 
 .cardRight {
-    transform: translateZ(-10px) rotateX(90deg) rotateY(90deg) translateZ(calc(v-bind("$props.width ?? '312px'") - 32px));
+    transform: translateZ(-10px) rotateX(90deg) rotateY(90deg) translateZ(calc(v-bind("$props.width ?? '322px'") - 32px));
 }
 
 .cardCorner1,
@@ -210,11 +210,11 @@ const onMouseLeave = () => {
 }
 
 .cardCorner2 {
-    transform: translateZ(-10px) rotateX(90deg) translateZ(calc(-1 * v-bind("$props.height ?? '412px'"))) translateX(calc(v-bind("$props.width ?? '312px'") - 32px)) rotateY(-45deg);
+    transform: translateZ(-10px) rotateX(90deg) translateZ(calc(-1 * v-bind("$props.height ?? '412px'"))) translateX(calc(v-bind("$props.width ?? '322px'") - 32px)) rotateY(-45deg);
 }
 
 .cardFaceContainer {
-    width: v-bind("$props.width ?? '312px'");
+    width: v-bind("$props.width ?? '322px'");
     height: v-bind("$props.height ?? '412px'");;
 }
 
@@ -222,7 +222,7 @@ const onMouseLeave = () => {
     display: grid;
     grid-template-rows: 92% 8%;
     justify-items: center;
-    width: calc(v-bind("$props.width ?? '312px'") - 32px);
+    width: calc(v-bind("$props.width ?? '322px'") - 32px);
     height: calc(v-bind("$props.height ?? '412px'") - 32px);
 }
 
@@ -230,25 +230,24 @@ const onMouseLeave = () => {
     display: grid;
     grid-template-rows: 50% min-content min-content min-content;
     justify-items: center;
-    width: calc(v-bind("$props.width ?? '312px'") - 32px);
 }
 
 .cardContent2 {
     display: grid;
     grid-template-rows: minmax(max-content, 92%) 8%;
     justify-items: center;
-    width: calc(v-bind("$props.width ?? '312px'") - 32px);
+    width: calc(v-bind("$props.width ?? '322px'") - 32px);
     height: calc(v-bind("$props.height ?? '412px'") - 32px);
 }
 
 .cardBio {
     text-align: center;
-    font-size: var(--font-medium);
+    font-size: var(--font-24);
 }
 
 .cardImage {
-    width: auto;
-    height: calc(100% - 8px);
+    height: calc((v-bind("$props.height ?? '412px'") - 72px) / 2);
+    align-self: stretch;
     border: 4px solid white;
 }
 
