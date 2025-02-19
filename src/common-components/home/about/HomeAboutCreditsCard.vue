@@ -12,6 +12,7 @@ const props = defineProps<{
     github?: string
     discord?: string
     youtube?: string
+    website?: string
     grade: string
     bio: string
     img: string
@@ -75,7 +76,8 @@ const onMouseLeave = () => {
                                 <HomeAboutCreditsCardIcon profileUrl="https://artofproblemsolving.com/community/user/" :user=$props.aops icon="/img/aops-icon.svg" color="#009FAD"></HomeAboutCreditsCardIcon>
                                 <HomeAboutCreditsCardIcon profileUrl="https://github.com/" :user=$props.github icon="/img/github-icon.svg" color="#F05032"></HomeAboutCreditsCardIcon>
                                 <HomeAboutCreditsCardIcon profileUrl="https://discord.com/users/" :user=$props.discord icon="/img/discord-icon.svg" color="#5865F2"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://youtube.com/" :user=$props.youtube icon="/img/youtube-icon.svg" color="#FF0000"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://youtube.com/@" :user=$props.youtube icon="/img/youtube-icon.svg" color="#FF0000"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://" :user=$props.website icon="/img/internet-icon.svg" color="#33BBFF"></HomeAboutCreditsCardIcon>
                             </div>
                         </div>
                     </DoubleCutCornerContainer>
@@ -94,7 +96,8 @@ const onMouseLeave = () => {
                                 <HomeAboutCreditsCardIcon profileUrl="https://artofproblemsolving.com/community/user/" :user=$props.aops icon="/img/aops-icon.svg" color="#009FAD"></HomeAboutCreditsCardIcon>
                                 <HomeAboutCreditsCardIcon profileUrl="https://github.com/" :user=$props.github icon="/img/github-icon.svg" color="#F05032"></HomeAboutCreditsCardIcon>
                                 <HomeAboutCreditsCardIcon profileUrl="https://discord.com/users/" :user=$props.discord icon="/img/discord-icon.svg" color="#5865F2"></HomeAboutCreditsCardIcon>
-                                <HomeAboutCreditsCardIcon profileUrl="https://youtube.com/" :user=$props.youtube icon="/img/youtube-icon.svg" color="#FF0000"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://youtube.com/@" :user=$props.youtube icon="/img/youtube-icon.svg" color="#FF0000"></HomeAboutCreditsCardIcon>
+                                <HomeAboutCreditsCardIcon profileUrl="https://" :user=$props.website icon="/img/internet-icon.svg" color="#33BBFF"></HomeAboutCreditsCardIcon>
                             </div>
                         </div>
                     </DoubleCutCornerContainer>
