@@ -69,7 +69,7 @@ const onMouseLeave = () => {
                             <div class="cardBio">
                                 <RouterLink :to="'/user/@' + $props.username" class="cardUserLink">@{{ $props.username }}</RouterLink>
                                 <br>
-                                {{ $props.bio }}
+                                <div class="cardBio" v-html=$props.bio></div>
                             </div>
                             <div class="cardIcons">
                                 <HomeAboutCreditsCardIcon profileUrl="https://codeforces.com/profile/" :user=$props.codeforces icon="/img/codeforces-icon.svg" color="#1F8ACB"></HomeAboutCreditsCardIcon>
