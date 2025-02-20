@@ -44,7 +44,7 @@ onMounted(() => {
 <style scoped>
 .panelNavButton {
     display: inline-block;
-    min-width: 128px;
+    min-width: 112px;
     font-size: 18px;
     color: white !important;
     text-decoration: none;
@@ -54,7 +54,7 @@ onMounted(() => {
     font-family: 'Source Code Pro', Courier, monospace;
     transition: 100ms cubic-bezier(0.6, 1, 0.5, 1.6) background-color;
     cursor: pointer;
-    padding: 16px 16px;
+    padding: 0px 8px;
 }
 
 .panelNavButtonSelected {
