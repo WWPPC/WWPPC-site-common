@@ -54,6 +54,7 @@ onMounted(() => {
     font-family: 'Source Code Pro', Courier, monospace;
     transition: 100ms cubic-bezier(0.6, 1, 0.5, 1.6) background-color;
     cursor: pointer;
+    padding: 16px 16px;
 }
 
 .panelNavButtonSelected {
