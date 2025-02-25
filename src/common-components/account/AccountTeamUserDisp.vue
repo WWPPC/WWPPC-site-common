@@ -5,7 +5,6 @@ import LoadingSpinner from '#/common/LoadingSpinner.vue';
 import { globalModal, ModalMode } from '#/modal';
 import { onMounted, ref, watch } from 'vue';
 import { type AccountData, getTeamOpMessage, TeamOpResult, useAccountManager } from '#/scripts/AccountManager';
-import recaptcha from '#/scripts/recaptcha';
 
 const props = defineProps<{
     user: string
@@ -30,8 +29,7 @@ onMounted(async () => {
 const kick = async () => {
     const confirmation = await modal.showModal({ title: 'Kick from team?', content: `You are about to kick ${data.value?.displayName} (@${props.user}) from the team. Are you sure?`, mode: ModalMode.INPUT, color: 'yellow' }).result;
     if (!confirmation) return;
-    const token = await recaptcha.execute('kick_team');
-    const res = await accountManager.kickTeam(props.user, token);
+    const res = await accountManager.kickTeam(props.user);
     if (res != TeamOpResult.SUCCESS) modal.showModal({ title: 'Could not kick from team', content: getTeamOpMessage(res), color: 'red' });
     await accountManager.updateOwnUserData();
 };

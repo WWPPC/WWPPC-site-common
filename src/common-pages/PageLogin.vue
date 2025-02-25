@@ -10,7 +10,6 @@ import { globalModal } from '#/modal';
 import { useServerConnection } from '#/scripts/ServerConnection';
 import { languageMaps, experienceMaps, gradeMaps, useAccountManager, validateCredentials, getAccountOpMessage, AccountOpResult } from '#/scripts/AccountManager';
 import { useConnectionEnforcer } from '#/scripts/ConnectionEnforcer';
-import recaptcha from '#/scripts/recaptcha';
 
 const router = useRouter();
 const route = useRoute();
@@ -53,8 +52,7 @@ const attemptLogin = async () => {
         return;
     }
     showLoginWait.value = true;
-    const token = await recaptcha.execute('login');
-    const res = await accountManager.login(usernameInput.value, passwordInput.value, token);
+    const res = await accountManager.login(usernameInput.value, passwordInput.value);
     showLoginWait.value = false;
     if (res == 0) router.push({ path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home', query: { clearQuery: 1 } });
     else modal.showModal({ title: 'Could not log in:', content: getAccountOpMessage(res), color: 'var(--color-2)' });
@@ -77,8 +75,7 @@ const toSignUp = () => {
 const attemptSignup = async () => {
     if (!validateCredentials(usernameInput.value, passwordInput.value) || ((firstNameInput.value.trim()) == '') || ((lastNameInput.value.trim()) == '') || ((schoolInput.value.trim()) == '') || ((emailInput.value.trim()) == '') || gradeInput.value == '' || experienceInput.value == '') return;
     showLoginWait.value = true;
-    const token = await recaptcha.execute('signup');
-    const res = await accountManager.signup(usernameInput.value, passwordInput.value, token, {
+    const res = await accountManager.signup(usernameInput.value, passwordInput.value, {
         firstName: firstNameInput.value.trim(),
         lastName: lastNameInput.value.trim(),
         email: emailInput.value.trim(),
@@ -98,8 +95,7 @@ const toRecovery = async () => {
 const attemptRecovery = async () => {
     if (!validateCredentials(usernameInput.value, 'oof') || ((emailInput.value.trim()) == '')) return;
     showRecoveryWait.value = true;
-    const token = await recaptcha.execute('recoverpassword');
-    const res = await accountManager.requestRecovery(usernameInput.value, emailInput.value, token);
+    const res = await accountManager.requestRecovery(usernameInput.value, emailInput.value);
     showRecoveryWait.value = false;
     if (res == AccountOpResult.SUCCESS) {
         modal.showModal({ title: 'Recovery email sent', content: 'The recovery email was sent and should arrive in your inbox within 10 minutes.', color: 'var(--color-1)' });

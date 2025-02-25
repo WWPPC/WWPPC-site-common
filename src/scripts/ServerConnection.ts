@@ -6,7 +6,6 @@ import { reactive } from 'vue';
 
 import { AccountOpResult, useAccountManager } from './AccountManager';
 import crossDomainStorage from './CrossDomainStorage';
-import recaptcha from './recaptcha';
 
 // send HTTP wakeup request before trying socket.io
 export const serverHostname = isDev ? 'https://localhost:8000' : 'https://server.wwppc.tech';
@@ -111,7 +110,7 @@ socket.on('getCredentials', async (session) => {
     // autologin if possible
     if (sessionCreds != null && RSA.sessionID.toString() === await crossDomainStorage.getItem('sessionId')) {
         const creds = JSON.parse(sessionCreds);
-        const res = await sendCredentials(creds.username, creds.password, await recaptcha.execute('autologin'));
+        const res = await sendCredentials(creds.username, creds.password);
         if (res == AccountOpResult.SUCCESS) {
             state.loggedIn = true;
             state.manualLogin = false;
@@ -125,7 +124,7 @@ socket.on('getCredentials', async (session) => {
     state.handshakeComplete = true;
     handshakeResolve(undefined);
 });
-export const sendCredentials = async (username: string, password: string | number[], token: string, signupData?: CredentialsSignupData): Promise<AccountOpResult> => {
+export const sendCredentials = async (username: string, password: string | number[], signupData?: CredentialsSignupData): Promise<AccountOpResult> => {
     return await new Promise(async (resolve, reject) => {
         if (state.loggedIn) {
             resolve(AccountOpResult.NOT_CONNECTED);
@@ -137,7 +136,6 @@ export const sendCredentials = async (username: string, password: string | numbe
             const res: AccountOpResult = await socket.emitWithAck('credentials', {
                 username: username,
                 password: password2,
-                token: token,
                 session: RSA.sessionID,
                 signupData: signupData !== undefined ? {
                     firstName: signupData.firstName,
