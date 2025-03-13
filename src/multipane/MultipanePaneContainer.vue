@@ -8,7 +8,7 @@ const props = defineProps<{
 }>();
 
 const multipane = useMultipane();
-provide('multipane-selector-id', props.for);
+provide('multipane-id', props.for);
 
 if (multipane[props.for] == undefined) multipane[props.for] = new Multipane();
 multipane[props.for]!.selected = props.default;

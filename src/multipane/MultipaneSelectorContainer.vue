@@ -7,7 +7,7 @@ const props = defineProps<{
 }>();
 
 const multipane = useMultipane();
-provide('multipane-selector-id', props.for);
+provide('multipane-id', props.for);
 
 const mouseleave = () => {
     if (multipane[props.for] != undefined) multipane[props.for]!.hovering = '';
