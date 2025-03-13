@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import type { Accordion } from '#/accordion';
 import { isMobile } from '#/scripts/userAgent';
-import { ref, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
 
 const props = defineProps<{
     title: string
@@ -14,7 +15,14 @@ const props = defineProps<{
     noPadding?: boolean
 }>();
 
-const show = ref(props.startCollapsed == false);
+// check if in accordion and assign self a unique ID within one if possible
+const accordionContainer = inject('accordion-container') as Accordion | undefined;
+const isInAccordion = ref(accordionContainer !== undefined);
+const accordionSelf = accordionContainer?.c;
+if (accordionContainer !== undefined) accordionContainer.c++;
+
+// accordion items default start closed
+const show = ref(props.startCollapsed == false && accordionContainer === undefined);
 
 const emit = defineEmits<{
     (e: 'open'): any
@@ -23,8 +31,18 @@ const emit = defineEmits<{
 }>();
 watch(show, () => {
     emit('click');
-    if (show.value) emit('open');
-    else emit('close');
+    if (show.value) {
+        // if exclusive empty other selections
+        if (accordionContainer?.exclusive) accordionContainer.selected.clear();
+        accordionContainer?.selected.add(accordionSelf!);
+        emit('open');
+    } else {
+        accordionContainer?.selected.delete(accordionSelf!);
+        emit('close');
+    }
+});
+if (accordionContainer !== undefined) watch(accordionContainer.selected, () => {
+    if (accordionContainer.selected.has(accordionSelf!) != show.value) show.value = accordionContainer.selected.has(accordionSelf!);
 });
 defineExpose({
     show
@@ -41,10 +59,11 @@ export default {
     mounted() {
         if (this.createdObserver) return;
         this.createdObserver = true;
+        // no pure CSS solution to this, so JS will suffice
         const observer = new ResizeObserver(() => {
             this.boxHeight = (this.$refs.body as any)?.scrollHeight ?? 0;
         });
-        observer.observe((this.$refs.body as any));
+        observer.observe(this.$refs.body as any);
         this.boxHeight = (this.$refs.body as any)?.scrollHeight ?? 0;
     }
 }
@@ -71,11 +90,16 @@ export default {
     box-sizing: border-box;
     width: v-bind("$props.width ?? 'initial'");
     border: 4px solid;
-    border-color: v-bind("$props.borderColor ?? ' white'");
+    border-color: v-bind("$props.borderColor ?? 'white'");
+    border-top: v-bind("isInAccordion ? 'none' : '4px solid'");
     background-color: black;
     text-align: left;
     will-change: transform;
     overflow: hidden;
+}
+
+.headeredCollapsibleContainer:first-child {
+    border-top: 4px solid;
 }
 
 .headeredCollapsibleContainerHeader {
@@ -95,7 +119,8 @@ export default {
     margin: 0px 0px;
     text-align: v-bind("$props.align ?? 'left'");
     text-wrap: wrap;
-    font-size: v-bind("$props.fontSize ?? 'var(--font-large)'"); /* idk why */
+    font-size: v-bind("$props.fontSize ?? 'var(--font-large)'");
+    /* idk why */
     flex-grow: 1;
     white-space: pre-wrap;
 }

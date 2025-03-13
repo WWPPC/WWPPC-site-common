@@ -5,7 +5,7 @@ defineProps<{
     for: string
 }>();
 
-const multipaneId = inject('multipane-selector-id');
+const multipaneId = inject('multipane-id');
 
 if (typeof multipaneId != 'string') throw new Error('MultipaneSelector not placed in MultipaneSelectorContainer');
 </script>
