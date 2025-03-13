@@ -15,7 +15,6 @@ const props = defineProps<{
     noPadding?: boolean
 }>();
 
-
 // check if in accordion and assign self a unique ID within one if possible
 const accordionContainer = inject('accordion-container') as Accordion | undefined;
 const isInAccordion = ref(accordionContainer !== undefined);
