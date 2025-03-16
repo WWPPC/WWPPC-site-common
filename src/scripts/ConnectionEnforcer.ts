@@ -6,14 +6,18 @@ import { globalModal, ModalMode } from '#/modal';
 import { useServerConnection } from './ServerConnection';
 
 const state = reactive<{
-    connectionInclude: Set<string>
-    connectionExclude: Set<string>
-    connectionIncludeExact: Set<string>
-    connectionExcludeExact: Set<string>
-    loginInclude: Set<string>
-    loginExclude: Set<string>
-    loginIncludeExact: Set<string>
-    loginExcludeExact: Set<string>
+    readonly connectionInclude: Set<string>
+    readonly connectionExclude: Set<string>
+    readonly connectionIncludeExact: Set<string>
+    readonly connectionExcludeExact: Set<string>
+    /**Enforce login requirements on paths that partially match */
+    readonly loginInclude: Set<string>
+    /**Do not enforce login requirements on paths that partially match */
+    readonly loginExclude: Set<string>
+    /**Enforce login requirements on paths that exactly match */
+    readonly loginIncludeExact: Set<string>
+    /**Do not enforce login requirements on paths that exactly match */
+    readonly loginExcludeExact: Set<string>
 }>({
     connectionInclude: new Set(),
     connectionExclude: new Set(),
