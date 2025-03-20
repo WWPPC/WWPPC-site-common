@@ -16,13 +16,13 @@ const props = defineProps<{
 }>();
 
 // check if in accordion and assign self a unique ID within one if possible
-const accordionContainer = inject('accordion-container') as Accordion | undefined;
-const isInAccordion = ref(accordionContainer !== undefined);
+const accordionContainer = inject<Accordion | null>('accordion-container', null);
+const isInAccordion = ref(accordionContainer !== null);
 const accordionSelf = accordionContainer?.c;
-if (accordionContainer !== undefined) accordionContainer.c++;
+if (accordionContainer !== null) accordionContainer.c++;
 
 // accordion items default start closed
-const show = ref(props.startCollapsed == false && accordionContainer === undefined);
+const show = ref(props.startCollapsed == false && accordionContainer === null);
 
 const emit = defineEmits<{
     (e: 'open'): any
@@ -41,7 +41,7 @@ watch(show, () => {
         emit('close');
     }
 });
-if (accordionContainer !== undefined) watch(accordionContainer.selected, () => {
+if (accordionContainer !== null) watch(accordionContainer.selected, () => {
     if (accordionContainer.selected.has(accordionSelf!) != show.value) show.value = accordionContainer.selected.has(accordionSelf!);
 });
 defineExpose({
