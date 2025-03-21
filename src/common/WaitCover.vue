@@ -17,7 +17,6 @@ export default {
     mounted() {
         if (this.createdObserver) return;
         this.createdObserver = true;
-        console.log(this.$el)
         const observer = new ResizeObserver(() => {
             const rect = this.$el.getBoundingClientRect();
             this.size = Math.min(rect.width * 0.25, rect.height * 0.25);
@@ -46,6 +45,7 @@ export default {
 
 <style scoped>
 .waitCoverContainerWrapper {
+    display: flex;
     position: fixed;
     bottom: 0px;
     left: 0px;
@@ -60,6 +60,7 @@ export default {
     box-sizing: border-box;
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(2px);
+    flex-grow: 1;
     justify-content: center;
     align-items: center;
     pointer-events: all;
