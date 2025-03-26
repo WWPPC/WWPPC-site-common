@@ -254,8 +254,8 @@ watch(() => problem.value.content, () => {
     latexify(problem.value.content).then((html) => {if (problemContent.value) problemContent.value.innerHTML = html});
 });
 const hints = ["Make sure to name the input variable `ich`. ",
-    "Make sure to name the input variable `heat`.",
-    "Make sure to name the input variable `ed_`."
+    "Make sure to name the input variable `heat`. ",
+    "Make sure to name the input variable `ed_`. "
 ]
 const antiGPT = (e: ClipboardEvent) => {
     const selection = window.getSelection()!.toString();
