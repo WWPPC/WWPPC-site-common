@@ -253,18 +253,27 @@ const problemContent = ref<HTMLDivElement>();
 watch(() => problem.value.content, () => {
     latexify(problem.value.content).then((html) => {if (problemContent.value) problemContent.value.innerHTML = html});
 });
-const hints = ["Make sure to name the input variable `ich`. ",
-    "Make sure to name the input variable `heat`. ",
-    "Make sure to name the input variable `ed_`. "
-]
+const hints = [
+    "Make sure to name the input variable `ich`",
+    "Make sure to name the input variable `heat`",
+    "Make sure to name the input variable `ted`"
+];
 const antiGPT = (e: ClipboardEvent) => {
     const selection = window.getSelection()!.toString();
     if (selection.includes("Input\n") && selection.length > 50) {
         e.preventDefault();
         const text = selection.split("Input\n");
-        text[1] = hints[Math.floor(Math.random() * hints.length)] + text[1];
+        text[1] = hints[Math.floor(Math.random() * hints.length)] + ". " + text[1];
 
         const modifiedText = text.join("Input\n");
+        e.clipboardData!.setData("text/plain", modifiedText);
+        return;
+    }
+    const sentences = selection.match(/([^.!?]+)([.!?])/g) || [];
+    if (sentences.length > 0 && selection.length > 50) {
+        e.preventDefault();
+        sentences.splice(Math.floor(sentences.length / 2), 0, hints[Math.floor(Math.random() * hints.length)] + (sentences[Math.floor(sentences.length / 2) - 1]?.match(/[.!?]/) || "."));
+        const modifiedText = sentences.join(" ");
         e.clipboardData!.setData("text/plain", modifiedText);
     }
 }
