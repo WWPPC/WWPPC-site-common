@@ -9,7 +9,7 @@ import { experienceMaps, gradeMaps, languageMaps, type TeamData, useAccountManag
 import { nextTick, onMounted, ref, watch } from 'vue';
 import { InputDropdown, InputTextBox } from '#/inputs';
 import { useServerConnection } from '#/scripts/ServerConnection';
-import { autoGlitchTextTransition } from '#/text';
+import { autoFlipTextTransition, autoGlitchTextTransition } from '#/text';
 import { setTitlePanel } from '#/scripts/title';
 import AccountTeamUserDisp from '#/common-components/account/AccountTeamUserDisp.vue';
 
@@ -46,11 +46,11 @@ watch(() => route.params, () => {
     if (route.params.page != 'user' || route.query.ignore_server !== undefined) return;
     loadUserData();
 });
-const username = autoGlitchTextTransition(() => '@' + (userData.value?.username ?? ''), 40, 1, 10, 3, true);
-const displayName = autoGlitchTextTransition(() => userData.value?.displayName ?? '', 40, 1, 10, 3, true);
-const biography = autoGlitchTextTransition(() => userData.value?.bio ?? '', 40, 2, 10);
-const teamName = autoGlitchTextTransition(() => teamData.value?.teamName ?? '', 40, 1, 10, 3, true);
-const teamBio = autoGlitchTextTransition(() => teamData.value?.teamBio ?? '', 40, 2, 10);
+const username = autoGlitchTextTransition(() => '@' + (userData.value?.username ?? ''), 20, 2, 10, 3, true);
+const displayName = autoGlitchTextTransition(() => userData.value?.displayName ?? '', 20, 2, 10, 3, true);
+const biography = autoFlipTextTransition(() => userData.value?.bio ?? '', 20, 4);
+const teamName = autoGlitchTextTransition(() => teamData.value?.teamName ?? '', 20, 2, 10, 3, true);
+const teamBio = autoFlipTextTransition(() => teamData.value?.teamBio ?? '', 20, 4);
 const grade = ref('');
 const experience = ref('');
 const languages = ref<string[]>([]);
