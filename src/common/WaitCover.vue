@@ -17,7 +17,6 @@ export default {
     mounted() {
         if (this.createdObserver) return;
         this.createdObserver = true;
-        console.log(this.$el)
         const observer = new ResizeObserver(() => {
             const rect = this.$el.getBoundingClientRect();
             this.size = Math.min(rect.width * 0.25, rect.height * 0.25);
