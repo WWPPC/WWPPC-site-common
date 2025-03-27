@@ -99,6 +99,7 @@ export default {
 }
 
 .headeredCollapsibleContainer:first-child {
+    border-color: v-bind("$props.borderColor ?? 'white'");
     border-top: 4px solid;
 }
 
