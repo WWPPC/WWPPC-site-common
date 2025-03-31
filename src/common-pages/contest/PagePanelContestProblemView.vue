@@ -455,10 +455,6 @@ const viewCode = async () => {
     text-align: justify;
 }
 
-.problemLoadingCover {
-    position: sticky;
-}
-
 .problemViewSubmitForm {
     display: flex;
     flex-direction: column;
