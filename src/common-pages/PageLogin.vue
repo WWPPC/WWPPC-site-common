@@ -110,6 +110,11 @@ const attemptRecovery = async () => {
         color: 'var(--color-2)'
     });
 };
+watch(usernameInput, (value) => {
+    if (value.toLowerCase().trim() == 'rick astley') {
+        window.location.href = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+    }
+});
 </script>
 
 <script lang="ts">

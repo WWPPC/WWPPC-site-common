@@ -89,18 +89,13 @@ export function glitchTextTransition(from: string, to: string, update: (text: st
     return ret;
 }
 export function* glitchTextTransitionGenerator(from: string, to: string, block: number, glitchLength: number, advanceMod: number, startGlitched: boolean, letterOverride?: string): Generator<string, undefined, undefined> {
-    const addSpaces = to.length < from.length;
+    if (from.length > to.length) from = from.substring(0, to.length);
     const letters = letterOverride ?? 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890-=!@#$%^&*()_+`~[]\\{}|;\':",./?';
     const { cleanFrom, cleanTo, fromTags, toTags } = getTags(from, to);
     let a = 0;
     let i = startGlitched ? cleanTo.length : 0;
     while (true) {
         let text = cleanTo.substring(0, i - glitchLength);
-        if (addSpaces && i >= cleanTo.length) {
-            for (let j = cleanTo.length; j < i - glitchLength; j++) {
-                text += ' ';
-            }
-        }
         for (let j = 0; text.includes('§'); j++) {
             text = text.replace('§', toTags[j]);
         }
@@ -114,7 +109,7 @@ export function* glitchTextTransitionGenerator(from: string, to: string, block: 
             k = text.lastIndexOf('§');
         }
         if (a % advanceMod == 0) i += block;
-        if (i >= cleanTo.length + block + glitchLength && (!addSpaces || i >= cleanFrom.length + block + glitchLength)) {
+        if (i >= cleanTo.length + block + glitchLength) {
             yield to;
             break;
         }
