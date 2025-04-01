@@ -5,7 +5,7 @@ defineProps<{
 </script>
 
 <template>
-    <RouterLink :to="$props.target ?? '/home/home'" class="navLargeLogo">
+    <RouterLink :to="$props.target ?? '/home'" class="navLargeLogo">
         <img class="navLogoImg" src="/logo.svg" alt="WWPPC Logo">
     </RouterLink>
 </template>

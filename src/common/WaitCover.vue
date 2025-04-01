@@ -45,6 +45,7 @@ export default {
 
 <style scoped>
 .waitCoverContainerWrapper {
+    display: flex;
     position: fixed;
     bottom: 0px;
     left: 0px;
@@ -59,6 +60,7 @@ export default {
     box-sizing: border-box;
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(2px);
+    flex-grow: 1;
     justify-content: center;
     align-items: center;
     pointer-events: all;

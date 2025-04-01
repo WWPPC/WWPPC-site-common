@@ -114,7 +114,7 @@ const attemptRecovery = async () => {
 <template>
     <PanelView name="login" title="WWPPC">
         <PanelHeader>
-            <PanelNavLargeLogo target="/home/home?clearQuery"></PanelNavLargeLogo>
+            <PanelNavLargeLogo target="/home?clearQuery"></PanelNavLargeLogo>
         </PanelHeader>
         <PanelMain>
             <PanelBody name="default" title="Login" is-default>
