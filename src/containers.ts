@@ -6,7 +6,7 @@ import DoubleCutCornerContainer from '#/containers/DoubleCutCornerContainer.vue'
 import HeaderedTable from '#/containers/HeaderedTable.vue';
 import PairedGridContainer from '#/containers/PairedGridContainer.vue';
 import ShowOnscreenContainer from '#/containers/ShowOnscreenContainer.vue';
-import TitledCollapsible from '#/containers/TitledCollapsible.vue';
+import TitledCollapsibleContainer from '#/containers/TitledCollapsibleContainer.vue';
 import TitledCutCornerContainer from '#/containers/TitledCutCornerContainer.vue';
 import TitledDoubleCutCornerContainer from '#/containers/TitledDoubleCutCornerContainer.vue';
 
@@ -19,7 +19,7 @@ export {
     TitledCutCornerContainer,
     DoubleCutCornerContainer,
     TitledDoubleCutCornerContainer,
-    TitledCollapsible,
+    TitledCollapsibleContainer,
     HeaderedTable,
     PairedGridContainer,
 }
