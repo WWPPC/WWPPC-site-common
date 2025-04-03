@@ -97,7 +97,7 @@ defineExpose({ showModal, cancelAllModals });
 document.addEventListener('keypress', (e) => {
     if (e.key == 'Enter') {
         if (modalResolve) modalResolve();
-    } else if (e.key == ' ') {
+    } else if (e.key == 'Escape') {
         if (modalReject) modalReject();
     }
 });
