@@ -62,34 +62,8 @@ img {
     /* pointer-events: none; */
 }
 
-/* oof */
-img:hover,
-button:hover,
-input:hover,
-label:hover,
-select:hover,
-a:hover,
-.glowText:hover,
-.waitCoverContainer {
-    animation: 500ms spinny linear infinite;
-}
-
-
-.cutCornerContainerWrapper:hover,
-.doubleCutCornerContainerWrapper:hover,
-.headeredCollapsibleContainer:hover {
-    animation: 5000ms spinny linear infinite reverse;
-
-}
-
-@keyframes spinny {
-    from {
-        transform: rotateZ(0deg);
-    }
-
-    to {
-        transform: rotateZ(360deg);
-    }
+.hidden {
+    display: none;
 }
 
 /* more font stuff */
