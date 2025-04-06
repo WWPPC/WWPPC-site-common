@@ -8,6 +8,7 @@ defineProps<{
     silver: { name: string; src: string; url: string; height: string }[];
     otherSponsors: { name: string; src: string; url: string; height: string }[];
 }>();
+
 </script>
 
 <template>
