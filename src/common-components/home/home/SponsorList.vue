@@ -32,9 +32,7 @@ defineProps<{
             <HomeSponsorLogo v-for="sponsor in silver" :key="sponsor.name" :src="sponsor.src" :url="sponsor.url" :name="sponsor.name" :height="sponsor.height" />
         </div>
     </div>
-
     <LineDivider v-if="otherSponsors.length != 0" color="#AAA"></LineDivider>
-
     <div class="sponsors" v-if="otherSponsors.length != 0">
         <HomeSponsorLogo v-for="sponsor in otherSponsors" :key="sponsor.name" :src="sponsor.src" :url="sponsor.url" :name="sponsor.name" :height="sponsor.height" />
     </div>
