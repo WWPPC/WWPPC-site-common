@@ -1,5 +1,5 @@
 import { ContestProblemCompletionState, ContestUpdateSubmissionResult } from './ContestManager';
-import { apiFetch, socket, useServerConnection } from './ServerConnection';
+import { apiFetch, socket, useServerConnection } from './ServerState';
 import { defineStore } from 'pinia';
 import { reactive } from 'vue';
 

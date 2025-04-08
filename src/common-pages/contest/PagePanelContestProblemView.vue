@@ -10,7 +10,7 @@ import { autoGlitchTextTransition } from '#/text';
 import { nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
-import { useServerConnection } from '#/scripts/ServerConnection';
+import { useServerConnection } from '#/scripts/ServerState';
 import { completionStateString, type ContestProblem, ContestProblemCompletionState, type ContestSubmission, ContestUpdateSubmissionResult, getUpdateSubmissionMessage, useContestManager } from '#/scripts/ContestManager';
 import { useUpsolveManager } from '#/scripts/UpsolveManager';
 import latexify from '#/scripts/katexify';

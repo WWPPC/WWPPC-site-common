@@ -4,7 +4,7 @@ import { io, Socket as SocketIOSocket } from 'socket.io-client';
 import { reactive } from 'vue';
 
 import { useAccountManager } from './AccountManager';
-import { apiFetch, serverHostname, socket, useServerConnection } from './ServerConnection';
+import { apiFetch, serverHostname, socket, useServerConnection } from './ServerState';
 
 export interface Contest {
     readonly id: string

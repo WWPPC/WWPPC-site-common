@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useConnectionEnforcer } from '#/scripts/ConnectionEnforcer';
+import { useConnectionEnforcer } from '#/scripts/LoginEnforcer';
 import LoadingCover from '#/common/LoadingCover.vue';
 import NotFound from '#/common/NotFound.vue';
 import OnScreenHook from '#/common/OnScreenHook.vue';
@@ -8,7 +8,7 @@ import { useRoute } from 'vue-router';
 import { experienceMaps, gradeMaps, languageMaps, type TeamData, useAccountManager, type AccountData } from '#/scripts/AccountManager';
 import { nextTick, onMounted, ref, watch } from 'vue';
 import { InputDropdown, InputTextBox } from '#/inputs';
-import { useServerConnection } from '#/scripts/ServerConnection';
+import { useServerConnection } from '#/scripts/ServerState';
 import { autoFlipTextTransition, autoGlitchTextTransition } from '#/text';
 import { setTitlePanel } from '#/scripts/title';
 import AccountTeamUserDisp from '#/common-components/account/AccountTeamUserDisp.vue';
