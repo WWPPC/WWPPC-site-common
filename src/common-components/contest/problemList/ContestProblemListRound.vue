@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ContestRound } from '#/scripts/ContestManager';
+import type { ContestRound } from '#/modules/ContestManager';
 import ContestProblemListProblem from './ContestProblemListProblem.vue';
 import { AnimateInContainer, CutCornerContainer } from '#/containers';
 import { ref, onMounted } from 'vue';

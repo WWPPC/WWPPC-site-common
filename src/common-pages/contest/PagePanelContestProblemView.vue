@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { setTitlePanel } from '#/scripts/title';
+import { setTitlePanel } from '#/title';
 import { DoubleCutCornerContainer, TitledCutCornerContainer, AnimateInContainer } from '#/containers';
 import { InputButton, InputCopyButton, InputFileUpload, InputIconButton, InputTextBox } from '#/inputs';
 import InputDropdown from '#/inputs/InputDropdown.vue'; // this is required for spaghetti fix
@@ -10,10 +10,10 @@ import { autoGlitchTextTransition } from '#/text';
 import { nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
-import { useServerConnection } from '#/scripts/ServerState';
-import { completionStateString, type ContestProblem, ContestProblemCompletionState, type ContestSubmission, ContestUpdateSubmissionResult, getUpdateSubmissionMessage, useContestManager } from '#/scripts/ContestManager';
-import { useUpsolveManager } from '#/scripts/UpsolveManager';
-import latexify from '#/scripts/katexify';
+import { useServerConnection } from '#/modules/ServerState';
+import { completionStateString, type ContestProblem, ContestProblemCompletionState, type ContestSubmission, ContestUpdateSubmissionResult, getUpdateSubmissionMessage, useContestManager } from '#/modules/ContestManager';
+import { useUpsolveManager } from '#/modules/UpsolveManager';
+import latexify from '#/katexify';
 
 // despaghettifier
 const props = defineProps<{

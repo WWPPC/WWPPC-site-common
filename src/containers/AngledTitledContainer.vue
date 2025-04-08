@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { isMobile } from '#/scripts/userAgent';
+import { isMobile } from '#/userAgent';
 
 defineProps<{
     title: string

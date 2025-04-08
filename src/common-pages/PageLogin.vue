@@ -7,9 +7,9 @@ import WaitCover from '#/common/WaitCover.vue';
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
-import { useServerConnection } from '#/scripts/ServerState';
-import { languageMaps, experienceMaps, gradeMaps, useAccountManager, validateCredentials, getAccountOpMessage, AccountOpResult } from '#/scripts/AccountManager';
-import { useConnectionEnforcer } from '#/scripts/LoginEnforcer';
+import { useServerConnection } from '#/modules/ServerState';
+import { languageMaps, experienceMaps, gradeMaps, useAccountManager, validateCredentials, getAccountOpMessage, AccountOpResult } from '#/modules/AccountManager';
+import { useConnectionEnforcer } from '#/modules/LoginEnforcer';
 
 const router = useRouter();
 const route = useRoute();

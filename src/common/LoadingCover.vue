@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useServerConnection } from '#/scripts/ServerState';
+import { useServerConnection } from '#/modules/ServerState';
 import LoadingSquare from './LoadingSquare.vue';
 import { useRoute } from 'vue-router';
 

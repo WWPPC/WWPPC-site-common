@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { useConnectionEnforcer } from '#/scripts/LoginEnforcer';
+import { useConnectionEnforcer } from '#/modules/LoginEnforcer';
 import LoadingCover from '#/common/LoadingCover.vue';
 import NotFound from '#/common/NotFound.vue';
 import OnScreenHook from '#/common/OnScreenHook.vue';
 import { AnimateInContainer, CutCornerContainer, PairedGridContainer, TitledCutCornerContainer, TitledDoubleCutCornerContainer } from '#/containers';
 import { useRoute } from 'vue-router';
-import { experienceMaps, gradeMaps, languageMaps, type TeamData, useAccountManager, type AccountData } from '#/scripts/AccountManager';
+import { experienceMaps, gradeMaps, languageMaps, type TeamData, useAccountManager, type AccountData } from '#/modules/AccountManager';
 import { nextTick, onMounted, ref, watch } from 'vue';
 import { InputDropdown, InputTextBox } from '#/inputs';
-import { useServerConnection } from '#/scripts/ServerState';
+import { useServerConnection } from '#/modules/ServerState';
 import { autoFlipTextTransition, autoGlitchTextTransition } from '#/text';
-import { setTitlePanel } from '#/scripts/title';
+import { setTitlePanel } from '#/title';
 import AccountTeamUserDisp from '#/common-components/account/AccountTeamUserDisp.vue';
 
 const route = useRoute();

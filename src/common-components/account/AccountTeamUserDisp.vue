@@ -4,7 +4,7 @@ import { InputButton } from '#/inputs';
 import LoadingSpinner from '#/common/LoadingSpinner.vue';
 import { globalModal, ModalMode } from '#/modal';
 import { onMounted, ref, watch } from 'vue';
-import { type AccountData, getTeamOpMessage, TeamOpResult, useAccountManager } from '#/scripts/AccountManager';
+import { type AccountData, getTeamOpMessage, TeamOpResult, useAccountManager } from '#/modules/AccountManager';
 
 const props = defineProps<{
     user: string

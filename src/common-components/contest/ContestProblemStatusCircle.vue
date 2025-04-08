@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ContestProblemCompletionState, completionStateString } from '#/scripts/ContestManager';
+import { ContestProblemCompletionState, completionStateString } from '#/modules/ContestManager';
 import { globalModal } from '#/modal';
 
 const props = defineProps<{

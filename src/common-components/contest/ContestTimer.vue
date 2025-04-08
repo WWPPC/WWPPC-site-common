@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useContestManager } from '#/scripts/ContestManager';
+import { useContestManager } from '#/modules/ContestManager';
 import { useRoute } from 'vue-router';
 import { onMounted, ref, watch } from 'vue';
 import { GlitchText } from '#/text';

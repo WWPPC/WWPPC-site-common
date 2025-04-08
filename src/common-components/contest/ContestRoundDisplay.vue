@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import TimeDisplay from '#/common/TimeDisplay.vue';
-import { useContestManager } from '#/scripts/ContestManager';
+import { useContestManager } from '#/modules/ContestManager';
 import { onMounted, ref, watch } from 'vue';
 import ContestTimer from './ContestTimer.vue';
 

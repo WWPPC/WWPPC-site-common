@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Accordion } from '#/accordion';
-import { isMobile } from '#/scripts/userAgent';
+import { isMobile } from '#/userAgent';
 import { inject, ref, watch } from 'vue';
 
 const props = defineProps<{

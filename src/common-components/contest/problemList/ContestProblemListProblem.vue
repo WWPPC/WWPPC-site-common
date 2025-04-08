@@ -3,7 +3,7 @@ import { InputLinkButton } from '#/inputs';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
 import { glitchTextTransition } from '#/text';
 import { ref, onMounted } from 'vue';
-import { type ContestProblem } from '#/scripts/ContestManager';
+import { type ContestProblem } from '#/modules/ContestManager';
 
 const props = defineProps<{
     data: ContestProblem

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { AnimateInContainer, AngledTitledContainer } from '#/containers';
 import ContestProblemListRound from '#/common-components/contest/problemList/ContestProblemListRound.vue';
-import { type Contest, useContestManager } from '#/scripts/ContestManager';
+import { type Contest, useContestManager } from '#/modules/ContestManager';
 import WaitCover from '#/common/WaitCover.vue';
 import ContestProblemListProblem from '#/common-components/contest/problemList/ContestProblemListProblem.vue';
 import { nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';

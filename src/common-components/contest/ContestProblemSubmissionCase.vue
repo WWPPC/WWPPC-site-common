@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type ContestScore, ContestScoreState } from '#/scripts/ContestManager';
+import { type ContestScore, ContestScoreState } from '#/modules/ContestManager';
 import { globalModal } from '#/modal';
 
 const props = defineProps<{

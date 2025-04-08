@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-import { setTitlePanel } from '#/scripts/title';
+import { setTitlePanel } from '#/title';
 import { watch, nextTick, getCurrentInstance } from 'vue';
-import { isMobile } from '#/scripts/userAgent';
+import { isMobile } from '#/userAgent';
 
 const route = useRoute();
 const props = defineProps<{

@@ -3,8 +3,8 @@ import { InputButton } from '#/inputs';
 import { glitchTextTransition } from '#/text';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { useServerConnection } from '#/scripts/ServerState';
-import { useAccountManager } from '#/scripts/AccountManager';
+import { useServerConnection } from '#/modules/ServerState';
+import { useAccountManager } from '#/modules/AccountManager';
 
 const serverConnection = useServerConnection();
 const accountManager = useAccountManager();

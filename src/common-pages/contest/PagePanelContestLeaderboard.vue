@@ -2,8 +2,8 @@
 import { GlitchText } from '#/text';
 import LoadingSpinner from '#/common/LoadingSpinner.vue';
 import { onMounted, ref, watch } from 'vue';
-import { useAccountManager } from '#/scripts/AccountManager';
-import { useContestManager } from '#/scripts/ContestManager';
+import { useAccountManager } from '#/modules/AccountManager';
+import { useContestManager } from '#/modules/ContestManager';
 
 const props = defineProps<{
     contest: string

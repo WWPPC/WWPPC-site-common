@@ -5,7 +5,7 @@ import ContestRoundDisplay from '#/common-components/contest/ContestRoundDisplay
 import { AnimateInContainer, TitledCutCornerContainer } from '#/containers';
 import { InputIconButton } from '#/inputs';
 import { GlitchText } from '#/text';
-import { useContestManager } from '#/scripts/ContestManager';
+import { useContestManager } from '#/modules/ContestManager';
 
 const props = defineProps<{
     contest: string
