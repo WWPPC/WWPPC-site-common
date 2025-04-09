@@ -1,36 +1,8 @@
-import { ContestProblemCompletionState, ContestUpdateSubmissionResult } from './ContestManager';
-import { apiFetch, socket, useServerConnection } from './ServerState';
 import { defineStore } from 'pinia';
 import { reactive } from 'vue';
 
-import type { ContestScore } from './ContestManager';
+import { apiFetch, useServerState } from './ServerState';
 
-export interface UpsolveContest {
-    readonly id: string
-    rounds: UpsolveRound[]
-}
-export interface UpsolveRound {
-    readonly contest: string
-    readonly number: number
-    problems: string[]
-}
-export interface UpsolveProblem {
-    readonly id: string
-    readonly contest: string
-    readonly round: number
-    readonly number: number
-    name: string
-    author: string
-    content: string
-    constraints: { memory: number, time: number }
-}
-export interface UpsolveSubmission {
-    readonly problemId: string
-    time: number
-    lang: string
-    scores: ContestScore[]
-    status: ContestProblemCompletionState
-}
 
 const state = reactive<{
     submissionsCache: Map<string, UpsolveSubmission[]>
@@ -56,14 +28,14 @@ export const useUpsolveManager = defineStore('upsolveManager', {
             return await apiFetch('GET', `/upsolve/${contest}/${round}/${problem}`);
         },
         async updateSubmission(problemId: string, lang: string, file: string): Promise<ContestUpdateSubmissionResult> {
-            const serverConnection = useServerConnection();
-            if (!serverConnection.loggedIn) return ContestUpdateSubmissionResult.NOT_CONNECTED;
-            return await serverConnection.emitWithAck('updateUpsolveSubmission', { id: problemId, file, lang });
+            const serverState = useServerState();
+            if (!serverState.loggedIn) return ContestUpdateSubmissionResult.NOT_CONNECTED;
+            return await serverState.emitWithAck('updateUpsolveSubmission', { id: problemId, file, lang });
         },
         async refreshSubmission(problemId: string): Promise<UpsolveSubmission[] | null> {
-            const serverConnection = useServerConnection();
-            if (!serverConnection.loggedIn) return null;
-            const res: UpsolveSubmission[] | null = await serverConnection.emitWithAck('refreshUpsolveSubmission', { id: problemId });
+            const serverState = useServerState();
+            if (!serverState.loggedIn) return null;
+            const res: UpsolveSubmission[] | null = await serverState.emitWithAck('refreshUpsolveSubmission', { id: problemId });
             if (res != null) state.submissionsCache.set(problemId, res);
             return res;
         },
@@ -72,9 +44,9 @@ export const useUpsolveManager = defineStore('upsolveManager', {
             return await this.refreshSubmission(problemId);
         },
         async getSubmissionCode(problemId: string): Promise<string> {
-            const serverConnection = useServerConnection();
-            if (!serverConnection.loggedIn) return '';
-            return await serverConnection.emitWithAck('getUpsolveSubmissionCode', { id: problemId });
+            const serverState = useServerState();
+            if (!serverState.loggedIn) return '';
+            return await serverState.emitWithAck('getUpsolveSubmissionCode', { id: problemId });
         }
     }
 });
@@ -86,8 +58,8 @@ window.addEventListener('DOMContentLoaded', () => {
         state.submissionsCache.set(submissions[0].problemId, submissions);
         state.submissionsUpdated++;
     });
-    const serverConnection = useServerConnection();
-    serverConnection.ondisconnect(() => {
+    const serverState = useServerState();
+    serverState.ondisconnect(() => {
         state.submissionsCache.clear();
     });
 });

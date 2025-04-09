@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { AnimateInContainer } from '#/containers';
-import { isMobile } from '#/userAgent';
+import { isMobile } from '#/util/userAgent';
 
 defineProps<{
     anchor: string

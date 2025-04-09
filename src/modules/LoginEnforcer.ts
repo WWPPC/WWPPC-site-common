@@ -20,10 +20,10 @@ const state = reactive<{
     excludeExact: new Set()
 });
 
-export const useConnectionEnforcer = defineStore('connectionEnforcer', {
+export const useLoginEnforcer = defineStore('loginEnforcer', {
     state: () => state
 });
-setImmediate(() => {
+setTimeout(() => {
     const serverState = useServerState();
     const route = useRoute();
     const router = useRouter();

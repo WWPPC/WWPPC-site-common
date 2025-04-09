@@ -10,10 +10,10 @@ import { autoGlitchTextTransition } from '#/text';
 import { nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
-import { useServerConnection } from '#/modules/ServerState';
-import { completionStateString, type ContestProblem, ContestProblemCompletionState, type ContestSubmission, ContestUpdateSubmissionResult, getUpdateSubmissionMessage, useContestManager } from '#/modules/ContestManager';
+import { useServerState } from '#/modules/ServerState';
+import { completionStateString, type Problem, ProblemCompletionState, type Submission, useContestManager } from '#/modules/ContestManager';
 import { useUpsolveManager } from '#/modules/UpsolveManager';
-import latexify from '#/katexify';
+import latexify from '#/util/katexify';
 
 // despaghettifier
 const props = defineProps<{
@@ -24,13 +24,13 @@ const contestType = props.contest;
 
 const route = useRoute();
 const router = useRouter();
-const serverConnection = useServerConnection();
+const serverState = useServerState();
 const contestManager = useContestManager();
 const upsolveManager = useUpsolveManager();
 const modal = globalModal();
 
 // placeholder data behind loading cover
-const problem = ref<ContestProblem>({
+const problem = ref<Problem>({
     id: 'loading',
     contest: 'WWPIT Loading Contest',
     round: 0,
@@ -62,7 +62,7 @@ Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu 
     `,
     constraints: { memory: 0, time: 0 },
     submissions: [],
-    status: ContestProblemCompletionState.ERROR,
+    status: ProblemCompletionState.ERROR,
 });
 let problemId: string | undefined = undefined;
 const loadErrorModal = (title: string, content: string) => {
@@ -114,7 +114,7 @@ const loadProblem = async () => {
         problem.value = {
             ...p,
             submissions: [],
-            status: ContestProblemCompletionState.NOT_UPLOADED
+            status: ProblemCompletionState.NOT_UPLOADED
         };
         problemId = p.id;
         // latexify(problem.value.content).then((html) => problemContent.value = html);
@@ -135,12 +135,12 @@ const updateSubmissions = () => {
         if (problemId == undefined) return;
         const s = await upsolveManager.getSubmissions(problemId) ?? [];
         problem.value.submissions = s;
-        problem.value.status = s[0]?.status ?? ContestProblemCompletionState.NOT_UPLOADED;
+        problem.value.status = s[0]?.status ?? ProblemCompletionState.NOT_UPLOADED;
     }, 100);
 };
 if (props.isUpsolve) {
     watch(() => upsolveManager.submissionsUpdated, updateSubmissions);
-    watch(() => serverConnection.loggedIn, updateSubmissions);
+    watch(() => serverState.loggedIn, updateSubmissions);
 }
 
 watch(() => problem.value.name, () => {
@@ -241,7 +241,7 @@ const aaa = async () => {
     a.value = true;
 };
 const a = ref(true);
-const b = ref<ContestSubmission[]>([]);
+const b = ref<Submission[]>([]);
 watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onSpaghetti(() => {
     loadProblem();
     aaa();
@@ -337,7 +337,7 @@ const viewCode = async () => {
                         <InputTextBox v-model="answerInput"></InputTextBox>
                     </div>
                     <InputButton ref="submitButton" :text="contestManager.config[contestType]?.submitSolver ? 'Upload Submission' : 'Submit'" type="submit" width="min-content" @click="submit" :disabled="disableSubmit"></InputButton>
-                    <div style="text-align: center; color: var(--color-3);" v-if="!serverConnection.loggedIn">
+                    <div style="text-align: center; color: var(--color-3);" v-if="!serverState.loggedIn">
                         <i>You must be signed in to submit solutions</i>
                     </div>
                 </form>
@@ -365,7 +365,7 @@ const viewCode = async () => {
                         </div>
                     </div>
                 </AnimateInContainer>
-                <div style="text-align: center; color: var(--color-3);" v-if="!serverConnection.loggedIn">
+                <div style="text-align: center; color: var(--color-3);" v-if="!serverState.loggedIn">
                     <i>You must be signed in to submit solutions</i>
                 </div>
                 <div v-else-if="problem.submissions.length == 0" style="text-align: center;"><i>You have not submitted any solutions yet.</i></div>

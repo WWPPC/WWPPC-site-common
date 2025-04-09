@@ -7,25 +7,25 @@ import WaitCover from '#/common/WaitCover.vue';
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
-import { useServerConnection } from '#/modules/ServerState';
-import { languageMaps, experienceMaps, gradeMaps, useAccountManager, validateCredentials, getAccountOpMessage, AccountOpResult } from '#/modules/AccountManager';
-import { useConnectionEnforcer } from '#/modules/LoginEnforcer';
+import { useServerState } from '#/modules/ServerState';
+import { languageMaps, experienceMaps, gradeMaps, useAccountManager } from '#/modules/AccountManager';
+import { useLoginEnforcer } from '#/modules/LoginEnforcer';
 
 const router = useRouter();
 const route = useRoute();
 
 // connection modals
 const modal = globalModal();
-const serverConnection = useServerConnection();
-const connectionEnforcer = useConnectionEnforcer();
+const serverState = useServerState();
+const loginEnforcer = useLoginEnforcer();
 const accountManager = useAccountManager();
 
-connectionEnforcer.connectionInclude.add('/login');
+loginEnforcer.connectionInclude.add('/login');
 
 watch(() => route.params.page, async () => {
     if (route.params.page == 'login' && route.query.ignore_server === undefined) {
-        serverConnection.handshakePromise.then(() => {
-            if (serverConnection.loggedIn) router.replace({ path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home?clearQuery', query: { clearQuery: 1 } });
+        serverState.handshakePromise.then(() => {
+            if (serverState.loggedIn) router.replace({ path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home?clearQuery', query: { clearQuery: 1 } });
         });
     } else {
         page.value = 0;
@@ -45,24 +45,42 @@ const languageInput = ref<string[]>([]);
 const showLoginWait = ref(false);
 const showRecoveryWait = ref(false);
 const attemptedRecovery = ref(false);
+const validateCredentials = (): boolean => {
+    if (usernameInput.value.length == 0 || usernameInput.value.length > 16 || !/^[a-z]([a-z0-9-]*[a-z0-9])?$/.test(usernameInput.value)) {
+        modal.showModal({
+            title: 'Invalid username',
+            content: 'Username must be a maximum of 16 characters and contain only lowercase letters (a-z), numbers (0-9), underscores ("_"), and dashes ("-").',
+            color: 'var(--color-2)'
+        });
+        return false;
+    }
+    if (passwordInput.value.length == 0 || passwordInput.value.length > 1024) {
+        modal.showModal({
+            title: 'Invalid password',
+            content: 'Password must be a maximum of 1024 characters',
+            color: 'var(--color-2)'
+        });
+        return false;
+    }
+    return true;
+};
 const attemptLogin = async () => {
     if (usernameInput.value.trim() == '' || passwordInput.value == '') return;
-    if (!validateCredentials(usernameInput.value, passwordInput.value)) {
-        modal.showModal({ title: 'Invalid username or password', content: 'Username must be less than or equal to 16 characters and contain only lowercase alphanumeric (a-z, 0-9) and "-" and "_" characters.', color: 'var(--color-2)' });
-        return;
-    }
+    if (!validateCredentials()) return;
     showLoginWait.value = true;
     const res = await accountManager.login(usernameInput.value, passwordInput.value);
     showLoginWait.value = false;
     if (res == 0) router.push({ path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home', query: { clearQuery: 1 } });
     else modal.showModal({ title: 'Could not log in:', content: getAccountOpMessage(res), color: 'var(--color-2)' });
 };
-const toSignUp = () => {
+const toSignUp = async () => {
     if (usernameInput.value.trim() == '' || passwordInput.value == '') return;
-    if (!validateCredentials(usernameInput.value, passwordInput.value)) {
-        modal.showModal({ title: 'Invalid username or password', content: 'Username must be less than or equal to 16 characters and contain only lowercase alphanumeric (a-z, 0-9) and "-" and "_" characters.', color: 'var(--color-2)' });
-        return;
-    }
+    if (!validateCredentials()) return;
+    // add check if account already exists or people get annoyed
+    // add check if account already exists or people get annoyed
+    // add check if account already exists or people get annoyed
+    // add check if account already exists or people get annoyed
+    // add check if account already exists or people get annoyed
     firstNameInput.value = '';
     lastNameInput.value = '';
     emailInput.value = '';

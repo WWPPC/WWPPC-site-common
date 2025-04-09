@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useConnectionEnforcer } from '#/modules/LoginEnforcer';
+import { useLoginEnforcer } from '#/modules/LoginEnforcer';
 import LoadingCover from '#/common/LoadingCover.vue';
 import NotFound from '#/common/NotFound.vue';
 import OnScreenHook from '#/common/OnScreenHook.vue';
@@ -8,18 +8,18 @@ import { useRoute } from 'vue-router';
 import { experienceMaps, gradeMaps, languageMaps, type TeamData, useAccountManager, type AccountData } from '#/modules/AccountManager';
 import { nextTick, onMounted, ref, watch } from 'vue';
 import { InputDropdown, InputTextBox } from '#/inputs';
-import { useServerConnection } from '#/modules/ServerState';
+import { useServerState } from '#/modules/ServerState';
 import { autoFlipTextTransition, autoGlitchTextTransition } from '#/text';
 import { setTitlePanel } from '#/title';
 import AccountTeamUserDisp from '#/common-components/account/AccountTeamUserDisp.vue';
 
 const route = useRoute();
 
-const serverConnection = useServerConnection();
-const connectionEnforcer = useConnectionEnforcer();
+const serverState = useServerState();
+const loginEnforcer = useLoginEnforcer();
 const accountManager = useAccountManager();
 
-connectionEnforcer.connectionInclude.add('/user');
+loginEnforcer.connectionInclude.add('/user');
 
 const userData = ref<AccountData | null>(null);
 const teamData = ref<TeamData | null>(null);
@@ -28,7 +28,7 @@ const loadUserData = async () => {
     userData.value = null;
     teamData.value = null;
     showLoading.value = true;
-    await serverConnection.handshakePromise;
+    await serverState.handshakePromise;
     await nextTick();
     if (route.params.userView != null) {
         await Promise.all([

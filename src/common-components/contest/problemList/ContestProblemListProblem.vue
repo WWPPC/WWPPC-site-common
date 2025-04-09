@@ -3,10 +3,10 @@ import { InputLinkButton } from '#/inputs';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
 import { glitchTextTransition } from '#/text';
 import { ref, onMounted } from 'vue';
-import { type ContestProblem } from '#/modules/ContestManager';
+import { type Problem } from '#/modules/ContestManager';
 
 const props = defineProps<{
-    data: ContestProblem
+    data: Problem
     archive?: boolean
 }>();
 

@@ -2,7 +2,7 @@
 import { onMounted, ref, watch } from 'vue';
 import { glitchTextTransition, type AsyncTextTransition } from '#/text';
 import { useRoute } from 'vue-router';
-import { isMobile } from '#/userAgent';
+import { isMobile } from '#/util/userAgent';
 
 const props = defineProps<{
     text: string

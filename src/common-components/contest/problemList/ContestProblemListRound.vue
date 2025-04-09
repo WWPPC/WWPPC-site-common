@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { ContestRound } from '#/modules/ContestManager';
+import type { Round } from '#/modules/ContestManager';
 import ContestProblemListProblem from './ContestProblemListProblem.vue';
 import { AnimateInContainer, CutCornerContainer } from '#/containers';
 import { ref, onMounted } from 'vue';
 import { glitchTextTransition } from '#/text';
 
 const props = defineProps<{
-    data: ContestRound
+    data: Round
 }>();
 const roundText = ref<string>('');
 onMounted(() => {

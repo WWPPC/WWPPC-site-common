@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { reactive, ref, watch } from 'vue';
 
-import { apiFetch, useServerState } from './ServerState';
+import { apiFetch, RSAencrypt } from './ServerState';
 
 /**Descriptor for an account (see server docs) */
 export type AccountData = {
@@ -100,8 +100,6 @@ const state = reactive<{
 watch(state.user, () => unsaved.value = true);
 watch(state.team, () => unsaved2.value = true);
 
-const serverState = useServerState();
-
 export const useAccountManager = defineStore('accountManager', {
     state: () => state,
     getters: {
@@ -112,15 +110,15 @@ export const useAccountManager = defineStore('accountManager', {
         async login(username: string, password: string): Promise<Response> {
             return await apiFetch('POST', '/auth/login', {
                 username: username,
-                password: await serverState.RSAencrypt(password)
+                password: await RSAencrypt(password)
             });
         },
         async signup(username: string, password: string, data: Omit<AccountData, 'username' | 'displayName' | 'profileImage' | 'bio' | 'pastRegistrations' | 'team'>): Promise<Response> {
             return await apiFetch('POST', '/auth/signup', {
                 username: username,
-                password: await serverState.RSAencrypt(password),
-                email: await serverState.RSAencrypt(data.email),
-                email2: await serverState.RSAencrypt(data.email2),
+                password: await RSAencrypt(password),
+                email: await RSAencrypt(data.email),
+                email2: await RSAencrypt(data.email2),
                 firstName: data.firstName,
                 lastName: data.lastName,
                 school: data.school,
@@ -131,25 +129,25 @@ export const useAccountManager = defineStore('accountManager', {
         async requestRecovery(username: string, email: string): Promise<Response> {
             return await apiFetch('POST', '/auth/requestRecovery', {
                 username: username,
-                email: await serverState.RSAencrypt(email)
+                email: await RSAencrypt(email)
             });
         },
         async recoverAccount(username: string, recoveryPassword: string, newPassword: string): Promise<Response> {
             return await apiFetch('POST', '/auth/recovery', {
                 username: username,
-                recoveryPassword: await serverState.RSAencrypt(recoveryPassword),
-                newPassword: await serverState.RSAencrypt(newPassword)
+                recoveryPassword: await RSAencrypt(recoveryPassword),
+                newPassword: await RSAencrypt(newPassword)
             });
         },
         async changePassword(currentPass: string, newPass: string): Promise<Response> {
             return await apiFetch('PUT', '/auth/changePassword', {
-                password: await serverState.RSAencrypt(currentPass),
-                newPassword: await serverState.RSAencrypt(newPass)
+                password: await RSAencrypt(currentPass),
+                newPassword: await RSAencrypt(newPass)
             })
         },
         async deleteAccount(password: string): Promise<Response> {
             return await apiFetch('DELETE', '/auth/delete', {
-                password: await serverState.RSAencrypt(password),
+                password: await RSAencrypt(password),
             });
         },
         async logout(): Promise<Response> {

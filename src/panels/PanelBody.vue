@@ -2,7 +2,7 @@
 import { useRoute } from 'vue-router';
 import { setTitlePanel } from '#/title';
 import { watch, nextTick, getCurrentInstance } from 'vue';
-import { isMobile } from '#/userAgent';
+import { isMobile } from '#/util/userAgent';
 
 const route = useRoute();
 const props = defineProps<{

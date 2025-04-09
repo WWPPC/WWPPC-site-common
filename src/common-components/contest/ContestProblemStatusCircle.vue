@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { ContestProblemCompletionState, completionStateString } from '#/modules/ContestManager';
+import { ProblemCompletionState, completionStateString } from '#/modules/ContestManager';
 import { globalModal } from '#/modal';
 
 const props = defineProps<{
-    status: ContestProblemCompletionState
+    status: ProblemCompletionState
 }>();
 
 const modal = globalModal();
 
-const completionStateAnimation = (status: ContestProblemCompletionState) => {
-    return status == ContestProblemCompletionState.NOT_UPLOADED ? 'pstatus-not-uploaded' :
-        status == ContestProblemCompletionState.UPLOADED ? 'pstatus-uploaded' :
-            status == ContestProblemCompletionState.SUBMITTED ? 'pstatus-submitted' :
-                status == ContestProblemCompletionState.GRADED_PASS ? 'pstatus-graded-pass' :
-                    status == ContestProblemCompletionState.GRADED_FAIL ? 'pstatus-graded-fail' :
-                        status == ContestProblemCompletionState.GRADED_PARTIAL ? 'pstatus-graded-partial' : 'pstatus-error'
+const completionStateAnimation = (status: ProblemCompletionState) => {
+    return status == ProblemCompletionState.NOT_UPLOADED ? 'pstatus-not-uploaded' :
+        status == ProblemCompletionState.UPLOADED ? 'pstatus-uploaded' :
+            status == ProblemCompletionState.SUBMITTED ? 'pstatus-submitted' :
+                status == ProblemCompletionState.GRADED_PASS ? 'pstatus-graded-pass' :
+                    status == ProblemCompletionState.GRADED_FAIL ? 'pstatus-graded-fail' :
+                        status == ProblemCompletionState.GRADED_PARTIAL ? 'pstatus-graded-partial' : 'pstatus-error'
 };
 
 const showModal = () => {

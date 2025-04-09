@@ -25,8 +25,6 @@ export async function apiFetch(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: 
     });
 }
 
-const modal = globalModal();
-
 let resolveHandshake: () => void;
 const state = reactive<{
     loggedIn: boolean
@@ -65,11 +63,10 @@ const RSA: {
     }
 };
 
+export const RSAencrypt = RSA.encrypt;
+
 export const useServerState = defineStore('serverState', {
-    state: () => state,
-    actions: {
-        RSAencrypt: RSA.encrypt,
-    }
+    state: () => state
 });
 
 try {
@@ -87,6 +84,7 @@ try {
     apiFetch('GET', '/api/config').then(async (res) => {
         if (!res.ok) {
             console.error(`Failed to fetch configuration: ${res.status} - ${res.statusText}`);
+            const modal = globalModal();
             modal.showModal({
                 title: 'Configuration fetch failed',
                 content: 'Failed to fetch server configuration. This may interfere with some functionality.',
@@ -100,6 +98,7 @@ try {
 } catch (err) {
     console.error('Failed to fetch public key or check login status');
     console.error(err);
+    const modal = globalModal();
     modal.showModal({
         title: 'Authentication error',
         content: 'Failed to fetch public key or check login status',
