@@ -34,6 +34,7 @@ export class LongPollEventReceiver<E> {
     readonly path: string;
     /**Most recent value published by server endpoint */
     readonly ref: Ref<E | undefined>;
+    private running: boolean = true;
 
     /**
      * @param method HTTP method
@@ -55,8 +56,7 @@ export class LongPollEventReceiver<E> {
             await new Promise<void>((r) => setTimeout(() => r(), 10000));
         }
         let retryTime = 10000;
-        // while (true) throws an error because eslint dumb
-        for (; ;) {
+        while (this.running) {
             const res = await apiFetch(this.method, this.path);
             if (res.ok) {
                 if (res.status != 204) this.ref.value = await res.json();
@@ -66,5 +66,12 @@ export class LongPollEventReceiver<E> {
                 retryTime *= 1.5;
             }
         }
+    }
+
+    /**
+     * Stops long-polling requests indefinitely.
+     */
+    stop(): void {
+        this.running = false;
     }
 }

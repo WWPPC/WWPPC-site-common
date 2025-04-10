@@ -3,6 +3,13 @@ import { apiFetch } from '#/util/netUtil';
 import { defineStore } from 'pinia';
 import { reactive } from 'vue';
 
+export type ServerContestConfig = {
+    rounds: boolean
+    submitSolver: boolean
+    acceptedSolverLanguages: string[]
+    maxSubmissionSize: number
+};
+
 let resolveHandshake: () => void;
 const state = reactive<{
     loggedIn: boolean
@@ -10,14 +17,7 @@ const state = reactive<{
     handshakePromise: Promise<void>
     serverConfig: {
         maxProfileImgSize: string,
-        contests: {
-            [key: string]: {
-                rounds: boolean
-                submitSolver: boolean
-                acceptedSolverLanguages: string[]
-                maxSubmissionSize: number
-            } | undefined
-        }
+        contests: { [key: string]: ServerContestConfig | undefined }
     }
 }>({
     loggedIn: false,
