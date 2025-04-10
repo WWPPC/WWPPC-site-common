@@ -2,20 +2,32 @@
 import { InputLinkButton } from '#/inputs';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
 import { glitchTextTransition } from '#/text';
-import { ref, onMounted } from 'vue';
-import { type Problem } from '#/modules/ContestManager';
+import { ref, onMounted, computed } from 'vue';
+import type { ContestHost } from '#/modules/ContestManager';
 
 const props = defineProps<{
-    data: Problem
+    // add archive host later
+    host: ContestHost
+    problemId: string
     archive?: boolean
 }>();
 
-const nameText = ref<string>('');
-const authorText = ref<string>('');
+const data = computed(() => {
+    const data = await props.host.getProblem(props.problemId);
+    if (data instanceof Response) {
+        return {
+
+        } 
+    }
+    return data;
+})
 onMounted(() => {
-    if (props.archive) {
-        nameText.value = props.data.name;
-        authorText.value = 'Author: ' + props.data.author;
+        if (data instanceof Response) {
+            return;
+        }
+        if (props.archive) {
+        nameText.value = data.name;
+        authorText.value = 'Author: ' + data.author;
     } else setTimeout(() => {
         glitchTextTransition('', props.data.name, (t) => { nameText.value = t; }, 40);
         glitchTextTransition('', 'Author: ' + props.data.author, (t) => { authorText.value = t; }, 40);

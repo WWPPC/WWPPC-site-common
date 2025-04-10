@@ -26,14 +26,24 @@ const loadUserData = async () => {
     showLoading.value = true;
     await serverState.handshakePromise;
     if (route.params.userView != null) {
-        await Promise.all([
-            accountManager.getUserData(route.params.userView.toString()).then((v) => {
-                if (!(v instanceof Error)) userData.value = v;
-            }),
-            accountManager.getTeamData(route.params.userView.toString()).then((v) => {
-                if (!(v instanceof Error)) teamData.value = v;
-            })
-        ]);
+        const accRes = await accountManager.fetchAccountData(route.params.userView.toString());
+        if (accRes instanceof Response) {
+            if (accRes.status != 404) {
+                // idk
+            }
+            return;
+        }
+        userData.value = accRes;
+        if (userData.value.team !== null) {
+            const teamRes = await accountManager.fetchTeamData(userData.value.team);
+            if (teamRes instanceof Response) {
+                if (teamRes.status != 404) {
+                    // still idk
+                }
+                return;
+            }
+            teamData.value = teamRes;
+        }
     }
     showLoading.value = false;
 };
@@ -44,8 +54,8 @@ watch(() => route.params, () => {
 const username = autoGlitchTextTransition(() => '@' + (userData.value?.username ?? ''), 20, 2, 10, 3, true);
 const displayName = autoGlitchTextTransition(() => userData.value?.displayName ?? '', 20, 2, 10, 3, true);
 const biography = autoFlipTextTransition(() => userData.value?.bio ?? '', 20, 4);
-const teamName = autoGlitchTextTransition(() => teamData.value?.teamName ?? '', 20, 2, 10, 3, true);
-const teamBio = autoFlipTextTransition(() => teamData.value?.teamBio ?? '', 20, 4);
+const teamName = autoGlitchTextTransition(() => teamData.value?.name ?? '', 20, 2, 10, 3, true);
+const teamBio = autoFlipTextTransition(() => teamData.value?.bio ?? '', 20, 4);
 const grade = ref('');
 const experience = ref('');
 const languages = ref<string[]>([]);
@@ -70,13 +80,13 @@ const largeHeader = ref(true);
                     <PairedGridContainer style="font-size: var(--font-small);">
                         <span>Name:</span>
                         <InputTextBox :value="userData?.firstName + ' ' + userData?.lastName" width="var(--fwidth)" disabled></InputTextBox>
-                        <span>School:</span>
-                        <InputTextBox :value="userData?.school" width="var(--fwidth)" disabled></InputTextBox>
+                        <span>School / Organization:</span>
+                        <InputTextBox :value="userData?.organization" width="var(--fwidth)" disabled></InputTextBox>
                         <span>Grade Level:</span>
                         <InputDropdown v-model="grade" width="var(--fwidth)" :items="gradeMaps" disabled></InputDropdown>
                         <span>Experience Level:</span>
                         <InputDropdown v-model="experience" width="var(--fwidth)" :items="experienceMaps" disabled></InputDropdown>
-                        <span>Known Languages:</span>
+                        <span>Familiar Languages:</span>
                         <InputDropdown v-model="languages" width="var(--fwidth)" height="6em" :items="languageMaps" multiple disabled></InputDropdown>
                     </PairedGridContainer>
                 </TitledCutCornerContainer>
@@ -86,15 +96,19 @@ const largeHeader = ref(true);
                     </p>
                 </TitledDoubleCutCornerContainer>
                 <TitledCutCornerContainer title="Team" hover-animation="lift" align="center" height="100%" style="grid-row: span 2; max-height: 80vh;">
-                    <div class="userViewTeamGrid">
+                    <div class="userViewTeamGrid" v-if="teamData !== null">
                         <div class="userViewTeamList">
-                            <AccountTeamUserDisp v-for="user in teamData?.teamMembers" :key="user" :user="user" :team="teamData!.team"></AccountTeamUserDisp>
+                            <AccountTeamUserDisp v-for="user in teamData.members" :key="user" :user="user" :team="teamData!.id"></AccountTeamUserDisp>
                         </div>
                         <div>
                             <TitledCutCornerContainer :title="teamName" vertical-flipped>
                                 {{ teamBio }}
                             </TitledCutCornerContainer>
                         </div>
+                    </div>
+                    <div v-else>
+                        <!-- wow a v-else how rare -->
+                        {{ userData?.displayName }} is not on a team.
                     </div>
                 </TitledCutCornerContainer>
             </div>
@@ -109,7 +123,7 @@ const largeHeader = ref(true);
                         <div class="userViewProfileRegistrationsHeader">
                             <h3>Registrations</h3>
                         </div>
-                        <AnimateInContainer type="slideUp" v-for="(reg, i) in userData?.registrations" :key="i" :delay="i * 200" single>
+                        <AnimateInContainer type="slideUp" v-for="(reg, i) in teamData?.registrations" :key="i" :delay="i * 200" single>
                             <span class="registrationLine">
                                 <div class="registrationStatusDotUpcoming"></div>
                                 {{ reg }}
@@ -121,7 +135,7 @@ const largeHeader = ref(true);
                                 {{ reg }}
                             </span>
                         </AnimateInContainer>
-                        <span v-if="!userData?.registrations.length && !userData?.pastRegistrations.length">
+                        <span v-if="!teamData?.registrations.length && !userData?.pastRegistrations.length">
                             This user is not registered for any contests
                         </span>
                     </CutCornerContainer>

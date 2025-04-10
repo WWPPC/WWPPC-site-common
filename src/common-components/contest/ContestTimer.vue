@@ -49,7 +49,7 @@ const updateTime = () => {
             nextTime.value = new Date(r.startTime);
             color.value = 'white';
         } else if (now < r.endTime) {
-            if (contestManager.config[contestType]?.rounds) round.value = `Round ${r.number + 1}`;
+            if (contestManager.config[contestType]?.rounds) round.value = `Round ${r.round + 1}`;
             else round.value = 'Contest';
             nextTime.value = new Date(r.endTime);
             color.value = 'var(--color-1)';
