@@ -22,7 +22,7 @@ export type AccountData = {
     pastRegistrations: string[]
     team: string | null
 }
-/**Descriptor for a team (see server docs) */
+/**Descriptor for a team (see server docs) - note "join code" is team id + "join key" */
 export type TeamData = {
     id: string
     name: string
@@ -75,7 +75,7 @@ const unsaved = ref(false);
 const unsaved2 = ref(false);
 const state = reactive<{
     user: AccountData,
-    team: TeamData,
+    team: TeamData | null,
     writeUserErr: string | undefined,
     writeTeamErr: string | undefined,
 }>({
@@ -94,14 +94,7 @@ const state = reactive<{
         pastRegistrations: [],
         team: null
     },
-    team: {
-        id: '',
-        name: '',
-        bio: '',
-        members: [],
-        registrations: [],
-        joinKey: ''
-    },
+    team: null,
     writeUserErr: undefined,
     writeTeamErr: undefined
 });
@@ -117,9 +110,11 @@ const writeUser = debounce(async () => {
     }
 }, 3000);
 const writeTeam = debounce(async () => {
+    // don't write when null
+    if (state.team === null) return;
     // when loading data unsaved will be set to false, prevents saving data that was just loaded
     if (!unsaved2.value) return;
-    const res = await apiFetch('PUT', '/api/self/teamData', state.user);
+    const res = await apiFetch('PUT', '/api/self/teamData', state.team);
     if (res.ok) {
         unsaved2.value = false;
         state.writeTeamErr = undefined;
@@ -127,11 +122,11 @@ const writeTeam = debounce(async () => {
         state.writeTeamErr = res.status + ' - ' + (await res.text());
     }
 }, 3000);
-watch(state.user, () => {
+watch(() => state.user, () => {
     unsaved.value = true;
     writeUser();
 });
-watch(state.team, () => {
+watch(() => state.team, () => {
     unsaved2.value = true;
     writeTeam();
 });
@@ -216,11 +211,13 @@ export const useAccountManager = defineStore('accountManager', {
                         state.user = await res.json();
                         unsaved.value = false;
                     } else if (showErrors) {
+                        const errText = res.status + await res.text();
                         globalModal().showModal({
                             title: 'Failed to fetch user data',
-                            content: res.status + await res.text(),
+                            content: errText,
                             color: 'var(--color-2)'
                         });
+                        console.error('Failed to fetch user data:\n', errText);
                     }
                 },
                 async () => {
@@ -228,15 +225,51 @@ export const useAccountManager = defineStore('accountManager', {
                     if (res.ok) {
                         state.team = await res.json();
                         unsaved2.value = false;
+                    } else if (res.status == 404) {
+                        // special case if not on team
+                        state.team = null;
+                        unsaved2.value = false;
                     } else if (showErrors) {
+                        const errText = res.status + await res.text();
                         globalModal().showModal({
                             title: 'Failed to fetch team data',
-                            content: res.status + await res.text(),
+                            content: errText,
                             color: 'var(--color-2)'
                         });
+                        console.error('Failed to fetch team data:\n', errText);
                     }
                 }
             ]);
+        },
+        async createTeam(teamName: string): Promise<Response> {
+            const res = await apiFetch('POST', '/api/self/team', { name: teamName });
+            this.fetchSelf();
+            return res;
+        },
+        async joinTeam(joinCode: string): Promise<Response> {
+            const res = await apiFetch('PUT', '/api/self/team', { code: joinCode });
+            this.fetchSelf();
+            return res;
+        },
+        async leaveTeam(): Promise<Response> {
+            const res = await apiFetch('DELETE', '/api/self/team');
+            this.fetchSelf();
+            return res;
+        },
+        async kickTeam(username: string): Promise<Response> {
+            const res = await apiFetch('DELETE', '/api/self/team/' + username);
+            this.fetchSelf();
+            return res;
+        },
+        async registerContest(contest: string): Promise<Response> {
+            const res = await apiFetch('POST', '/api/self/registrations/' + contest);
+            this.fetchSelf();
+            return res;
+        },
+        async unregisterContest(contest: string): Promise<Response> {
+            const res = await apiFetch('DELETE', '/api/self/registrations/' + contest);
+            this.fetchSelf();
+            return res;
         }
     }
 });
