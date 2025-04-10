@@ -1,29 +1,7 @@
-import { isDev } from '#/index';
 import { globalModal } from '#/modal';
+import { apiFetch } from '#/util/netUtil';
 import { defineStore } from 'pinia';
 import { reactive } from 'vue';
-
-export const serverHostname = isDev ? 'https://localhost:8000' : 'https://server.wwppc.tech';
-
-/**
- * Execute an HTTP request to the server and get a response.
- * @param method HTTP method
- * @param path URL path
- * @param body Optional request body, sent as JSON
- * @returns Response
- * @throws Typical errors thrown by `fetch` calls
- */
-export async function apiFetch(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: any): Promise<Response> {
-    return await fetch(serverHostname + (path.startsWith('/') ? path : ('/' + path)), {
-        method: method,
-        headers: body != undefined ? {
-            "Content-Type": "application/json"
-        } : undefined,
-        mode: 'cors',
-        credentials: 'include',
-        body: body != undefined ? JSON.stringify(body) : undefined
-    });
-}
 
 let resolveHandshake: () => void;
 const state = reactive<{

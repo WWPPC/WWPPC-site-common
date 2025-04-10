@@ -16,10 +16,7 @@ import AccountTeamUserDisp from '#/common-components/account/AccountTeamUserDisp
 const route = useRoute();
 
 const serverState = useServerState();
-const loginEnforcer = useLoginEnforcer();
 const accountManager = useAccountManager();
-
-loginEnforcer.connectionInclude.add('/user');
 
 const userData = ref<AccountData | null>(null);
 const teamData = ref<TeamData | null>(null);

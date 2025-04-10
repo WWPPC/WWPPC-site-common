@@ -96,8 +96,18 @@ export const useContestManager = defineStore('contestManager', {
         }
     },
     actions: {
-        async getContestList(): Promise<Response> {
-            return await apiFetch('GET', '/contestList');
+        async getUpcoming(): Promise<string[] | Response> {
+            const res = await apiFetch('GET', '/api/contest/upcoming');
+            if (res.ok) return await res.json();
+            return res;
+        },
+        async getOpenRegistrations(): Promise<string[] | Response> {
+            const res = await apiFetch('GET', '/api/contest/open');
+            if (res.ok) return await res.json();
+            return res;
+        },
+        async getRunning(): Promise<string[]> {
+
         }
     }
 });

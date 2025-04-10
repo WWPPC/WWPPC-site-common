@@ -20,8 +20,6 @@ const serverState = useServerState();
 const loginEnforcer = useLoginEnforcer();
 const accountManager = useAccountManager();
 
-loginEnforcer.connectionInclude.add('/login');
-
 watch(() => route.params.page, async () => {
     if (route.params.page == 'login' && route.query.ignore_server === undefined) {
         serverState.handshakePromise.then(() => {

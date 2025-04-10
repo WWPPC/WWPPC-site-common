@@ -1,7 +1,10 @@
+import { apiFetch } from '#/util/netUtil';
 import { defineStore } from 'pinia';
 import { reactive, ref, watch } from 'vue';
 
-import { apiFetch, RSAencrypt } from './ServerState';
+import { RSAencrypt } from './ServerState';
+import { debounce } from '#/util/inputLimiting';
+import { globalModal } from '#/modal';
 
 /**Descriptor for an account (see server docs) */
 export type AccountData = {
@@ -40,11 +43,11 @@ export const gradeMaps = [
     { text: 'Graduated', value: '14' }
 ];
 export const experienceMaps = [
-    { text: 'Beginner', value: '0' },
-    { text: 'Intermediate', value: '1' },
-    { text: 'Advanced', value: '2' },
-    { text: 'Legendary', value: '3' },
-    { text: '???', value: '4' },
+    { text: 'Beginner / AP CSA', value: '0' },
+    { text: 'USACO Bronze-Silver / CF < 1600', value: '1' },
+    { text: 'USACO Gold-Platinum / CF 1600-2100', value: '2' },
+    { text: 'USACO Camp / IOI / CF > 2100', value: '3' },
+    { text: 'N/A', value: '4' },
 ];
 export const languageMaps = [
     { text: 'Python', value: 'python' },
@@ -67,11 +70,14 @@ export const languageMaps = [
     { text: 'Bash', value: 'bash' },
 ];
 
+// automatically save data
 const unsaved = ref(false);
 const unsaved2 = ref(false);
 const state = reactive<{
     user: AccountData,
-    team: TeamData
+    team: TeamData,
+    writeUserErr: string | undefined,
+    writeTeamErr: string | undefined,
 }>({
     user: {
         username: '',
@@ -95,18 +101,56 @@ const state = reactive<{
         members: [],
         registrations: [],
         joinKey: ''
-    }
+    },
+    writeUserErr: undefined,
+    writeTeamErr: undefined
 });
-watch(state.user, () => unsaved.value = true);
-watch(state.team, () => unsaved2.value = true);
+const writeUser = debounce(async () => {
+    // when loading data unsaved will be set to false, prevents saving data that was just loaded
+    if (!unsaved.value) return;
+    const res = await apiFetch('PUT', '/api/self/userData', state.user);
+    if (res.ok) {
+        unsaved.value = false;
+        state.writeUserErr = undefined;
+    } else {
+        state.writeUserErr = res.status + ' - ' + (await res.text());
+    }
+}, 3000);
+const writeTeam = debounce(async () => {
+    // when loading data unsaved will be set to false, prevents saving data that was just loaded
+    if (!unsaved2.value) return;
+    const res = await apiFetch('PUT', '/api/self/teamData', state.user);
+    if (res.ok) {
+        unsaved2.value = false;
+        state.writeTeamErr = undefined;
+    } else {
+        state.writeTeamErr = res.status + ' - ' + (await res.text());
+    }
+}, 3000);
+watch(state.user, () => {
+    unsaved.value = true;
+    writeUser();
+});
+watch(state.team, () => {
+    unsaved2.value = true;
+    writeTeam();
+});
+
+// autosave
+
+// "your changes may not be saved" warning
+window.addEventListener('beforeunload', (e) => {
+    if (unsaved.value || unsaved2.value) e.preventDefault();
+});
 
 export const useAccountManager = defineStore('accountManager', {
     state: () => state,
     getters: {
-        unsavedChanges: () => unsaved.value,
+        unsavedUserChanges: () => unsaved.value,
         unsavedTeamChanges: () => unsaved2.value
     },
     actions: {
+        // auth
         async login(username: string, password: string): Promise<Response> {
             return await apiFetch('POST', '/auth/login', {
                 username: username,
@@ -152,6 +196,47 @@ export const useAccountManager = defineStore('accountManager', {
         },
         async logout(): Promise<Response> {
             return await apiFetch('DELETE', '/auth/logout');
+        },
+        // account data
+        async fetchAccountData(username: string): Promise<AccountData | Response> {
+            const res = await apiFetch('GET', '/api/userData/' + username);
+            if (res.ok) return await res.json();
+            return res;
+        },
+        async fetchTeamData(team: string): Promise<TeamData | Response> {
+            const res = await apiFetch('GET', '/api/teamData/' + team);
+            if (res.ok) return await res.json();
+            return res;
+        },
+        async fetchSelf(showErrors: boolean = true): Promise<void> {
+            await Promise.all([
+                async () => {
+                    const res = await apiFetch('GET', '/api/self/userData');
+                    if (res.ok) {
+                        state.user = await res.json();
+                        unsaved.value = false;
+                    } else if (showErrors) {
+                        globalModal().showModal({
+                            title: 'Failed to fetch user data',
+                            content: res.status + await res.text(),
+                            color: 'var(--color-2)'
+                        });
+                    }
+                },
+                async () => {
+                    const res = await apiFetch('GET', '/api/self/teamData');
+                    if (res.ok) {
+                        state.team = await res.json();
+                        unsaved2.value = false;
+                    } else if (showErrors) {
+                        globalModal().showModal({
+                            title: 'Failed to fetch team data',
+                            content: res.status + await res.text(),
+                            color: 'var(--color-2)'
+                        });
+                    }
+                }
+            ]);
         }
     }
 });
