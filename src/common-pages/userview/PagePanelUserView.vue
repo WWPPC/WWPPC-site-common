@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { useLoginEnforcer } from '#/modules/LoginEnforcer';
 import LoadingCover from '#/common/LoadingCover.vue';
 import NotFound from '#/common/NotFound.vue';
 import OnScreenHook from '#/common/OnScreenHook.vue';
 import { AnimateInContainer, CutCornerContainer, PairedGridContainer, TitledCutCornerContainer, TitledDoubleCutCornerContainer } from '#/containers';
 import { useRoute } from 'vue-router';
 import { experienceMaps, gradeMaps, languageMaps, type TeamData, useAccountManager, type AccountData } from '#/modules/AccountManager';
-import { nextTick, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { InputDropdown, InputTextBox } from '#/inputs';
 import { useServerState } from '#/modules/ServerState';
 import { autoFlipTextTransition, autoGlitchTextTransition } from '#/text';
@@ -26,7 +25,6 @@ const loadUserData = async () => {
     teamData.value = null;
     showLoading.value = true;
     await serverState.handshakePromise;
-    await nextTick();
     if (route.params.userView != null) {
         await Promise.all([
             accountManager.getUserData(route.params.userView.toString()).then((v) => {
@@ -132,7 +130,7 @@ const largeHeader = ref(true);
         </div>
     </div>
     <NotFound v-if="route.params.userView == undefined || userData === null"></NotFound>
-    <LoadingCover text="Loading..." ignore-server :show="showLoading"></LoadingCover>
+    <LoadingCover text="Loading..." :show="showLoading"></LoadingCover>
 </template>
 
 <style scoped>

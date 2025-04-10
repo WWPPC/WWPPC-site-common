@@ -16,8 +16,9 @@ export type AccountData = {
     displayName: string
     profileImage: string
     bio: string
-    school: string
+    organization: string
     grade: number
+    experience: number
     languages: string[]
     pastRegistrations: string[]
     team: string | null
@@ -88,8 +89,9 @@ const state = reactive<{
         displayName: '',
         profileImage: '',
         bio: '',
-        school: '',
+        organization: '',
         grade: 0,
+        experience: 0,
         languages: [],
         pastRegistrations: [],
         team: null
@@ -131,8 +133,6 @@ watch(() => state.team, () => {
     writeTeam();
 });
 
-// autosave
-
 // "your changes may not be saved" warning
 window.addEventListener('beforeunload', (e) => {
     if (unsaved.value || unsaved2.value) e.preventDefault();
@@ -160,8 +160,9 @@ export const useAccountManager = defineStore('accountManager', {
                 email2: await RSAencrypt(data.email2),
                 firstName: data.firstName,
                 lastName: data.lastName,
-                school: data.school,
+                organization: data.organization,
                 grade: data.grade,
+                experience: data.experience,
                 languages: data.languages
             });
         },

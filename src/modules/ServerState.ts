@@ -15,6 +15,7 @@ const state = reactive<{
     loggedIn: boolean
     manualLogin: boolean,
     handshakePromise: Promise<void>
+    handshakeComplete: boolean
     serverConfig: {
         maxProfileImgSize: string,
         contests: { [key: string]: ServerContestConfig | undefined }
@@ -23,6 +24,7 @@ const state = reactive<{
     loggedIn: false,
     manualLogin: true,
     handshakePromise: new Promise<void>((resolve) => resolveHandshake = resolve),
+    handshakeComplete: false,
     serverConfig: {
         maxProfileImgSize: '4kb',
         contests: {}
@@ -58,6 +60,7 @@ try {
         state.loggedIn = res.ok;
         state.manualLogin = !state.loggedIn;
         resolveHandshake();
+        state.handshakeComplete = true;
     }));
     apiFetch('GET', '/api/config').then(async (res) => {
         if (!res.ok) {
@@ -83,4 +86,5 @@ try {
         color: 'var(--color-2)'
     });
     resolveHandshake!();
+    state.handshakeComplete = true;
 }
