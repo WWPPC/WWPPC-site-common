@@ -32,7 +32,7 @@ if ((route.params.panel === undefined && props.isDefault && route.params.catchAl
                 </div>
             </div>
             <div class="panelBodyCopyrightNotice">
-                Copyright &copy; 2024 WWPPC
+                Copyright &copy; 2025 WWPPC
             </div>
         </div>
     </Transition>
