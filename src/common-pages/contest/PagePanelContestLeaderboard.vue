@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { GlitchText } from '#/text';
 import LoadingSpinner from '#/common/LoadingSpinner.vue';
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useAccountManager } from '#/modules/AccountManager';
 import { useContestManager } from '#/modules/ContestManager';
 
@@ -13,8 +13,15 @@ const contestType = props.contest;
 const accountManager = useAccountManager();
 const contestManager = useContestManager();
 
-const scoreboard = computed(async () => {
-    return await Promise.all((contestManager.contests[contestType]?.scoreboard ?? []).map(async (entry) => {
+const scoreboardLoaded = ref<boolean>(false);
+const scoreboard = ref<{
+    team: string,
+    name: string,
+    score: number,
+    penalty: number
+}[]>([]);
+onMounted(async ()=>{
+    await Promise.all((contestManager.contests[contestType]?.scoreboard ?? []).map(async (entry) => {
         const teamRes = await accountManager.fetchTeamData(entry.team);
         return {
             team: entry.team,
@@ -24,20 +31,22 @@ const scoreboard = computed(async () => {
             penalty: Math.floor((Math.ceil(entry.score) - entry.score) * 1000000)
         };
     }));
+    scoreboardLoaded.value = true;
 });
 </script>
 
 <template>
     <GlitchText text="Leaderboards" class="leaderboardTitle" font-size="var(--font-title)" color="var(--color-1)" shadow glow :steps=2 :delay=10 random on-visible></GlitchText>
     <div class="centered">
+        <!-- todo: add button to update the leaderboard -->
         <div class="leaderboard">
-            <div class="leaderboardItem" v-for="(item, i) of await scoreboard" :key="i">
+            <div class="leaderboardItem" v-for="(item, i) of scoreboard" :key="i">
                 {{ i + 1 }}.
                 <RouterLink :to="'/team/@' + item.team">{{ item.name }}</RouterLink>
                 - {{ item.score }} solved, {{ item.penalty }} penalty
             </div>
         </div>
-        <div v-if="(await scoreboard).length == 0" style="display: flex; flex-direction: column; align-items: center;">
+        <div v-if="!scoreboardLoaded" style="display: flex; flex-direction: column; align-items: center;">
             <div style="width: 10vw; height: 10vw">
                 <LoadingSpinner></LoadingSpinner>
             </div>

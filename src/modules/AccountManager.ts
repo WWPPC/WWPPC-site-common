@@ -124,6 +124,7 @@ const writeTeam = debounce(async () => {
         state.writeTeamErr = res.status + ' - ' + (await res.text());
     }
 }, 3000);
+  
 watch(() => state.user, () => {
     unsaved.value = true;
     writeUser();

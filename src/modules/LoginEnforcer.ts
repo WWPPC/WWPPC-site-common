@@ -21,18 +21,20 @@ const state = reactive<{
 });
 
 export const useLoginEnforcer = defineStore('loginEnforcer', {
-    state: () => state
-});
-setTimeout(() => {
-    const serverState = useServerState();
-    const route = useRoute();
-    const router = useRouter();
-    const checkLogin = () => {
-        const trimmed = route.path.replace(/\/*$/, '');
-        return (!serverState.loggedIn && Array.from(state.include.values()).some((p) => trimmed.startsWith(p)) || state.includeExact.has(trimmed))
-            && !(Array.from(state.exclude.values()).some((p) => trimmed.startsWith(p)) || state.excludeExact.has(trimmed));
-    };
-    watch(() => route.params, () => {
-        if (checkLogin() && route.query.ignore_server === undefined) router.replace({ path: '/login', query: { redirect: route.fullPath, clearQuery: 1 }});
-    });
+    state: () => state,
+    actions: {
+        init() {
+            const serverState = useServerState();
+            const route = useRoute();
+            const router = useRouter();
+            const checkLogin = () => {
+                const trimmed = route.path.replace(/\/*$/, '');
+                return (!serverState.loggedIn && Array.from(state.include.values()).some((p) => trimmed.startsWith(p)) || state.includeExact.has(trimmed))
+                    && !(Array.from(state.exclude.values()).some((p) => trimmed.startsWith(p)) || state.excludeExact.has(trimmed));
+            };
+            watch(() => route.params, () => {
+                if (checkLogin() && route.query.ignore_server === undefined) router.replace({ path: '/login', query: { redirect: route.fullPath, clearQuery: 1 }});
+            });
+        }
+    }
 });

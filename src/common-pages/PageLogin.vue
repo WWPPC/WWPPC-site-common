@@ -193,8 +193,8 @@ const attemptRecovery = async () => {
                                         <InputTextBox v-model="usernameInput" placeholder="Username" style="margin-bottom: 8px;" width="208px" title="Username (alphanumeric and/or dash/underscore)" maxlength="16" autocomplete="username" autocapitalize="off" pattern="[a-z0-9\-_]*" highlight-invalid required></InputTextBox>
                                         <InputTextBox v-model="passwordInput" placeholder="Password" type="password" style="margin-bottom: 8px;" width="208px" title="Password" autocomplete="current-password" required></InputTextBox>
                                         <span>
-                                            <InputButton text="Log In" type="submit" @click="attemptLogin" width="100px" title="Log in" glitchOnMount :disabled="showLoginWait"></InputButton>
-                                            <InputButton text="Sign Up" type="submit" @click="toSignUp" width="100px" title="Continue to create a new account" glitchOnMount :disabled="showLoginWait"></InputButton>
+                                            <InputButton text="Log In" type="submit" @click="attemptLogin" width="100px" title="Log in" glitchOnMount :disabled="showLoginWait || usernameInput.length == 0 || passwordInput.length == 0"></InputButton>
+                                            <InputButton text="Sign Up" type="submit" @click="toSignUp" width="100px" title="Continue to create a new account" glitchOnMount :disabled="showLoginWait || usernameInput.length == 0 || passwordInput.length == 0"></InputButton>
                                         </span>
                                         <span v-if="loginError != ''" class="loginError">{{ loginError }}</span>
                                         <span class="loginForgotPassword" @click="toRecovery">Forgot password?</span>

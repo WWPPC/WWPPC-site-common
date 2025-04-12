@@ -1,52 +1,44 @@
 <script setup lang="ts">
 import { InputLinkButton } from '#/inputs';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
-import { glitchTextTransition } from '#/text';
+// import { glitchTextTransition } from '#/text';
 import { ref, onMounted, computed } from 'vue';
-import type { ContestHost } from '#/modules/ContestManager';
+import { useContestManager, type Problem } from '#/modules/ContestManager';
 
 const props = defineProps<{
     // add archive host later
-    host: ContestHost
+    contest: string
     problemId: string
     archive?: boolean
 }>();
 
-const data = computed(() => {
-    const data = await props.host.getProblem(props.problemId);
-    if (data instanceof Response) {
-        return {
+const contestManager = useContestManager();
 
-        } 
+const problem = ref<Problem>();
+
+onMounted(async () => {
+    if (contestManager.contests[props.contest] === undefined) return;
+    const data = await contestManager.contests[props.contest]!.getProblem(props.problemId);
+    if (data instanceof Response) {
+        console.log("buh error", props.problemId);
+        return;
     }
-    return data;
-})
-onMounted(() => {
-        if (data instanceof Response) {
-            return;
-        }
-        if (props.archive) {
-        nameText.value = data.name;
-        authorText.value = 'Author: ' + data.author;
-    } else setTimeout(() => {
-        glitchTextTransition('', props.data.name, (t) => { nameText.value = t; }, 40);
-        glitchTextTransition('', 'Author: ' + props.data.author, (t) => { authorText.value = t; }, 40);
-    }, (props.data.round ?? 0) * 200 + (props.data.number ?? 0) * 100);
+    problem.value = data;
 });
 </script>
 
 <template>
     <div class="contestProblemListProblem">
-        <span class="contestProblemListProblemId">
+        <!-- <span class="contestProblemListProblemId">
             {{ props.data.round + 1 }}-{{ props.data.number + 1 }}
-        </span>
-        <span class="problemListCircle">
+        </span> -->
+        <!-- <span class="problemListCircle">
             <ContestProblemStatusCircle :status="props.data.status"></ContestProblemStatusCircle>
-        </span>
-        <span class="contestProblemListProblemName"><b>{{ nameText }}</b></span>
-        <span class="contestProblemListProblemAuthor"><i>{{ authorText }}</i></span>
+        </span> -->
+        <span class="contestProblemListProblemName"><b>{{ problem?.name ?? "Loading..." }}</b></span>
+        <span class="contestProblemListProblemAuthor"><i>{{ problem?.author ?? "Loading..." }}</i></span>
         <span class="contestProblemListProblemButton">
-            <RouterLink :to="props.archive ? `./archiveView/${props.data.contest}/${props.data.round}/${props.data.number}` : `./problemView/${props.data.round}_${props.data.number}`" no-deco>
+            <RouterLink v-if="problem?.id" :to="`./problemView/${problem.id}`" no-deco>
                 <InputLinkButton text="View" width="100px" height="36px" border></InputLinkButton>
             </RouterLink>
         </span>

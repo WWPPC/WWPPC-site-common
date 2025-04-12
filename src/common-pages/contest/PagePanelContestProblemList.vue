@@ -28,8 +28,8 @@ const contestData = computed(() => contestManager.contests[contestType]?.contest
                     </AnimateInContainer>
                 </div>
                 <div v-else class="problemList">
-                    <AnimateInContainer type="fade" v-for="(problem, index) in contestData?.rounds[0]?.problems" :key=problem. :delay="index * 100">
-                        <ContestProblemListProblem :problemId=problem></ContestProblemListProblem>
+                    <AnimateInContainer type="fade" v-for="(problem, index) in contestData?.rounds[0]?.problems" :key=problem :delay="index * 50">
+                        <ContestProblemListProblem :problemId=problem :contest="props.contest"></ContestProblemListProblem>
                     </AnimateInContainer>
                 </div>
                 <NotFound v-if="false"></NotFound>

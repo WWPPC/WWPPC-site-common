@@ -38,7 +38,16 @@ const RSA: {
     publicKey: null,
     async encrypt(text) {
         await state.handshakePromise;
-        if (RSA.publicKey != null) return await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, RSA.publicKey, new TextEncoder().encode(text));
+        if (RSA.publicKey != null) {
+            const encrypted =  await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, RSA.publicKey, new TextEncoder().encode(text)); if (typeof encrypted == 'string') return encrypted;
+            let binary = '';
+            const bytes = new Uint8Array(encrypted);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
         else return text;
     }
 };
@@ -46,45 +55,48 @@ const RSA: {
 export const RSAencrypt = RSA.encrypt;
 
 export const useServerState = defineStore('serverState', {
-    state: () => state
+    state: () => state,
+    actions: {
+        init() {
+            try {
+                apiFetch('GET', '/auth/publicKey').then(async (res) => {
+                    if (window.crypto.subtle === undefined) {
+                        console.warn('<h1>Insecure context!</h1><br>The page has been opened in an insecure context and cannot perform encryption processes. Credentials and submissions will be sent in PLAINTEXT!');
+                    } else {
+                        RSA.publicKey = await window.crypto.subtle.importKey('jwk', await res.json(), { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
+                    }
+                }).then(() => apiFetch('GET', '/auth/login').then((res) => {
+                    state.loggedIn = res.ok;
+                    state.manualLogin = !state.loggedIn;
+                    resolveHandshake();
+                    state.handshakeComplete = true;
+                }));
+                apiFetch('GET', '/api/config').then(async (res) => {
+                    if (!res.ok) {
+                        console.error(`Failed to fetch configuration: ${res.status} - ${res.statusText}`);
+                        const modal = globalModal();
+                        modal.showModal({
+                            title: 'Configuration fetch failed',
+                            content: 'Failed to fetch server configuration. This may interfere with some functionality.',
+                            color: 'var(--color-2)'
+                        });
+                    } else {
+                        state.serverConfig = await res.json();
+                        console.info('Server configuration fetched');
+                    }
+                });
+            } catch (err) {
+                console.error('Failed to fetch public key or check login status');
+                console.error(err);
+                const modal = globalModal();
+                modal.showModal({
+                    title: 'Authentication error',
+                    content: 'Failed to fetch public key or check login status',
+                    color: 'var(--color-2)'
+                });
+                resolveHandshake!();
+                state.handshakeComplete = true;
+            }
+        }
+    }
 });
-
-try {
-    apiFetch('GET', '/auth/publicKey').then(async (res) => {
-        if (window.crypto.subtle === undefined) {
-            console.warn('<h1>Insecure context!</h1><br>The page has been opened in an insecure context and cannot perform encryption processes. Credentials and submissions will be sent in PLAINTEXT!');
-        } else {
-            RSA.publicKey = await window.crypto.subtle.importKey('jwk', await res.json(), { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
-        }
-    }).then(() => apiFetch('GET', '/auth/login').then((res) => {
-        state.loggedIn = res.ok;
-        state.manualLogin = !state.loggedIn;
-        resolveHandshake();
-        state.handshakeComplete = true;
-    }));
-    apiFetch('GET', '/api/config').then(async (res) => {
-        if (!res.ok) {
-            console.error(`Failed to fetch configuration: ${res.status} - ${res.statusText}`);
-            const modal = globalModal();
-            modal.showModal({
-                title: 'Configuration fetch failed',
-                content: 'Failed to fetch server configuration. This may interfere with some functionality.',
-                color: 'var(--color-2)'
-            });
-        } else {
-            state.serverConfig = await res.json();
-            console.info('Server configuration fetched');
-        }
-    });
-} catch (err) {
-    console.error('Failed to fetch public key or check login status');
-    console.error(err);
-    const modal = globalModal();
-    modal.showModal({
-        title: 'Authentication error',
-        content: 'Failed to fetch public key or check login status',
-        color: 'var(--color-2)'
-    });
-    resolveHandshake!();
-    state.handshakeComplete = true;
-}

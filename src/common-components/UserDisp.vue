@@ -17,35 +17,25 @@ watch(() => route.query, () => {
 const name = ref('Not signed in');
 const buttonText = ref('Log in');
 
-serverState.onconnect(() => {
-    serverState.handshakePromise.then(() => {
-        if (serverState.loggedIn) {
-            glitchTextTransition(buttonText.value, 'Account', (text) => { buttonText.value = text; }, 40, 1, 10, 2).promise;
-            name.value = accountManager.displayName;
-        }
-    });
-});
-onMounted(() => {
-    serverState.handshakePromise.then(() => {
-        if (serverState.loggedIn) {
-            glitchTextTransition(buttonText.value, 'Account', (text) => { buttonText.value = text; }, 40, 1, 10, 2).promise;
-            name.value = accountManager.displayName;
-        }
-    });
-});
-watch(() => accountManager.displayName, () => {
-    if (serverState.loggedIn) name.value = accountManager.displayName;
-});
-serverState.ondisconnect(() => {
-    name.value = 'Not signed in';
-    glitchTextTransition(buttonText.value, 'Log in', (text) => { buttonText.value = text; }, 40, 1, 10, 2).promise;
-});
+const updateDisp = () => {
+    if (serverState.loggedIn) {
+        name.value = accountManager.user.displayName;
+        glitchTextTransition(buttonText.value, 'Account', (text) => { buttonText.value = text; }, 40, 1, 10, 2).promise;
+    } else {
+        name.value = 'Not signed in';
+        glitchTextTransition(buttonText.value, 'Log in', (text) => { buttonText.value = text; }, 40, 1, 10, 2).promise;
+    }
+}
+
+watch(() => accountManager.user.displayName, updateDisp);
+watch(() => serverState.loggedIn, updateDisp);
+onMounted(updateDisp);
 </script>
 
 <template v-slot:userDisp>
     <div class="userDispContainer">
         <div class="userDispUser">
-            <img :src=accountManager.profileImage class="userDispProfileImg" v-if="serverState.loggedIn || ignoreServer">
+            <img :src=accountManager.user.profileImage class="userDispProfileImg" v-if="serverState.loggedIn || ignoreServer">
             <div class="userDispUserName">{{ name }}</div>
         </div>
         <RouterLink :to="serverState.loggedIn ? '/account' : `/login?redirect=${route.fullPath}&clearQuery=1`" class="userDispButtonWrapper">

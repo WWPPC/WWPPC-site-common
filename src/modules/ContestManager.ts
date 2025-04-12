@@ -133,6 +133,12 @@ export class ContestHost {
         if (res.ok) return await res.json();
         return res;
     }
+    async getProblem2(roundIndex: number, problemIndex: number): Promise<Problem | Response> {
+        //best function name ever
+        const res = await apiFetch('GET', `/api/contest/${this.id}/problem/${roundIndex}-${problemIndex}`);
+        if (res.ok) return await res.json();
+        return res;
+    }
 
     async submitProblem(problemId: UUID, solution: File, language: string): Promise<Response> {
         return await apiFetch('POST', `/api/contest/${this.id}/submit/${problemId}`, {
