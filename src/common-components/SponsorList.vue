@@ -15,8 +15,9 @@ const props = defineProps<{
     bronze: SponsorLogo[]
 }>();
 
+const root = document.documentElement;
+
 onMounted(() => {
-    const root = document.documentElement;
     const mainDiv = document.getElementById('main') as HTMLDivElement;
 
     if (mainDiv) {
@@ -34,9 +35,10 @@ onMounted(() => {
     }
 });
 
-const root = document.documentElement;
-let ratio = ref( 2 / window.devicePixelRatio * 15 ).value;
-root.style.setProperty('--column-gap', ratio  + 'px');
+window.addEventListener('resize', function() {
+    let ratio = ref( 2 / window.devicePixelRatio * 15 ).value;
+    root.style.setProperty('--column-gap', ratio  + 'px');  
+})
 
 </script>
 
