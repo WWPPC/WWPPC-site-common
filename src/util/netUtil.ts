@@ -72,10 +72,6 @@ export class LongPollEventReceiver<E> {
         return this.ref.value;
     }
 
-    set value(nxt: E) {
-        this.ref.value = nxt;
-    }
-
     /**
      * Stops long-polling requests indefinitely.
      */
