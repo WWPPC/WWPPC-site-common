@@ -51,7 +51,7 @@ export class LongPollEventReceiver<E> {
         // initial request
         const res = await apiFetch(this.method, this.path, undefined, { init: '1' });
         if(res.ok) {
-            if (res.status != 204) this.ref.value = await res.json();
+            if (res.status != 204) this.ref.value = await res.json() as E;
         } else {
             await new Promise<void>((r) => setTimeout(() => r(), 10000));
         }
@@ -59,13 +59,21 @@ export class LongPollEventReceiver<E> {
         while (this.running) {
             const res = await apiFetch(this.method, this.path);
             if (res.ok) {
-                if (res.status != 204) this.ref.value = await res.json();
+                if (res.status != 204) this.ref.value = await res.json() as E;
                 retryTime = 10000;
             } else {
                 await new Promise<void>((r) => setTimeout(() => r(), Math.min(120000, retryTime)));
                 retryTime *= 1.5;
             }
         }
+    }
+
+    get value(): E | undefined {
+        return this.ref.value;
+    }
+
+    set value(nxt: E) {
+        this.ref.value = nxt;
     }
 
     /**

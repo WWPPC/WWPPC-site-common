@@ -2,7 +2,6 @@
 import { PanelBody, PanelHeader, PanelMain, PanelView, PanelNavLargeLogo } from '#/panels';
 import { InputButton, InputDropdown, InputTextBox } from '#/inputs';
 import { PairedGridContainer } from '#/containers';
-import LoadingCover from '#/common/LoadingCover.vue';
 import WaitCover from '#/common/WaitCover.vue';
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -18,12 +17,10 @@ const modal = globalModal();
 const serverState = useServerState();
 const accountManager = useAccountManager();
 
-watch(() => route.params.page, async () => {
+watch([() => route.params.page, () => serverState.loggedIn], async () => {
     // redirect away from login (if redirected to login elsewhere) if logged in
     if (route.params.page == 'login' && route.query.ignore_server === undefined) {
-        serverState.handshakePromise.then(() => {
-            if (serverState.loggedIn) router.replace({ path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home?clearQuery', query: { clearQuery: 1 } });
-        });
+        if (serverState.loggedIn) router.replace({ path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home?clearQuery', query: { clearQuery: 1 } });
     } else {
         page.value = 0;
         loginError.value = '';
@@ -267,7 +264,6 @@ const attemptRecovery = async () => {
                 </div>
                 <WaitCover text="Signing in..." :show="showLoginWait"></WaitCover>
                 <WaitCover text="Sending email..." :show="showRecoveryWait"></WaitCover>
-                <LoadingCover text="Connecting..." :show="!serverState.handshakeComplete"></LoadingCover>
             </PanelBody>
         </PanelMain>
     </PanelView>

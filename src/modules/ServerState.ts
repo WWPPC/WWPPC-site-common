@@ -1,5 +1,5 @@
 import { globalModal } from '#/modal';
-import { apiFetch } from '#/util/netUtil';
+import { apiFetch, LongPollEventReceiver } from '#/util/netUtil';
 import { defineStore } from 'pinia';
 import { reactive } from 'vue';
 
@@ -10,23 +10,19 @@ export type ServerContestConfig = {
     maxSubmissionSize: number
 };
 
-let resolveHandshake: () => void;
 const state = reactive<{
-    loggedIn: boolean
+    loggedIn: boolean,
     manualLogin: boolean,
-    handshakePromise: Promise<void>
-    handshakeComplete: boolean
     serverConfig: {
-        maxProfileImgSize: string,
+        maxProfileImgSize: number,
         contests: { [key: string]: ServerContestConfig | undefined }
     }
 }>({
     loggedIn: false,
     manualLogin: true,
-    handshakePromise: new Promise<void>((resolve) => resolveHandshake = resolve),
-    handshakeComplete: false,
     serverConfig: {
-        maxProfileImgSize: '4kb',
+        maxProfileImgSize: 65535,
+        //TODO: remove contests from serverConfig and into the ContestManager class
         contests: {}
     }
 });
@@ -37,8 +33,7 @@ const RSA: {
 } = {
     publicKey: null,
     async encrypt(text) {
-        await state.handshakePromise;
-        if (RSA.publicKey != null) {
+        if (RSA.publicKey != undefined) {
             const encrypted =  await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, RSA.publicKey, new TextEncoder().encode(text)); if (typeof encrypted == 'string') return encrypted;
             let binary = '';
             const bytes = new Uint8Array(encrypted);
@@ -48,7 +43,8 @@ const RSA: {
             }
             return btoa(binary);
         }
-        else return text;
+        console.warn("Attempted encryption without public key");
+        return text;
     }
 };
 
@@ -59,18 +55,14 @@ export const useServerState = defineStore('serverState', {
     actions: {
         init() {
             try {
+                this.checkLoggedIn();
                 apiFetch('GET', '/auth/publicKey').then(async (res) => {
                     if (window.crypto.subtle === undefined) {
                         console.warn('<h1>Insecure context!</h1><br>The page has been opened in an insecure context and cannot perform encryption processes. Credentials and submissions will be sent in PLAINTEXT!');
                     } else {
                         RSA.publicKey = await window.crypto.subtle.importKey('jwk', await res.json(), { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
                     }
-                }).then(() => apiFetch('GET', '/auth/login').then((res) => {
-                    state.loggedIn = res.ok;
-                    state.manualLogin = !state.loggedIn;
-                    resolveHandshake();
-                    state.handshakeComplete = true;
-                }));
+                });
                 apiFetch('GET', '/api/config').then(async (res) => {
                     if (!res.ok) {
                         console.error(`Failed to fetch configuration: ${res.status} - ${res.statusText}`);
@@ -85,6 +77,8 @@ export const useServerState = defineStore('serverState', {
                         console.info('Server configuration fetched');
                     }
                 });
+                //TODO: make the interval based on server config
+                setInterval(this.checkLoggedIn, 30000);
             } catch (err) {
                 console.error('Failed to fetch public key or check login status');
                 console.error(err);
@@ -94,8 +88,18 @@ export const useServerState = defineStore('serverState', {
                     content: 'Failed to fetch public key or check login status',
                     color: 'var(--color-2)'
                 });
-                resolveHandshake!();
-                state.handshakeComplete = true;
+            }
+        },
+        checkLoggedIn() {
+            //if we aren't logged in we won't magically get logged in lol
+            if (state.loggedIn) {
+                apiFetch('GET', '/auth/login').then((res) => {
+                    if (!res.ok) {
+                        //avoid triggering reactivity if the state doesn't change
+                        state.loggedIn = false;
+                        state.manualLogin = true;
+                    }
+                });
             }
         }
     }

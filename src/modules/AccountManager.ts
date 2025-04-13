@@ -2,7 +2,7 @@ import { apiFetch } from '#/util/netUtil';
 import { defineStore } from 'pinia';
 import { reactive, ref, watch } from 'vue';
 
-import { RSAencrypt } from './ServerState';
+import { RSAencrypt, useServerState } from './ServerState';
 import { debounce } from '#/util/inputLimiting';
 import { globalModal } from '#/modal';
 
@@ -79,6 +79,7 @@ const state = reactive<{
     team: TeamData | null,
     writeUserErr: string | undefined,
     writeTeamErr: string | undefined,
+    loaded: boolean
 }>({
     user: {
         username: '',
@@ -98,7 +99,8 @@ const state = reactive<{
     },
     team: null,
     writeUserErr: undefined,
-    writeTeamErr: undefined
+    writeTeamErr: undefined,
+    loaded: false
 });
 const writeUser = debounce(async () => {
     // when loading data unsaved will be set to false, prevents saving data that was just loaded
@@ -146,15 +148,23 @@ export const useAccountManager = defineStore('accountManager', {
         unsavedTeamChanges: () => unsaved2.value
     },
     actions: {
+        init() {
+            const serverState = useServerState();
+            watch(() => serverState.loggedIn, (newValue, oldValue) => {
+                if (!oldValue && newValue) this.fetchSelf();
+            });
+        },
         // auth
         async login(username: string, password: string): Promise<Response> {
-            return await apiFetch('POST', '/auth/login', {
+            const res = await apiFetch('POST', '/auth/login', {
                 username: username,
                 password: await RSAencrypt(password)
             });
+            if (res.ok) useServerState().loggedIn = true;
+            return res;
         },
         async signup(username: string, password: string, data: Omit<AccountData, 'username' | 'displayName' | 'profileImage' | 'bio' | 'pastRegistrations' | 'team'>): Promise<Response> {
-            return await apiFetch('POST', '/auth/signup', {
+            const res = await apiFetch('POST', '/auth/signup', {
                 username: username,
                 password: await RSAencrypt(password),
                 email: await RSAencrypt(data.email),
@@ -166,6 +176,8 @@ export const useAccountManager = defineStore('accountManager', {
                 experience: data.experience,
                 languages: data.languages
             });
+            if (res.ok) useServerState().loggedIn = true;
+            return res;
         },
         async requestRecovery(username: string, email: string): Promise<Response> {
             return await apiFetch('POST', '/auth/requestRecovery', {
@@ -192,7 +204,9 @@ export const useAccountManager = defineStore('accountManager', {
             });
         },
         async logout(): Promise<Response> {
-            return await apiFetch('DELETE', '/auth/logout');
+            const res = await apiFetch('DELETE', '/auth/logout');
+            if (res.ok) useServerState().loggedIn = false;
+            return res;
         },
         // account data
         async fetchAccountData(username: string): Promise<AccountData | Response> {
@@ -206,12 +220,13 @@ export const useAccountManager = defineStore('accountManager', {
             return res;
         },
         async fetchSelf(showErrors: boolean = true): Promise<void> {
-            await Promise.all([
+            const res = await Promise.all([
                 async () => {
                     const res = await apiFetch('GET', '/api/self/userData');
                     if (res.ok) {
                         state.user = await res.json();
                         unsaved.value = false;
+                        return true;
                     } else if (showErrors) {
                         const errText = res.status + await res.text();
                         globalModal().showModal({
@@ -227,10 +242,12 @@ export const useAccountManager = defineStore('accountManager', {
                     if (res.ok) {
                         state.team = await res.json();
                         unsaved2.value = false;
+                        return true;
                     } else if (res.status == 404) {
                         // special case if not on team
                         state.team = null;
                         unsaved2.value = false;
+                        return true;
                     } else if (showErrors) {
                         const errText = res.status + await res.text();
                         globalModal().showModal({
@@ -242,6 +259,7 @@ export const useAccountManager = defineStore('accountManager', {
                     }
                 }
             ]);
+            if (res.every(result => result)) this.loaded = true;
         },
         async createTeam(teamName: string): Promise<Response> {
             const res = await apiFetch('POST', '/api/self/team', { name: teamName });
