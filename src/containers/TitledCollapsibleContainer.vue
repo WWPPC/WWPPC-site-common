@@ -91,7 +91,7 @@ export default {
     width: v-bind("$props.width ?? 'initial'");
     border: 4px solid;
     border-color: v-bind("$props.borderColor ?? 'white'");
-    border-top: v-bind("isInAccordion ? 'none' : ''");
+    border-top: v-bind("isInAccordion ? 'none' : '4px solid ' + $props.borderColor");
     background-color: black;
     text-align: left;
     will-change: transform;

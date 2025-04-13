@@ -19,9 +19,9 @@ const serverState = useServerState();
 const usernameNotEditable = ref('');
 const emailNotEditable = ref('');
 const joinCodeNotEditable = ref('');
-watch(() => accountManager.user.username, () => usernameNotEditable.value = accountManager.user.username);
-watch(() => accountManager.team?.joinKey, () => joinCodeNotEditable.value = accountManager.team?.joinKey ?? '');
-watch(() => accountManager.user.email, () => emailNotEditable.value = accountManager.user.email);
+watch(() => accountManager.user.username, () => usernameNotEditable.value = accountManager.user.username, { immediate: true });
+watch(() => accountManager.team?.joinKey, () => joinCodeNotEditable.value = accountManager.team?.joinKey ?? '', { immediate: true });
+watch(() => accountManager.user.email, () => emailNotEditable.value = accountManager.user.email, { immediate: true });
 
 // oops
 const gradeInput = ref('');
@@ -30,9 +30,9 @@ const languagesInput = ref<string[]>([]);
 watch(gradeInput, () => accountManager.user.grade = Number(gradeInput.value));
 watch(experienceInput, () => accountManager.user.experience = Number(experienceInput.value));
 watch(languagesInput, () => accountManager.user.languages = languagesInput.value);
-watch(() => accountManager.user.grade, () => gradeInput.value = accountManager.user.grade?.toString());
-watch(() => accountManager.user.experience, () => experienceInput.value = accountManager.user.experience?.toString());
-watch(() => accountManager.user.languages, () => languagesInput.value = accountManager.user.languages);
+watch(() => accountManager.user.grade, () => gradeInput.value = accountManager.user.grade?.toString(), { immediate: true });
+watch(() => accountManager.user.experience, () => experienceInput.value = accountManager.user.experience?.toString(), { immediate: true });
+watch(() => accountManager.user.languages, () => languagesInput.value = accountManager.user.languages, { immediate: true });
 
 const remainingBioCharacters = ref(2048);
 const remainingBioCharacters2 = ref(1024);
@@ -258,7 +258,7 @@ onMounted(clearDangerButtons);
                             <span>Biography<br>({{ remainingBioCharacters2 }} chars):</span>
                             <InputTextArea v-model=accountManager.team.bio width="var(--fwidth)" min-height="2em" height="4em" max-height="20em" maxlength="1024" placeholder="Describe your team in a few short sentences!" resize="vertical"></InputTextArea>
                         </PairedGridContainer>
-                        <InputButton class="profileSaveButton" type="submit" v-if=accountManager.unsavedTeamChanges text="Save" color="yellow" glitch-on-mount></InputButton>
+                        <!-- <InputButton class="profileSaveButton" type="submit" v-if=accountManager.unsavedTeamChanges text="Save" color="yellow" glitch-on-mount></InputButton> -->
                     </form>
                 </div>
             </div>

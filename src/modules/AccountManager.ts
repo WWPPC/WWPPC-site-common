@@ -172,6 +172,7 @@ export const useAccountManager = defineStore('accountManager', {
             return res;
         },
         async fetchSelf(showErrors: boolean = true): Promise<void> {
+            this.loaded = false;
             const res = await Promise.all([
                 new Promise(async (resolve) => {
                     const res = await apiFetch('GET', '/api/self/userData');

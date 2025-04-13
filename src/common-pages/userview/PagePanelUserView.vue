@@ -30,6 +30,7 @@ const loadUserData = async () => {
             if (accRes.status != 404) {
                 modal.showModal({ title: accRes.statusText, content: "Could not fetch user " + accRes.status, color: "var(--color-2)" });
             }
+            //@spsquared how do i make this show the 404 page
             return;
         }
         userData.value = accRes;
