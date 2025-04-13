@@ -1,6 +1,6 @@
 import { globalModal } from '#/modal';
 import { debounce } from '#/util/inputLimiting';
-import { apiFetch, LongPollEventReceiver } from '#/util/netUtil';
+import { apiFetch } from '#/util/netUtil';
 import { defineStore } from 'pinia';
 import { reactive } from 'vue';
 import type { AccountData } from './AccountManager';
@@ -88,11 +88,12 @@ const fetchConfig = () => {
     });
     apiFetch('GET', '/api/config').then(async (res) => {
         if (!res.ok) {
-            console.error(`Failed to fetch configuration: ${res.status} - ${res.statusText}`);
+            const errText = `${res.status} - ${await res.text()}`;
+            console.error(`Failed to fetch configuration:\n${errText}`);
             const modal = globalModal();
             modal.showModal({
                 title: 'Configuration fetch failed',
-                content: 'Failed to fetch server configuration. This may interfere with some functionality.',
+                content: `Failed to fetch server configuration. This may interfere with some functionality.\n${errText}`,
                 color: 'var(--color-2)'
             });
         } else {
@@ -113,8 +114,8 @@ export const useServerState = defineStore('serverState', {
             setInterval(() => checkLoggedIn(), 30000);
             document.addEventListener('visibilitychange', debounce(() => {
                 // debounce stops spam if for say someone is switching tabs a lot (sometimes this fires a lot)
-                checkLoggedIn();
-            }, 500));
+                if (document.visibilityState == 'visible') checkLoggedIn();
+            }, 3000));
         },
         // auth
         async login(username: string, password: string): Promise<Response> {

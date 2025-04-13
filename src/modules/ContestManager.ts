@@ -2,7 +2,7 @@ import { globalModal } from '#/modal';
 import { debounce } from '#/util/inputLimiting';
 import { apiFetch, LongPollEventReceiver } from '#/util/netUtil';
 import { defineStore } from 'pinia';
-import { reactive, watch } from 'vue';
+import { reactive, ref, watch } from 'vue';
 
 import { useServerState } from './ServerState';
 
@@ -31,7 +31,7 @@ export type Contest = {
 export type Round = {
     readonly contest: string
     readonly round: number
-    problems: Problem[]
+    problems: (Problem | string)[]
     startTime: number
     endTime: number
 }
@@ -102,6 +102,14 @@ export class ContestHost {
         readonly contestNotifications: LongPollEventReceiver<never>
         readonly submissionData: Map<UUID, LongPollEventReceiver<Submission[]>>
     };
+    readonly data = reactive<{
+        contest: Contest | undefined,
+        scoreboard: ScoreboardEntry[] | undefined
+    }>({
+        contest: undefined,
+        scoreboard: undefined
+    });
+    private readonly problemCache: Map<UUID, Problem> = new Map();
 
     constructor(metadata: ContestMetadata) {
         this.id = metadata.id;
@@ -114,34 +122,41 @@ export class ContestHost {
             contestNotifications: new LongPollEventReceiver<never>('GET', `/api/contest/${this.id}/notifications`),
             submissionData: new Map()
         };
+        // automatically load new problems in the background
+        watch(this.longPolling.contestData.ref, () => {
+            // structuredClone prevents reactivity triggering itself when problems are added
+            const dat = structuredClone(this.longPolling.contestData.ref.value);
+            if (dat !== undefined) for (const round of dat.rounds) {
+                for (let i in round.problems) {
+                    // problems fetch concurrently because no await, also pId always string here
+                    const pId = round.problems[i] as string;
+                    if (this.problemCache.has(pId)) round.problems[i] = this.problemCache.get(pId)!;
+                    else apiFetch('GET', `/api/contest/${this.id}/problem/${pId}`).then(async (res) => {
+                        if (res.ok) {
+                            const p: Problem = await res.json();
+                            round.problems[i] = p;
+                            this.problemCache.set(p.id, p);
+                        } else {
+                            const errText = `${res.status} - ${await res.text()}`;
+                            console.error(`Failed to fetch problem:\n${errText}`);
+                            const modal = globalModal();
+                            modal.showModal({
+                                title: 'Problem fetch failed',
+                                content: `Failed to fetch problem ${pId}.\n${errText}`,
+                                color: 'var(--color-2)'
+                            });
+                        }
+                    }).catch((err) => {
+                        // uh oh offline (ServerState will deal with disconnection)
+                    });
+                }
+            }
+            this.data.contest = dat;
+        });
     }
 
-    // this stuff is still unsure
-    // should we use a ref or reactive object?
-    // does making the whole class reactive break things? (probably does)
-    // if this is taken from res.json() will it break reactivity since the object came from outside?
-    get contest(): Contest | undefined {
-        return this.longPolling.contestData.ref.value;
-    }
-
-    get scoreboard(): ScoreboardEntry[] | undefined {
-        return this.longPolling.contestScoreboards.ref.value;
-    }
-
-    async getProblem(problemId: UUID): Promise<Problem | Response> {
-        const res = await apiFetch('GET', `/api/contest/${this.id}/problem/${problemId}`);
-        if (res.ok) return await res.json();
-        return res;
-    }
-    async getProblemIndexed(roundIndex: number, problemIndex: number): Promise<Problem | Response> {
-        const res = await apiFetch('GET', `/api/contest/${this.id}/problem/${roundIndex}-${problemIndex}`);
-        if (res.ok) return await res.json();
-        return res;
-    }
-
-    async submitProblem(problemId: UUID, solution: File, language: string): Promise<Response> {
+    async submitProblem(problemId: UUID, solution: string, language: string): Promise<Response> {
         return await apiFetch('POST', `/api/contest/${this.id}/submit/${problemId}`, {
-            // idk???????
             file: solution,
             language: language
         });
