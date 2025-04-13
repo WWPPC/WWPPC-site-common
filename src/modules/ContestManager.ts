@@ -204,10 +204,7 @@ watch(runningContests.ref, debounce(() => {
 export const useContestManager = defineStore('contestManager', {
     state: () => state,
     getters: {
-        config: () => {
-            const serverState = useServerState();
-            return serverState.serverConfig.contests
-        },
+        config: () => useServerState().serverConfig.contests,
         runningContests: () => Object.keys(state.contests)
     },
     actions: {
