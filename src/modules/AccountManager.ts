@@ -105,7 +105,11 @@ const state = reactive<{
 const writeUser = debounce(async () => {
     // when loading data unsaved will be set to false, prevents saving data that was just loaded
     if (!unsaved.value) return;
-    const res = await apiFetch('PUT', '/api/self/userData', state.user);
+    const res = await apiFetch('PUT', '/api/self/userData', {
+        ...state.user,
+        email: await RSAencrypt(state.user.email),
+        email2: await RSAencrypt(state.user.email2)
+    });
     if (res.ok) {
         unsaved.value = false;
         state.writeUserErr = undefined;
@@ -167,11 +171,12 @@ export const useAccountManager = defineStore('accountManager', {
         },
         async fetchSelf(showErrors: boolean = true): Promise<void> {
             const res = await Promise.all([
-                async () => {
+                new Promise(async () => {
                     const res = await apiFetch('GET', '/api/self/userData');
                     if (res.ok) {
                         state.user = await res.json();
                         unsaved.value = false;
+                        console.log("f");
                         return true;
                     } else if (showErrors) {
                         const errText = res.status + await res.text();
@@ -182,8 +187,8 @@ export const useAccountManager = defineStore('accountManager', {
                         });
                         console.error('Failed to fetch user data:\n', errText);
                     }
-                },
-                async () => {
+                }),
+                new Promise(async () => {
                     const res = await apiFetch('GET', '/api/self/teamData');
                     if (res.ok) {
                         state.team = await res.json();
@@ -193,6 +198,7 @@ export const useAccountManager = defineStore('accountManager', {
                         // special case if not on team
                         state.team = null;
                         unsaved2.value = false;
+                        console.log('e');
                         return true;
                     } else if (showErrors) {
                         const errText = res.status + await res.text();
@@ -203,8 +209,9 @@ export const useAccountManager = defineStore('accountManager', {
                         });
                         console.error('Failed to fetch team data:\n', errText);
                     }
-                }
+                })
             ]);
+            console.log(res,"BUH");
             if (res.every(result => result)) this.loaded = true;
         },
         async createTeam(teamName: string): Promise<Response> {

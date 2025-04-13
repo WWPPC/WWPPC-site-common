@@ -6,11 +6,13 @@ import { ref } from 'vue';
 import { globalModal } from '#/modal';
 import { useServerState } from '#/modules/ServerState';
 import { useAccountManager } from '#/modules/AccountManager';
+import { useRouter } from 'vue-router';
 
 const props = defineProps<{
     allowProfileImgChange?: boolean
 }>();
 
+const router = useRouter();
 const modal = globalModal();
 const serverState = useServerState();
 const accountManager = useAccountManager();
@@ -41,6 +43,11 @@ const changeProfileImage = (event: any) => {
     };
     reader.readAsDataURL(file);
 };
+const logout = async () => {
+    const res = await serverState.logout();
+    if (res.ok) router.push({ path: '/' });
+    else modal.showModal({ title: 'Error logging out', content: 'An error occured and you could not log out. Maybe the server is down?', color: 'red' });
+};
 </script>
 
 <template>
@@ -67,7 +74,7 @@ const changeProfileImage = (event: any) => {
                     </span>
                 </AnimateInContainer>
             </div>
-            <InputButton text="Log Out" width="100%" @click="accountManager.logout"></InputButton>
+            <InputButton text="Log Out" width="100%" @click="logout"></InputButton>
         </div>
     </div>
     <div class="accountScrollboxWrapper">

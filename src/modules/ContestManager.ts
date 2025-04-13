@@ -31,7 +31,7 @@ export type Contest = {
 export type Round = {
     readonly contest: string
     readonly round: number
-    problems: UUID[]
+    problems: Problem[]
     startTime: number
     endTime: number
 }
@@ -134,7 +134,6 @@ export class ContestHost {
         return res;
     }
     async getProblemIndexed(roundIndex: number, problemIndex: number): Promise<Problem | Response> {
-        //best function name ever
         const res = await apiFetch('GET', `/api/contest/${this.id}/problem/${roundIndex}-${problemIndex}`);
         if (res.ok) return await res.json();
         return res;

@@ -6,11 +6,14 @@ import AccountTeamUserDisp from '#/common-components/account/AccountTeamUserDisp
 import { onMounted, ref, watch } from 'vue';
 import { globalModal, ModalMode } from '#/modal';
 import { useAccountManager, gradeMaps, experienceMaps, languageMaps } from '#/modules/AccountManager';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { useServerState } from '#/modules/ServerState';
 
 const route = useRoute();
+const router = useRouter();
 const modal = globalModal();
 const accountManager = useAccountManager();
+const serverState = useServerState();
 
 // prevent username being overwritten
 const usernameNotEditable = ref('');
@@ -40,45 +43,37 @@ watch(() => accountManager.team?.bio, () => remainingBioCharacters2.value = 1024
 const joinTeamCode = ref('');
 const createTeamName = ref('');
 const showWriteTeamDataWait = ref(false);
-const writeTeamData = async () => {
-    showWriteTeamDataWait.value = true;
-    // artificial wait
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const res = await accountManager.writeTeamData();
-    if (res != TeamOpResult.SUCCESS) modal.showModal({ title: 'Write data failed', content: getTeamOpMessage(res), color: 'red' });
-    showWriteTeamDataWait.value = false;
-};
 const joinTeam = async () => {
     showWriteTeamDataWait.value = true;
     if (joinTeamCode.value.length != 6) return;
-    const res = await accountManager.joinTeam(joinTeamCode.value);
-    if (res == TeamOpResult.NOT_EXISTS) modal.showModal({ title: 'Invalid join code', content: 'The join code is invalid. Verify your join code is correct, then try again.', color: 'yellow' });
-    else if (res != TeamOpResult.SUCCESS) modal.showModal({ title: 'Could not join team', content: getTeamOpMessage(res), color: 'red' });
-    await accountManager.updateOwnUserData();
+    await accountManager.joinTeam(joinTeamCode.value);
     showWriteTeamDataWait.value = false;
 };
 const leaveTeam = async () => {
     const confirmation = await modal.showModal({ title: 'Leave team?', content: 'You are about to leave the team. Are you sure?', mode: ModalMode.CONFIRM, color: 'yellow' }).result;
     if (!confirmation) return;
     showWriteTeamDataWait.value = true;
-    if (accountManager.username == accountManager.team) return;
-    const res = await accountManager.leaveTeam();
-    if (res != TeamOpResult.SUCCESS) modal.showModal({ title: 'Could not leave team', content: getTeamOpMessage(res), color: 'red' });
-    await accountManager.updateOwnUserData();
+    await accountManager.leaveTeam();
+    showWriteTeamDataWait.value = false;
+};
+const createTeam = async () => {
+    showWriteTeamDataWait.value = true;
+    if (createTeamName.value.length < 1 || createTeamName.value.length > 32) return;
+    await accountManager.createTeam(createTeamName.value);
     showWriteTeamDataWait.value = false;
 };
 
 // hides join code when user is not hovering over it
 const obfuscatedJoinCode = ref('');
 const onCodeMouseEnter = () => {
-    obfuscatedJoinCode.value = accountManager.teamJoinCode ?? '';
+    obfuscatedJoinCode.value = accountManager.team?.joinKey ?? '';
 };
 const onCodeMouseLeave = () => {
-    obfuscatedJoinCode.value = '******';
+    obfuscatedJoinCode.value = '*'.repeat(accountManager.team?.joinKey.length ?? 6);
 };
 onMounted(() => {
-    obfuscatedJoinCode.value = '******';
-    document.addEventListener('blur', () => obfuscatedJoinCode.value = '******');
+    obfuscatedJoinCode.value = '*'.repeat(accountManager.team?.joinKey.length ?? 6);
+    document.addEventListener('blur', () => obfuscatedJoinCode.value = '*'.repeat(accountManager.team?.joinKey.length ?? 6));
 });
 
 // danger buttons
@@ -131,11 +126,11 @@ const changePassword = async () => {
         }
     }
     modalSpam();
-    const res = await accountManager.changePassword(currPassword, newPassword);
+    const res = await serverState.changePassword(currPassword, newPassword);
     spam = false;
     modal.cancelAllModals();
-    if (res == 0) window.location.reload();
-    else modal.showModal({ title: 'Could not change password:', content: getAccountOpMessage(res), color: 'red' });
+    if (res.ok) router.push({ path: '/' });
+    else modal.showModal({ title: res.statusText, content: "HTTP error " + res.status.toString(), color: 'red' });
 };
 const deleteAccount = async () => {
     const currPassword = currentPasswordInput.value;
@@ -186,11 +181,11 @@ const deleteAccount = async () => {
         }
     }
     modalSpam();
-    const res = await accountManager.deleteAccount(currPassword);
+    const res = await serverState.deleteAccount(currPassword);
     spam = false;
-    await modal.cancelAllModals();
-    if (res == 0) window.location.reload();
-    else modal.showModal({ title: 'Could not delete account:', content: getAccountOpMessage(res), color: 'red' });
+    modal.cancelAllModals();
+    if (res.ok) router.push({ path: '/' });
+    else modal.showModal({ title: res.statusText, content: "HTTP error " + res.status.toString(), color: 'red' });
 };
 const clearDangerButtons = () => {
     currentPasswordInput.value = '';
@@ -256,12 +251,12 @@ onMounted(clearDangerButtons);
                     <div class="profileTeamList">
                         <AccountTeamUserDisp v-for="user in accountManager.team?.members" :key="user" :user="user" :team="accountManager.user.team!" allow-kick></AccountTeamUserDisp>
                     </div>
-                    <form action="javascript:void(0)" @submit="writeTeamData">
+                    <form action="javascript:void(0)">
                         <PairedGridContainer width="100%">
                             <span>Team Name:</span>
-                            <InputTextBox v-model=accountManager.team?.name maxlength="32" width="var(--fwidth)" title="Collective team name" placeholder="Team Name"></InputTextBox>
+                            <InputTextBox v-model=accountManager.team.name maxlength="32" width="var(--fwidth)" title="Collective team name" placeholder="Team Name"></InputTextBox>
                             <span>Biography<br>({{ remainingBioCharacters2 }} chars):</span>
-                            <InputTextArea v-model=accountManager.team?.bio width="var(--fwidth)" min-height="2em" height="4em" max-height="20em" maxlength="1024" placeholder="Describe your team in a few short sentences!" resize="vertical"></InputTextArea>
+                            <InputTextArea v-model=accountManager.team.bio width="var(--fwidth)" min-height="2em" height="4em" max-height="20em" maxlength="1024" placeholder="Describe your team in a few short sentences!" resize="vertical"></InputTextArea>
                         </PairedGridContainer>
                         <InputButton class="profileSaveButton" type="submit" v-if=accountManager.unsavedTeamChanges text="Save" color="yellow" glitch-on-mount></InputButton>
                     </form>
@@ -356,4 +351,4 @@ onMounted(clearDangerButtons);
     min-width: 0px;
     margin: 0px 0px;
 }
-</style>, AccountOpResult, getAccountOpMessage, getTeamOpMessage, TeamOpResult, AccountOpResult, getAccountOpMessage, getTeamOpMessage, TeamOpResult, getAccountOpMessage, getTeamOpMessage, TeamOpResult, TeamOpResult
+</style>
