@@ -11,10 +11,10 @@ export type ServerContestConfig = {
 };
 
 const state = reactive<{
-    loggedIn: boolean,
-    manualLogin: boolean,
+    loggedIn: boolean
+    manualLogin: boolean
     serverConfig: {
-        maxProfileImgSize: number,
+        maxProfileImgSize: number
         contests: { [key: string]: ServerContestConfig | undefined }
     }
 }>({
@@ -33,15 +33,9 @@ const RSA: {
 } = {
     publicKey: null,
     async encrypt(text) {
-        if (RSA.publicKey != undefined) {
-            const encrypted =  await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, RSA.publicKey, new TextEncoder().encode(text)); if (typeof encrypted == 'string') return encrypted;
-            let binary = '';
-            const bytes = new Uint8Array(encrypted);
-            const len = bytes.byteLength;
-            for (let i = 0; i < len; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            return btoa(binary);
+        if (RSA.publicKey !== null) {
+            const encrypted = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, RSA.publicKey, new TextEncoder().encode(text)); if (typeof encrypted == 'string') return encrypted;
+            return btoa(String.fromCharCode(...new Uint8Array(encrypted)));
         }
         console.warn("Attempted encryption without public key");
         return text;
@@ -52,17 +46,13 @@ export const RSAencrypt = RSA.encrypt;
 
 export const useServerState = defineStore('serverState', {
     state: () => state,
+    getters: {
+        encryptionReady: (): boolean => RSA.publicKey !== null
+    },
     actions: {
         init() {
             try {
                 this.checkLoggedIn();
-                apiFetch('GET', '/auth/publicKey').then(async (res) => {
-                    if (window.crypto.subtle === undefined) {
-                        console.warn('<h1>Insecure context!</h1><br>The page has been opened in an insecure context and cannot perform encryption processes. Credentials and submissions will be sent in PLAINTEXT!');
-                    } else {
-                        RSA.publicKey = await window.crypto.subtle.importKey('jwk', await res.json(), { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
-                    }
-                });
                 apiFetch('GET', '/api/config').then(async (res) => {
                     if (!res.ok) {
                         console.error(`Failed to fetch configuration: ${res.status} - ${res.statusText}`);
@@ -77,8 +67,7 @@ export const useServerState = defineStore('serverState', {
                         console.info('Server configuration fetched');
                     }
                 });
-                //TODO: make the interval based on server config
-                setInterval(this.checkLoggedIn, 30000);
+                setInterval(() => this.checkLoggedIn(), 30000);
             } catch (err) {
                 console.error('Failed to fetch public key or check login status');
                 console.error(err);
@@ -91,16 +80,23 @@ export const useServerState = defineStore('serverState', {
             }
         },
         checkLoggedIn() {
-            //if we aren't logged in we won't magically get logged in lol
-            if (state.loggedIn) {
-                apiFetch('GET', '/auth/login').then((res) => {
-                    if (!res.ok) {
-                        //avoid triggering reactivity if the state doesn't change
-                        state.loggedIn = false;
-                        state.manualLogin = true;
-                    }
-                });
-            }
+            apiFetch('GET', '/auth/login').then((res) => {
+                if (!res.ok) {
+                    // avoid triggering reactivity if the state doesn't change
+                    state.loggedIn = false;
+                    state.manualLogin = true;
+                    // if not logged in then assume RSA keypairs rotated too
+                    RSA.publicKey = null;
+                } else if (RSA.publicKey === null) {
+                    apiFetch('GET', '/auth/publicKey').then(async (res) => {
+                        if (window.crypto.subtle === undefined) {
+                            console.warn('<h1>Insecure context!</h1><br>The page has been opened in an insecure context and cannot perform encryption processes. Credentials and submissions will be sent in PLAINTEXT!');
+                        } else {
+                            RSA.publicKey = await window.crypto.subtle.importKey('jwk', await res.json(), { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
+                        }
+                    });
+                }
+            });
         }
     }
 });

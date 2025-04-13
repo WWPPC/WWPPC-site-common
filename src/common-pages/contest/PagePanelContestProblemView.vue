@@ -88,7 +88,7 @@ const loadProblem = async () => {
             problem.value = p;
             latexify(problem.value.content).then((html) => problem.value.content = html);
         } else if (route.params.problemRound !== undefined && route.params.problemNumber !== undefined) {
-            const p = await contestManager.contests[contestType].getProblem2(Number(route.params.problemRound.toString()), Number(route.params.problemNumber.toString()));
+            const p = await contestManager.contests[contestType].getProblemIndexed(Number(route.params.problemRound.toString()), Number(route.params.problemNumber.toString()));
             if (p instanceof Response) { //spaghetti check if it's an error
                 loadErrorModal(p.statusText, "HTTP error " + p.status.toString());
                 return;
