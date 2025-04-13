@@ -1,7 +1,9 @@
 import { globalModal } from '#/modal';
+import { debounce } from '#/util/inputLimiting';
 import { apiFetch, LongPollEventReceiver } from '#/util/netUtil';
 import { defineStore } from 'pinia';
 import { reactive } from 'vue';
+import type { AccountData } from './AccountManager';
 
 export type ServerContestConfig = {
     rounds: boolean
@@ -11,15 +13,15 @@ export type ServerContestConfig = {
 };
 
 const state = reactive<{
+    connected: boolean
     loggedIn: boolean
-    manualLogin: boolean
     serverConfig: {
         maxProfileImgSize: number
         contests: { [key: string]: ServerContestConfig | undefined }
     }
 }>({
+    connected: false,
     loggedIn: false,
-    manualLogin: true,
     serverConfig: {
         maxProfileImgSize: 65535,
         //TODO: remove contests from serverConfig and into the ContestManager class
@@ -44,6 +46,62 @@ const RSA: {
 
 export const RSAencrypt = RSA.encrypt;
 
+const checkLoggedIn = () => {
+    // will detect if disconnected/session expired
+    try {
+        apiFetch('GET', '/auth/login').then((res) => {
+            if (res.ok) {
+                // connected & logged in
+                state.connected = true;
+                state.loggedIn = true;
+                // fetch config if not loaded
+                if (RSA.publicKey === null) fetchConfig();
+            } else if (res.status == 401) {
+                // connected but not logged in
+                state.connected = true;
+                state.loggedIn = false;
+                // fetch config if not loaded
+                if (RSA.publicKey === null) fetchConfig();
+            } else {
+                // oh no
+                state.connected = false;
+                state.loggedIn = false;
+                // remove config so it gets reloaded on reconnect
+                RSA.publicKey = null;
+            }
+        });
+    } catch (err) {
+        // failed to fetch - no internet is common cause for error
+        state.connected = false;
+        state.loggedIn = false;
+        // remove config so it gets reloaded on reconnect
+        RSA.publicKey = null;
+    }
+};
+const fetchConfig = () => {
+    apiFetch('GET', '/auth/publicKey').then(async (res) => {
+        if (window.crypto.subtle === undefined) {
+            console.warn('<h1>Insecure context!</h1><br>The page has been opened in an insecure context and cannot perform encryption processes. Credentials and submissions will be sent in PLAINTEXT!');
+        } else {
+            RSA.publicKey = await window.crypto.subtle.importKey('jwk', await res.json(), { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
+        }
+    });
+    apiFetch('GET', '/api/config').then(async (res) => {
+        if (!res.ok) {
+            console.error(`Failed to fetch configuration: ${res.status} - ${res.statusText}`);
+            const modal = globalModal();
+            modal.showModal({
+                title: 'Configuration fetch failed',
+                content: 'Failed to fetch server configuration. This may interfere with some functionality.',
+                color: 'var(--color-2)'
+            });
+        } else {
+            state.serverConfig = await res.json();
+            console.info('Server configuration fetched');
+        }
+    });
+};
+
 export const useServerState = defineStore('serverState', {
     state: () => state,
     getters: {
@@ -51,52 +109,66 @@ export const useServerState = defineStore('serverState', {
     },
     actions: {
         init() {
-            try {
-                this.checkLoggedIn();
-                apiFetch('GET', '/api/config').then(async (res) => {
-                    if (!res.ok) {
-                        console.error(`Failed to fetch configuration: ${res.status} - ${res.statusText}`);
-                        const modal = globalModal();
-                        modal.showModal({
-                            title: 'Configuration fetch failed',
-                            content: 'Failed to fetch server configuration. This may interfere with some functionality.',
-                            color: 'var(--color-2)'
-                        });
-                    } else {
-                        state.serverConfig = await res.json();
-                        console.info('Server configuration fetched');
-                    }
-                });
-                setInterval(() => this.checkLoggedIn(), 30000);
-            } catch (err) {
-                console.error('Failed to fetch public key or check login status');
-                console.error(err);
-                const modal = globalModal();
-                modal.showModal({
-                    title: 'Authentication error',
-                    content: 'Failed to fetch public key or check login status',
-                    color: 'var(--color-2)'
-                });
-            }
+            checkLoggedIn();
+            setInterval(() => checkLoggedIn(), 30000);
+            document.addEventListener('visibilitychange', debounce(() => {
+                // debounce stops spam if for say someone is switching tabs a lot (sometimes this fires a lot)
+                checkLoggedIn();
+            }, 500));
         },
-        checkLoggedIn() {
-            apiFetch('GET', '/auth/login').then((res) => {
-                if (!res.ok) {
-                    // avoid triggering reactivity if the state doesn't change
-                    state.loggedIn = false;
-                    state.manualLogin = true;
-                    // if not logged in then assume RSA keypairs rotated too
-                    RSA.publicKey = null;
-                } else if (RSA.publicKey === null) {
-                    apiFetch('GET', '/auth/publicKey').then(async (res) => {
-                        if (window.crypto.subtle === undefined) {
-                            console.warn('<h1>Insecure context!</h1><br>The page has been opened in an insecure context and cannot perform encryption processes. Credentials and submissions will be sent in PLAINTEXT!');
-                        } else {
-                            RSA.publicKey = await window.crypto.subtle.importKey('jwk', await res.json(), { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
-                        }
-                    });
-                }
+        // auth
+        async login(username: string, password: string): Promise<Response> {
+            const res = await apiFetch('POST', '/auth/login', {
+                username: username,
+                password: await RSAencrypt(password)
             });
-        }
+            if (res.ok) state.loggedIn = true;
+            return res;
+        },
+        async signup(username: string, password: string, data: Omit<AccountData, 'username' | 'displayName' | 'profileImage' | 'bio' | 'pastRegistrations' | 'team'>): Promise<Response> {
+            const res = await apiFetch('POST', '/auth/signup', {
+                username: username,
+                password: await RSAencrypt(password),
+                email: await RSAencrypt(data.email),
+                email2: await RSAencrypt(data.email2),
+                firstName: data.firstName,
+                lastName: data.lastName,
+                organization: data.organization,
+                grade: data.grade,
+                experience: data.experience,
+                languages: data.languages
+            });
+            if (res.ok) state.loggedIn = true;
+            return res;
+        },
+        async requestRecovery(username: string, email: string): Promise<Response> {
+            return await apiFetch('POST', '/auth/requestRecovery', {
+                username: username,
+                email: await RSAencrypt(email)
+            });
+        },
+        async recoverAccount(username: string, recoveryPassword: string, newPassword: string): Promise<Response> {
+            return await apiFetch('POST', '/auth/recovery', {
+                username: username,
+                recoveryPassword: await RSAencrypt(recoveryPassword),
+                newPassword: await RSAencrypt(newPassword)
+            });
+        },
+        async changePassword(currentPass: string, newPass: string): Promise<Response> {
+            return await apiFetch('PUT', '/auth/changePassword', {
+                password: await RSAencrypt(currentPass),
+                newPassword: await RSAencrypt(newPass)
+            })
+        },
+        async deleteAccount(password: string): Promise<Response> {
+            return await apiFetch('DELETE', '/auth/delete', {
+                password: await RSAencrypt(password),
+            });
+        },
+        async logout(): Promise<Response> {
+            const res = await apiFetch('DELETE', '/auth/logout');
+            if (res.ok) state.loggedIn = false;
+            return res;
+        },
     }
 });

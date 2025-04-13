@@ -69,7 +69,7 @@ const attemptLogin = async () => {
     if (!validateCredentials()) return;
     loginError.value = '';
     showLoginWait.value = true;
-    const res = await accountManager.login(usernameInput.value, passwordInput.value);
+    const res = await serverState.login(usernameInput.value, passwordInput.value);
     showLoginWait.value = false;
     if (res.ok) {
         router.push({
@@ -116,7 +116,7 @@ const attemptSignup = async () => {
     }
     loginError.value = '';
     showLoginWait.value = true;
-    const res = await accountManager.signup(usernameInput.value, passwordInput.value, {
+    const res = await serverState.signup(usernameInput.value, passwordInput.value, {
         firstName: firstNameInput.value.trim(),
         lastName: lastNameInput.value.trim(),
         email: emailInput.value.trim(),
@@ -148,7 +148,7 @@ const attemptRecovery = async () => {
     attemptedRecovery.value = true;
     loginError.value = '';
     showRecoveryWait.value = true;
-    const res = await accountManager.requestRecovery(usernameInput.value, emailInput.value);
+    const res = await serverState.requestRecovery(usernameInput.value, emailInput.value);
     showRecoveryWait.value = false;
     if (res.ok) {
         loginError.value = '';

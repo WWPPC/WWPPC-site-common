@@ -154,60 +154,6 @@ export const useAccountManager = defineStore('accountManager', {
                 if (!oldValue && newValue) this.fetchSelf();
             });
         },
-        // auth
-        async login(username: string, password: string): Promise<Response> {
-            const res = await apiFetch('POST', '/auth/login', {
-                username: username,
-                password: await RSAencrypt(password)
-            });
-            if (res.ok) useServerState().loggedIn = true;
-            return res;
-        },
-        async signup(username: string, password: string, data: Omit<AccountData, 'username' | 'displayName' | 'profileImage' | 'bio' | 'pastRegistrations' | 'team'>): Promise<Response> {
-            const res = await apiFetch('POST', '/auth/signup', {
-                username: username,
-                password: await RSAencrypt(password),
-                email: await RSAencrypt(data.email),
-                email2: await RSAencrypt(data.email2),
-                firstName: data.firstName,
-                lastName: data.lastName,
-                organization: data.organization,
-                grade: data.grade,
-                experience: data.experience,
-                languages: data.languages
-            });
-            if (res.ok) useServerState().loggedIn = true;
-            return res;
-        },
-        async requestRecovery(username: string, email: string): Promise<Response> {
-            return await apiFetch('POST', '/auth/requestRecovery', {
-                username: username,
-                email: await RSAencrypt(email)
-            });
-        },
-        async recoverAccount(username: string, recoveryPassword: string, newPassword: string): Promise<Response> {
-            return await apiFetch('POST', '/auth/recovery', {
-                username: username,
-                recoveryPassword: await RSAencrypt(recoveryPassword),
-                newPassword: await RSAencrypt(newPassword)
-            });
-        },
-        async changePassword(currentPass: string, newPass: string): Promise<Response> {
-            return await apiFetch('PUT', '/auth/changePassword', {
-                password: await RSAencrypt(currentPass),
-                newPassword: await RSAencrypt(newPass)
-            })
-        },
-        async deleteAccount(password: string): Promise<Response> {
-            return await apiFetch('DELETE', '/auth/delete', {
-                password: await RSAencrypt(password),
-            });
-        },
-        async logout(): Promise<Response> {
-            const res = await apiFetch('DELETE', '/auth/logout');
-            if (res.ok) useServerState().loggedIn = false;
-            return res;
-        },
         // account data
         async fetchAccountData(username: string): Promise<AccountData | Response> {
             const res = await apiFetch('GET', '/api/userData/' + username);

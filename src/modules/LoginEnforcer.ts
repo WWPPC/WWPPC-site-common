@@ -32,9 +32,8 @@ export const useLoginEnforcer = defineStore('loginEnforcer', {
                 return (!serverState.loggedIn && Array.from(state.include.values()).some((p) => trimmed.startsWith(p)) || state.includeExact.has(trimmed))
                     && !(Array.from(state.exclude.values()).some((p) => trimmed.startsWith(p)) || state.excludeExact.has(trimmed));
             };
-            router.beforeEach((to, from, next) => {
-                if (checkLogin(to) && route.query.ignore_server === undefined) next({ path: '/login', query: { redirect: to.fullPath, clearQuery: 1 }});
-                else next();
+            router.afterEach((to, from) => {
+                if (checkLogin(to) && route.query.ignore_server === undefined) router.push({ path: '/login', query: { redirect: to.fullPath, clearQuery: 1 }});
             });
         }
     }

@@ -33,7 +33,7 @@ const contestData = computed(() => contestManager.contests[contestType]?.contest
                     </AnimateInContainer>
                 </div>
                 <NotFound v-if="false"></NotFound>
-                <WaitCover text="Loading..." :show="!serverState.handshakeComplete || (contestData === undefined && contestManager.contests[contestType] !== undefined)"></WaitCover>
+                <WaitCover text="Loading..." :show="!serverState.connected || (contestData === undefined && contestManager.contests[contestType] !== undefined)"></WaitCover>
             </AngledTitledContainer>
         </div>
     </div>
