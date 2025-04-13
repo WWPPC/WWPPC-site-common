@@ -7,14 +7,14 @@ import { useRoute } from 'vue-router';
 import { experienceMaps, gradeMaps, languageMaps, type TeamData, useAccountManager, type AccountData } from '#/modules/AccountManager';
 import { onMounted, ref, watch } from 'vue';
 import { InputDropdown, InputTextBox } from '#/inputs';
-import { useServerState } from '#/modules/ServerState';
 import { autoFlipTextTransition, autoGlitchTextTransition } from '#/text';
 import { setTitlePanel } from '#/title';
 import AccountTeamUserDisp from '#/common-components/account/AccountTeamUserDisp.vue';
+import { globalModal } from '#/modal';
 
 const route = useRoute();
 
-const serverState = useServerState();
+const modal = globalModal();
 const accountManager = useAccountManager();
 
 const userData = ref<AccountData | null>(null);
@@ -24,12 +24,11 @@ const loadUserData = async () => {
     userData.value = null;
     teamData.value = null;
     showLoading.value = true;
-    await serverState.handshakePromise;
     if (route.params.userView != null) {
         const accRes = await accountManager.fetchAccountData(route.params.userView.toString());
         if (accRes instanceof Response) {
             if (accRes.status != 404) {
-                // idk
+                modal.showModal({ title: accRes.statusText, content: "Could not fetch user " + accRes.status, color: "var(--color-2)" });
             }
             return;
         }
@@ -38,7 +37,7 @@ const loadUserData = async () => {
             const teamRes = await accountManager.fetchTeamData(userData.value.team);
             if (teamRes instanceof Response) {
                 if (teamRes.status != 404) {
-                    // still idk
+                    modal.showModal({ title: teamRes.statusText, content: "Could not fetch team " + teamRes.status, color: "var(--color-2)" });
                 }
                 return;
             }
@@ -98,7 +97,7 @@ const largeHeader = ref(true);
                 <TitledCutCornerContainer title="Team" hover-animation="lift" align="center" height="100%" style="grid-row: span 2; max-height: 80vh;">
                     <div class="userViewTeamGrid" v-if="teamData !== null">
                         <div class="userViewTeamList">
-                            <AccountTeamUserDisp v-for="user in teamData.members" :key="user" :user="user" :team="teamData!.id"></AccountTeamUserDisp>
+                            <AccountTeamUserDisp v-for="user in teamData.members" :key="user" :user="user" :team="userData!.team!"></AccountTeamUserDisp>
                         </div>
                         <div>
                             <TitledCutCornerContainer :title="teamName" vertical-flipped>

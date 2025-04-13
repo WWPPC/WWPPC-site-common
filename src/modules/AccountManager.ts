@@ -5,6 +5,7 @@ import { reactive, ref, watch } from 'vue';
 import { RSAencrypt, useServerState } from './ServerState';
 import { debounce } from '#/util/inputLimiting';
 import { globalModal } from '#/modal';
+import { useRouter } from 'vue-router';
 
 /**Descriptor for an account (see server docs) */
 export type AccountData = {
@@ -130,20 +131,6 @@ const writeTeam = debounce(async () => {
         state.writeTeamErr = res.status + ' - ' + (await res.text());
     }
 }, 3000);
-  
-watch(() => state.user, () => {
-    unsaved.value = true;
-    writeUser();
-});
-watch(() => state.team, () => {
-    unsaved2.value = true;
-    writeTeam();
-});
-
-// "your changes may not be saved" warning
-window.addEventListener('beforeunload', (e) => {
-    if (unsaved.value || unsaved2.value) e.preventDefault();
-});
 
 export const useAccountManager = defineStore('accountManager', {
     state: () => state,
@@ -156,6 +143,21 @@ export const useAccountManager = defineStore('accountManager', {
             const serverState = useServerState();
             watch(() => serverState.loggedIn, (newValue, oldValue) => {
                 if (!oldValue && newValue) this.fetchSelf();
+            });
+            watch(() => state.user, () => {
+                unsaved.value = true;
+                writeUser();
+            }, { deep: true });
+            watch(() => state.team, () => {
+                unsaved2.value = true;
+                writeTeam();
+            }, { deep: true });
+            // "your changes may not be saved" warning
+            window.addEventListener('beforeunload', (e) => {
+                if (unsaved.value || unsaved2.value) {
+                    e.preventDefault();
+                    return e.returnValue = "You have unsaved changes. Are you sure you want to exit?";
+                }
             });
         },
         // account data
@@ -171,13 +173,11 @@ export const useAccountManager = defineStore('accountManager', {
         },
         async fetchSelf(showErrors: boolean = true): Promise<void> {
             const res = await Promise.all([
-                new Promise(async () => {
+                new Promise(async (resolve) => {
                     const res = await apiFetch('GET', '/api/self/userData');
                     if (res.ok) {
                         state.user = await res.json();
-                        unsaved.value = false;
-                        console.log("f");
-                        return true;
+                        resolve(true);
                     } else if (showErrors) {
                         const errText = res.status + await res.text();
                         globalModal().showModal({
@@ -186,20 +186,20 @@ export const useAccountManager = defineStore('accountManager', {
                             color: 'var(--color-2)'
                         });
                         console.error('Failed to fetch user data:\n', errText);
+                        resolve(false);
                     }
                 }),
-                new Promise(async () => {
+                new Promise(async (resolve) => {
                     const res = await apiFetch('GET', '/api/self/teamData');
                     if (res.ok) {
                         state.team = await res.json();
                         unsaved2.value = false;
-                        return true;
+                        resolve(true);
                     } else if (res.status == 404) {
                         // special case if not on team
                         state.team = null;
                         unsaved2.value = false;
-                        console.log('e');
-                        return true;
+                        resolve(true);
                     } else if (showErrors) {
                         const errText = res.status + await res.text();
                         globalModal().showModal({
@@ -208,10 +208,10 @@ export const useAccountManager = defineStore('accountManager', {
                             color: 'var(--color-2)'
                         });
                         console.error('Failed to fetch team data:\n', errText);
+                        resolve(false);
                     }
                 })
             ]);
-            console.log(res,"BUH");
             if (res.every(result => result)) this.loaded = true;
         },
         async createTeam(teamName: string): Promise<Response> {

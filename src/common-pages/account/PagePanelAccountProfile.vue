@@ -240,7 +240,7 @@ onMounted(clearDangerButtons);
                 <div class="profileTeamSection">
                     <h3>Create Team</h3>
                     <form class="nowrap" action="javascript:void(0)" @submit="createTeam">
-                        <InputTextBox v-model=createTeamName title="Create team!" placeholder="Team name" maxlength="32"></InputTextBox>
+                        <InputTextBox v-model=createTeamName title="Name for your new team" placeholder="Team name" maxlength="32"></InputTextBox>
                         <InputButton type="submit" text="Create" :disabled="createTeamName.length == 0"></InputButton>
                     </form>
                 </div>
@@ -262,14 +262,14 @@ onMounted(clearDangerButtons);
                     </form>
                 </div>
             </div>
-            <div class="profileTeamSection">
+            <div class="profileTeamSection" v-if="accountManager.team">
                 <form class="nowrap" action="javascript:void(0)">
                     <span>Join Code:</span>
                     <InputTextBox v-model="obfuscatedJoinCode" autocomplete="off" disabled @mouseenter="onCodeMouseEnter" @mouseleave="onCodeMouseLeave"></InputTextBox>
                     <InputCopyButton :value="joinCodeNotEditable ?? ''"></InputCopyButton>
                 </form>
             </div>
-            <div class="profileTeamSection" v-if="accountManager.team?.id !== accountManager.user.username">
+            <div class="profileTeamSection" v-if="accountManager.team && accountManager.team?.id !== accountManager.user.username">
                 <InputButton text="Leave Team" color="red" glitch-on-mount @click=leaveTeam></InputButton>
             </div>
             <!-- <WaitCover text="Please wait..." :show="(showWriteTeamDataWait || loading) && route.query.ignore_server === undefined"></WaitCover> -->

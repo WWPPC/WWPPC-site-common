@@ -114,7 +114,7 @@ export const useServerState = defineStore('serverState', {
             document.addEventListener('visibilitychange', debounce(() => {
                 // debounce stops spam if for say someone is switching tabs a lot (sometimes this fires a lot)
                 checkLoggedIn();
-            }, 500));
+            }, 1000));
         },
         // auth
         async login(username: string, password: string): Promise<Response> {
