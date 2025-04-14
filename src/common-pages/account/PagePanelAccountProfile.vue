@@ -6,10 +6,9 @@ import AccountTeamUserDisp from '#/common-components/account/AccountTeamUserDisp
 import { onMounted, ref, watch } from 'vue';
 import { globalModal, ModalMode } from '#/modal';
 import { useAccountManager, gradeMaps, experienceMaps, languageMaps } from '#/modules/AccountManager';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useServerState } from '#/modules/ServerState';
 
-const route = useRoute();
 const router = useRouter();
 const modal = globalModal();
 const accountManager = useAccountManager();
@@ -20,7 +19,7 @@ const usernameNotEditable = ref('');
 const emailNotEditable = ref('');
 const joinCodeNotEditable = ref('');
 watch(() => accountManager.user.username, () => usernameNotEditable.value = accountManager.user.username, { immediate: true });
-watch(() => accountManager.team?.joinKey, () => joinCodeNotEditable.value = accountManager.team?.joinKey ?? '', { immediate: true });
+watch([() => accountManager.team?.id, () => accountManager.team?.joinKey], () => accountManager.team !== null && (joinCodeNotEditable.value = accountManager.team.id + accountManager.team.joinKey), { immediate: true });
 watch(() => accountManager.user.email, () => emailNotEditable.value = accountManager.user.email, { immediate: true });
 
 // oops
@@ -65,16 +64,18 @@ const createTeam = async () => {
 
 // hides join code when user is not hovering over it
 const obfuscatedJoinCode = ref('');
-const onCodeMouseEnter = () => {
-    obfuscatedJoinCode.value = accountManager.team?.joinKey ?? '';
-};
-const onCodeMouseLeave = () => {
-    obfuscatedJoinCode.value = '*'.repeat(accountManager.team?.joinKey.length ?? 6);
-};
+const hovering = ref(false);
+const onCodeMouseEnter = () => hovering.value = true;
+const onCodeMouseLeave = () => hovering.value = false;
 onMounted(() => {
-    obfuscatedJoinCode.value = '*'.repeat(accountManager.team?.joinKey.length ?? 6);
-    document.addEventListener('blur', () => obfuscatedJoinCode.value = '*'.repeat(accountManager.team?.joinKey.length ?? 6));
+    document.addEventListener('blur', () => hovering.value = false);
 });
+watch([joinCodeNotEditable, hovering], () => {
+    if (hovering.value) obfuscatedJoinCode.value = joinCodeNotEditable.value;
+    else obfuscatedJoinCode.value = '*'.repeat(joinCodeNotEditable.value.length ?? 6);
+});
+
+
 
 // danger buttons
 const showCredWait = ref(false);
@@ -96,7 +97,7 @@ const changePassword = async () => {
         modal.showModal({
             title: 'Password Too Long!',
             content: 'Wow, that\'s a <i>REALLY</i> long password! However, please make it less than 1024 characters!',
-            color: 'red'
+            color: 'var(--color-2)'
         });
         return;
     }
@@ -129,8 +130,16 @@ const changePassword = async () => {
     const res = await serverState.changePassword(currPassword, newPassword);
     spam = false;
     modal.cancelAllModals();
-    if (res.ok) router.push({ path: '/' });
-    else modal.showModal({ title: res.statusText, content: "HTTP error " + res.status.toString(), color: 'red' });
+    if (res.ok) modal.showModal({
+        title: 'Password changed',
+        content: 'Your password was succesfully changed',
+        color: 'var(--color-1)'
+    }).result.then(() => () => router.push('/login?clearQuery=1'));
+    else modal.showModal({
+        title: 'Password change fail',
+        content: `${res.status} - ${await res.text()}`,
+        color: 'var(--color-2)'
+    });
 };
 const deleteAccount = async () => {
     const currPassword = currentPasswordInput.value;
@@ -138,25 +147,25 @@ const deleteAccount = async () => {
     if (await modal.showModal({
         title: 'Delete Account',
         content: '',
-        color: 'red',
+        color: 'var(--color-2)',
         mode: ModalMode.CONFIRM
     }).result === false) return;
     if (await modal.showModal({
         title: 'Delete Account',
-        content: '<span style="color: red;">Are you SURE that you want to <b>DELETE</b> your account?</span>',
-        color: 'red',
+        content: '<span style="color: var(--color-2);">Are you SURE that you want to <b>DELETE</b> your account?</span>',
+        color: 'var(--color-2)',
         mode: ModalMode.CONFIRM
     }).result === false) return;
     if (await modal.showModal({
         title: 'Delete Account',
-        content: '<span style="color: red;">This will <b>PERMANENTLY DELETE ALL DATA</b>, including <b>TEAMS</b>!</span>',
-        color: 'red',
+        content: '<span style="color: var(--color-2);">This will <b>PERMANENTLY DELETE ALL DATA</b>, including <b>TEAMS</b>!</span>',
+        color: 'var(--color-2)',
         mode: ModalMode.CONFIRM
     }).result === false) return;
     let password2 = await modal.showModal({
         title: 'Delete Account',
-        content: '<span style="color: red;">Enter your password to confirm <b>PERMANENT DELETION</b> of your account</span>',
-        color: 'red',
+        content: '<span style="color: var(--color-2);">Enter your password to confirm <b>PERMANENT DELETION</b> of your account</span>',
+        color: 'var(--color-2)',
         mode: ModalMode.QUERY,
         inputType: 'password'
     }).result;
@@ -164,8 +173,8 @@ const deleteAccount = async () => {
     while (password2 !== currPassword) {
         password2 = await modal.showModal({
             title: 'Delete Account',
-            content: '<span style="color: red;">Passwords do not match.<br>Enter your password to confirm <b>PERMANENT DELETION</b> of your account</span>',
-            color: 'red',
+            content: '<span style="color: var(--color-2);">Passwords do not match.<br>Enter your password to confirm <b>PERMANENT DELETION</b> of your account</span>',
+            color: 'var(--color-2)',
             mode: ModalMode.QUERY,
             inputType: 'password'
         }).result;
@@ -185,7 +194,11 @@ const deleteAccount = async () => {
     spam = false;
     modal.cancelAllModals();
     if (res.ok) router.push({ path: '/' });
-    else modal.showModal({ title: res.statusText, content: "HTTP error " + res.status.toString(), color: 'red' });
+    else modal.showModal({
+        title: 'Password change fail',
+        content: `${res.status} - ${await res.text()}`,
+        color: 'var(--color-2)'
+    });
 };
 const clearDangerButtons = () => {
     currentPasswordInput.value = '';
@@ -270,7 +283,7 @@ onMounted(clearDangerButtons);
                 </form>
             </div>
             <div class="profileTeamSection" v-if="accountManager.team && accountManager.team?.id !== accountManager.user.username">
-                <InputButton text="Leave Team" color="red" glitch-on-mount @click=leaveTeam></InputButton>
+                <InputButton text="Leave Team" color="var(--color-2)" glitch-on-mount @click=leaveTeam></InputButton>
             </div>
             <!-- <WaitCover text="Please wait..." :show="(showWriteTeamDataWait || loading) && route.query.ignore_server === undefined"></WaitCover> -->
         </TitledCutCornerContainer>
@@ -284,13 +297,13 @@ onMounted(clearDangerButtons);
                 <InputTextBox v-model=emailNotEditable width="var(--fwidth)" title="Email used to update you on contests, password changes, etc. (you cannot edit this)" disabled></InputTextBox>
             </PairedGridContainer>
             <br>
-            <TitledCollapsibleContainer title="Danger buttons" font-size="var(--font-medium)" border-color="red" @click="clearDangerButtons" start-collapsed>
+            <TitledCollapsibleContainer title="Danger buttons" font-size="var(--font-medium)" border-color="var(--color-2)" @click="clearDangerButtons" start-collapsed>
                 <!-- useless form -->
                 <form class="profileDangerButtons" action="javascript:void(0)">
                     <div style="text-align: right; align-content: center; font-size: var(--font-18);">Enter password:</div>
                     <InputTextBox type="password" v-model=currentPasswordInput placeholder="Current password"></InputTextBox>
-                    <InputButton text="CHANGE PASSWORD" color="red" @click="changePassword" :disabled="currentPasswordInput.length == 0"></InputButton>
-                    <InputButton text="DELETE ACCOUNT" color="red" @click="deleteAccount" :disabled="currentPasswordInput.length == 0"></InputButton>
+                    <InputButton text="CHANGE PASSWORD" color="var(--color-2)" @click="changePassword" :disabled="currentPasswordInput.length == 0"></InputButton>
+                    <InputButton text="DELETE ACCOUNT" color="var(--color-2)" @click="deleteAccount" :disabled="currentPasswordInput.length == 0"></InputButton>
                 </form>
             </TitledCollapsibleContainer>
         </TitledCutCornerContainer>

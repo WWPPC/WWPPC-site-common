@@ -5,7 +5,6 @@ import { reactive, ref, watch } from 'vue';
 import { RSAencrypt, useServerState } from './ServerState';
 import { debounce } from '#/util/inputLimiting';
 import { globalModal } from '#/modal';
-import { useRouter } from 'vue-router';
 
 /**Descriptor for an account (see server docs) */
 export type AccountData = {

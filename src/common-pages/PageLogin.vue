@@ -3,6 +3,7 @@ import { PanelBody, PanelHeader, PanelMain, PanelView, PanelNavLargeLogo } from 
 import { InputButton, InputDropdown, InputTextBox } from '#/inputs';
 import { PairedGridContainer } from '#/containers';
 import WaitCover from '#/common/WaitCover.vue';
+import LoadingCover from '#/common/LoadingCover.vue';
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
@@ -30,7 +31,6 @@ watch([() => route.params.page, () => serverState.loggedIn], async () => {
 const page = ref(0);
 const usernameInput = ref('');
 const passwordInput = ref('');
-const loginError = ref('');
 const firstNameInput = ref('');
 const lastNameInput = ref('');
 const emailInput = ref('');
@@ -39,10 +39,15 @@ const organizationInput = ref('');
 const gradeInput = ref('');
 const experienceInput = ref('');
 const languageInput = ref<string[]>([]);
+const loginError = ref('');
 const showLoginWait = ref(false);
 const showRecoveryWait = ref(false);
 const attemptedRecovery = ref(false);
 const validateCredentials = (checkPass: boolean = true): boolean => {
+    if (!serverState.connected) {
+        loginError.value = 'Server connection failed';
+        return false;
+    }
     if (usernameInput.value.length == 0) {
         loginError.value = 'Please enter username';
         return false;
@@ -264,6 +269,7 @@ const attemptRecovery = async () => {
                 </div>
                 <WaitCover text="Signing in..." :show="showLoginWait"></WaitCover>
                 <WaitCover text="Sending email..." :show="showRecoveryWait"></WaitCover>
+                <LoadingCover text="Connecting..." :show="!serverState.connected"></LoadingCover>
             </PanelBody>
         </PanelMain>
     </PanelView>

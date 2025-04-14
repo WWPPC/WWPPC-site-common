@@ -128,8 +128,9 @@ export class ContestHost {
     constructor(metadata: ContestMetadata) {
         this.id = metadata.id;
         this.type = metadata.type;
-        this.config = useServerState().serverConfig.contests[metadata.type]!;
+        this.config = useServerState().config.contests[metadata.type]!;
         if (this.config === undefined) throw new TypeError(`Could not load contest as contest type ${metadata.type} not in server config`);
+        console.info('Loading contest ' + this.id);
         this.longPolling = {
             contestData: new LongPollEventReceiver<Contest>('GET', `/api/contest/${this.id}/data`),
             contestScoreboards: new LongPollEventReceiver<ScoreboardEntry[]>('GET', `/api/contest/${this.id}/scoreboards`),
@@ -240,7 +241,7 @@ watch(runningContests.ref, debounce(() => {
 export const useContestManager = defineStore('contestManager', {
     state: () => state,
     getters: {
-        config: () => useServerState().serverConfig.contests,
+        config: () => useServerState().config.contests,
         runningContests: () => Object.keys(state.contests)
     },
     actions: {

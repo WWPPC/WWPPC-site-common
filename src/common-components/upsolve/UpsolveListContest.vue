@@ -24,7 +24,7 @@ const load = async () => {
     loaded = true;
     const data = await upsolveManager.getContestData(props.id);
     if (data instanceof Error) {
-        modal.showModal({ title: data.message, content: `Could not load contest (loading "${props.id}")`, color: 'red' });
+        modal.showModal({ title: data.message, content: `Could not load contest (loading "${props.id}")`, color: 'var(--color-2)' });
         return;
     }
     contest.value = data;

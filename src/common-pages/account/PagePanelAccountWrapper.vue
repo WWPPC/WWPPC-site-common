@@ -24,29 +24,46 @@ const fileUpload = ref<HTMLInputElement>();
 const changeProfileImage = (event: any) => {
     const file: File | undefined = event.target?.files?.item(0);
     if (file == undefined) return;
+    if (file.size > serverState.config.maxProfileImgSize) {
+        modal.showModal({
+            title: 'Image too large',
+            content: `Maximum file size for profile images is ${Math.floor(serverState.config.maxProfileImgSize / 1024)}kB`,
+            color: 'var(--color-2)'
+        });
+        if (fileUpload.value) fileUpload.value.value = '';
+        return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
         if (typeof reader.result != 'string') return; // idk should never happen
         if (/^data:image\/(png|jpeg)/.test(reader.result)) {
-            if (reader.result.length > serverState.serverConfig.maxProfileImgSize) {
-                modal.showModal({ title: 'Image too large', content: 'Due to database restrictions, the maximum profile image size is an arbitrary small number.', color: 'red' });
-                if (fileUpload.value) fileUpload.value.value = '';
-                return;
-            }
             accountManager.user.profileImage = reader.result;
         } else {
-            modal.showModal({ title: 'Unsupported file type', content: 'Only PNG and JPEG images are allowed.', color: 'red' });
+            modal.showModal({
+                title: 'Unsupported file type',
+                content: 'Only PNG and JPEG images are allowed.',
+                color: 'var(--color-2)'
+            });
         }
     };
-    reader.onerror = () => {
-        modal.showModal({ title: 'Error decoding image', content: 'An error occured and your profile image could not be used. Try using a PNG or JPEG image instead.', color: 'red' });
+    reader.onerror = (err) => {
+        console.error(err);
+        modal.showModal({
+            title: 'Error decoding image',
+            content: 'An error occured and your profile image could not be used. Try using a PNG or JPEG image instead.',
+            color: 'var(--color-2)'
+        });
     };
     reader.readAsDataURL(file);
 };
 const logout = async () => {
     const res = await serverState.logout();
     if (res.ok) router.push({ path: '/' });
-    else modal.showModal({ title: 'Error logging out', content: 'An error occured and you could not log out. Maybe the server is down?', color: 'red' });
+    else modal.showModal({
+        title: 'Failed to log out',
+        content: `${res.status} - ${await res.text()}`,
+        color: 'var(--color-2)'
+    });
 };
 </script>
 

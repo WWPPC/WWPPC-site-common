@@ -6,20 +6,21 @@ import WaitCover from '#/common/WaitCover.vue';
 import { nextTick, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
+import { useServerState } from '#/modules/ServerState';
 import { useAccountManager } from '#/modules/AccountManager';
-import { useLoginEnforcer } from '#/modules/LoginEnforcer';
 
 const route = useRoute();
 const router = useRouter();
 
 const modal = globalModal();
+const serverState = useServerState();
 const accountManager = useAccountManager();
-const loginEnforcer = useLoginEnforcer();
 
 const usernameInput = ref('');
 const passwordInput = ref('');
 const passwordInput2 = ref('');
 const recoveryPassword = ref('');
+const loginError = ref('');
 const showRecoveryWait = ref(false);
 const attemptedRecovery = ref(false);
 watch(() => route.query, async () => {
@@ -28,15 +29,56 @@ watch(() => route.query, async () => {
     recoveryPassword.value = route.query.pass?.toString() ?? '';
 });
 
+const validateCredentials = (checkPass: boolean = true): boolean => {
+    if (!serverState.connected) {
+        loginError.value = 'Server connection failed';
+        return false;
+    }
+    if (usernameInput.value.length == 0) {
+        loginError.value = 'Please enter username';
+        return false;
+    }
+    if (usernameInput.value.length > 16) {
+        loginError.value = 'Username must be less than 16 characters in length';
+        return false;
+    }
+    if (!/^[a-z]([a-z0-9-]*[a-z0-9])?$/.test(usernameInput.value)) {
+        loginError.value = 'Username must contain only lowercase letters (a-z), numbers (0-9), underscores ("_"), and dashes ("-").';
+        return false;
+    }
+    if (!checkPass) return true;
+    if (passwordInput.value.length == 0) {
+        loginError.value = 'Please enter a password';
+        return false;
+    }
+    if (passwordInput.value.length > 1024) {
+        loginError.value = 'Password must be less than 1024 characters in length';
+    }
+    return true;
+};
 const attemptRecovery = async () => {
-    if (!validateCredentials(usernameInput.value, passwordInput.value) || passwordInput.value != passwordInput2.value) return;
+    if (!validateCredentials()) return;
+    if (passwordInput.value != passwordInput2.value) {
+        loginError.value = 'Passwords must match';
+        return;
+    }
     showRecoveryWait.value = true;
     attemptedRecovery.value = true;
-    const res = await accountManager.recoverAccount(usernameInput.value, recoveryPassword.value, passwordInput.value);
+    const res = await serverState.recoverAccount(usernameInput.value, recoveryPassword.value, passwordInput.value);
     showRecoveryWait.value = false;
-    if (res == 0) modal.showModal({ title: 'Password changed', content: 'Your password has been changed.', color: 'lime'}).result.then(() => window.location.reload());
-    else modal.showModal({ title: 'Recovery failed:', content: getAccountOpMessage(res), color: 'red' });
-    router.push('/login?clearQuery=1');
+    if (res.ok) {
+        modal.showModal({
+            title: 'Password changed',
+            content: 'Your password has been changed.',
+            color: 'var(--color-1)'
+        }).result.then(() => router.push('/login?clearQuery=1'));
+    } else {
+        modal.showModal({
+            title: 'Recovery failed:',
+            content: `${res.status} - ${await res.text()}`,
+            color: 'var(--color-2)'
+        });
+    }
 };
 </script>
 
@@ -59,8 +101,8 @@ const attemptRecovery = async () => {
                         </form>
                     </div>
                 </div>
-                <WaitCover text="Please wait..." :show=showRecoveryWait></WaitCover>
-                <LoadingCover text="Connecting..."></LoadingCover>
+                <WaitCover text="Please wait..." :show="showRecoveryWait"></WaitCover>
+                <LoadingCover text="Connecting..." :show="!serverState.connected"></LoadingCover>
             </PanelBody>
         </PanelMain>
     </PanelView>
