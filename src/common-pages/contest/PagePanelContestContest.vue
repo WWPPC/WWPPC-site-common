@@ -18,7 +18,7 @@ const contestManager = useContestManager();
 <template>
     <div class="fullBlock stretchBlock">
         <div class="timerContainer">
-            <GlitchText :text="contestManager.contests[contestType]?.contest?.id ?? 'Not in contest'" class="timerTitle" color="var(--color-1)" font-size="var(--font-title)" shadow glow :steps=2 :delay=10 random on-visible></GlitchText>
+            <GlitchText :text="contestManager.contests[contestType]?.data.contest?.id ?? 'Not in contest'" class="timerTitle" color="var(--color-1)" font-size="var(--font-title)" shadow glow :steps=2 :delay=10 random on-visible></GlitchText>
             <ContestTimer big :contest="props.contest"></ContestTimer>
         </div>
         <div style="flex-grow: 1"></div>

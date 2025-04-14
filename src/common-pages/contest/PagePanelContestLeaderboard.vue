@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { GlitchText } from '#/text';
 import LoadingSpinner from '#/common/LoadingSpinner.vue';
-import { computed, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useAccountManager } from '#/modules/AccountManager';
 import { useContestManager } from '#/modules/ContestManager';
 
@@ -21,7 +21,7 @@ const scoreboard = ref<{
     penalty: number
 }[]>([]);
 onMounted(async ()=>{
-    await Promise.all((contestManager.contests[contestType]?.scoreboard ?? []).map(async (entry) => {
+    await Promise.all((contestManager.contests[contestType]?.data.scoreboard ?? []).map(async (entry) => {
         const teamRes = await accountManager.fetchTeamData(entry.team);
         return {
             team: entry.team,

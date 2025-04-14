@@ -6,63 +6,27 @@ import InputDropdown from '#/inputs/InputDropdown.vue'; // this is required for 
 import WaitCover from '#/common/WaitCover.vue';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
 import ContestProblemSubmissionCase from '#/common-components/contest/ContestProblemSubmissionCase.vue';
-// import { autoGlitchTextTransition } from '#/text';
-import { nextTick, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
 import { useServerState } from '#/modules/ServerState';
-import { completionStateString, type Problem, ProblemCompletionState, type Submission, useContestManager } from '#/modules/ContestManager';
+import { completionStateString, type ContestMetadata, type Problem, ProblemCompletionState, type Submission, type SubmissionDetail, useContestManager } from '#/modules/ContestManager';
 import latexify from '#/util/katexify';
-// import { useUpsolveManager } from '#/modules/UpsolveManager';
 
-// despaghettifier
 const props = defineProps<{
+    data: Problem | string
+    submissions: Submission[]
     contest: string
     isUpsolve?: boolean //i'm nuking this property, we can add it back after the contest
 }>();
-const contestType = props.contest;
 
 const route = useRoute();
 const router = useRouter();
 const serverState = useServerState();
 const contestManager = useContestManager();
-// const upsolveManager = useUpsolveManager();
 const modal = globalModal();
 
 // placeholder data behind loading cover
-const problem = ref<Problem>({
-    id: 'loading',
-    contest: 'Loading Contest',
-    round: 0,
-    number: 0,
-    name: 'Loading Problem...',
-    author: 'passwordisa',
-    content: `
-<b>Lorem ipsum dolor sit amet</b>,
-<br><br>
-<a href="https://wwppc.tech">c</a>onsectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-<br><br>
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. $\\sum_{i=0}^{\\infty}$ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-<br><br>
-<codeblock>function sum(a, b) {
-    if (b > a) {
-        let c = a;
-        a = b;
-        b = c;
-    }
-    let sum = a;
-    let i = 0;
-    do {
-        sum++;
-        i = i + 1;
-    } while (i < b);
-    return sum;
-}
-</codeblock>
-    `,
-    constraints: { memory: 0, time: 0 },
-});
-const submissions = ref<Submission[]>([]);
 const loadErrorModal = (title: string, content: string) => {
     modal.showModal({
         title: title,
@@ -72,70 +36,9 @@ const loadErrorModal = (title: string, content: string) => {
         router.push(`./problemList`);
     });
 };
-const loadProblem = async () => {
-    if (contestManager.contests[contestType] === undefined) return;
-    if (!props.isUpsolve) {
-        if (route.params.problemId !== undefined) {
-            if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.exec(route.params.problemId.toString())) {
-                loadErrorModal('Malformed problem ID', 'The supplied problem ID is invalid!');
-                return;
-            }
-            const p = await contestManager.contests[contestType].getProblem(route.params.problemId.toString());
-            if (p instanceof Response) { //spaghetti check if it's an error
-                loadErrorModal(p.statusText, "HTTP error " + p.status.toString());
-                return;
-            }
-            problem.value = p;
-            latexify(problem.value.content).then((html) => problem.value.content = html);
-        } else if (route.params.problemRound !== undefined && route.params.problemNumber !== undefined) {
-            const p = await contestManager.contests[contestType].getProblemIndexed(Number(route.params.problemRound.toString()), Number(route.params.problemNumber.toString()));
-            if (p instanceof Response) { //spaghetti check if it's an error
-                loadErrorModal(p.statusText, "HTTP error " + p.status.toString());
-                return;
-            }
-            problem.value = p;
-            latexify(problem.value.content).then((html) => problem.value.content = html);
-        } else if (route.query.ignore_server === undefined) {
-            loadErrorModal('No problem ID', 'No problem ID was supplied!');
-        }
-    } else {
-        //TODO: uncomment and fix this part for upsolve
 
-        // if (isNaN(Number(route.params.archiveRound)) || isNaN(Number(route.params.archiveProblem))) {
-        //     loadErrorModal('Invalid round or problem number', 'The round or problem is not a number.');
-        //     return;
-        // }
-        // const p = await upsolveManager.getProblemData(route.params.archiveContest.toString(), Number(route.params.archiveRound), Number(route.params.archiveProblem));
-        // if (p instanceof Error) {
-        //     loadErrorModal(p.message, 'Could not load the problem.');
-        //     return;
-        // }
-        // problem.value = {
-        //     ...p,
-        //     submissions: [],
-        //     status: ProblemCompletionState.NOT_UPLOADED
-        // };
-        // problemId = p.id;
-        // // latexify(problem.value.content).then((html) => problemContent.value = html);
-        // updateSubmissions();
-    }
-    await nextTick();
-    // latexify(problem.value.content).then((html) => problemContent.value = html);
-    // setTimeout(() => latexify(problem.value.content).then((html) => problemContent.value = html), 1000);
-};
-onMounted(loadProblem);
-watch(() => contestManager.contests[contestType]?.contest, loadProblem);
-watch(() => route.params.problemId, loadProblem);
-watch(() => route.params.problemRound, loadProblem);
-watch(() => route.params.problemNumber, loadProblem);
-
-// if (props.isUpsolve) {
-//     watch(() => upsolveManager.submissionsUpdated, updateSubmissions);
-//     watch(() => serverState.loggedIn, updateSubmissions);
-// }
-
-watch(() => problem.value.name, () => {
-    setTitlePanel(problem.value.name);
+watch(() => typeof props.data == 'string' ? props.data : props.data.name, () => {
+    setTitlePanel(typeof props.data == 'string' ? props.data : props.data.name);
 });
 
 // uploads
@@ -145,7 +48,7 @@ const submitButton = ref<InstanceType<typeof InputButton>>();
 const handleUpload = () => {
     const file: File | undefined | null = fileUpload.value?.files?.item(0);
     if (fileUpload.value == undefined || file == undefined) return;
-    if (file.size > (contestManager.config[contestType]?.maxSubmissionSize ?? 0)) {
+    if (file.size > (contestManager.config[props.contest]?.maxSubmissionSize ?? 0)) {
         fileUpload.value.resetFileList();
         modal.showModal({
             title: 'File size too large',
@@ -165,7 +68,7 @@ const handleUpload = () => {
     }
 };
 const submitUpload = async () => {
-    if (contestManager.contests[contestType] == undefined || languageDropdown.value?.value == undefined || languageDropdown.value?.value == '' || fileUpload.value == null || fileUpload.value.files == null) {
+    if (contestManager.contests[props.contest] == undefined || languageDropdown.value?.value == undefined || languageDropdown.value?.value == '' || fileUpload.value == null || fileUpload.value.files == null) {
         return;
     }
     const file = fileUpload.value.files.item(0);
@@ -173,7 +76,7 @@ const submitUpload = async () => {
         modal.showModal({ title: 'No file selected', content: 'No file was selected!', color: 'var(--color-2)' });
         return;
     }
-    const res = await contestManager.contests[contestType].submitProblem(problem.value.id, file, (languageDropdown.value.value as string));
+    const res = await contestManager.contests[props.contest]!.submitProblem(typeof props.data == 'string' ? props.data : props.data.id, await file.text(), (languageDropdown.value.value as string));
     if (!res.ok) {
         loadErrorModal(res.statusText, "HTTP error " + res.status.toString());
     } else {
@@ -181,18 +84,12 @@ const submitUpload = async () => {
         fileUpload.value.resetFileList();
         languageDropdown.value.value = '';
     }
-    // const status = await (props.isUpsolve ? upsolveManager : contestManager.contests[contestType]).updateSubmission(problem.value.id, (languageDropdown.value.value as string), await file.text());
-    // if (status != ContestUpdateSubmissionResult.SUCCESS) {
-    //     modal.showModal({ title: 'Could not submit', content: getUpdateSubmissionMessage(status), color: 'var(--color-2)' })
-    // } else {
-    //     modal.showModal({ title: 'Submission uploaded', content: 'Grading will happen soon', color: 'var(--color-1)' });
-    // }
 };
 
 // other uploads
 const answerInput = ref('');
 const submit = async () => {
-    if (contestManager.config[contestType]?.submitSolver) {
+    if (contestManager.config[props.contest]?.submitSolver) {
         await submitUpload();
     } else {
         //TODO: re-add output-only for WWPMI
@@ -213,11 +110,11 @@ const submit = async () => {
 // submit button spaghetti
 const disableSubmit = ref(true);
 const updateSubmitButton = () => {
-    disableSubmit.value = (contestManager.config[contestType]?.submitSolver && (languageDropdown.value == undefined || languageDropdown.value?.value == '' || fileUpload.value?.files == null || fileUpload.value?.files.item(0) == null))
-        || (!contestManager.config[contestType]?.submitSolver && answerInput.value.trim() == '')
-        || (!props.isUpsolve && (contestManager.contests[contestType]?.contest == null
-            || (contestManager.contests[contestType]?.contest?.rounds[problem.value.round].startTime ?? 0) > Date.now()
-            || (contestManager.contests[contestType]?.contest?.rounds[problem.value.round].endTime ?? Infinity) <= Date.now()));
+    disableSubmit.value = typeof props.data == 'string' || (contestManager.config[props.contest]?.submitSolver && (languageDropdown.value == undefined || languageDropdown.value?.value == '' || fileUpload.value?.files == null || fileUpload.value?.files.item(0) == null))
+        || (!contestManager.config[props.contest]?.submitSolver && answerInput.value.trim() == '')
+        || (!props.isUpsolve && (contestManager.contests[props.contest]?.data.contest == null
+            || (contestManager.contests[props.contest]?.data.contest?.rounds[props.data.round].startTime ?? 0) > Date.now()
+            || (contestManager.contests[props.contest]?.data.contest?.rounds[props.data.round].endTime ?? Infinity) <= Date.now()));
 };
 watch(() => languageDropdown.value?.value, updateSubmitButton);
 watch(() => fileUpload.value?.files, updateSubmitButton);
@@ -226,8 +123,10 @@ watch(() => answerInput.value, updateSubmitButton);
 // thing for katex
 // using ref instead of v-html fix?
 const problemContent = ref<HTMLDivElement>();
-watch(() => problem.value.content, () => {
-    latexify(problem.value.content).then((html) => {if (problemContent.value) problemContent.value.innerHTML = html});
+watch(() => typeof props.data == 'string' ? props.data : props.data.content, () => {
+    if (typeof props.data != 'string') {
+        latexify(props.data.content).then((html) => {if (problemContent.value) problemContent.value.innerHTML = html});
+    }
 });
 const hints = [
     "Make sure to name the input variable `ich`",
@@ -255,33 +154,35 @@ const antiGPT = (e: ClipboardEvent) => {
 }
 
 // view submission code
-// i'm nuking this part as well
-// const showCode = ref(false);
-// const submissionCode = ref('');
-// const viewCode = async () => {
-//     if (contestManager.contests[contestType] == undefined) return;
-//     submissionCode.value = contestManager.contests[contestType].getSubmissionCode(problem.value.id);
-//     // submissionCode.value = await (props.isUpsolve ? upsolveManager : contestManager.contests[contestType]).getSubmissionCode(problem.value.id);
-//     showCode.value = true;
-// };
+const showCode = ref(false);
+const viewingSubmission = ref<SubmissionDetail>();
+const viewCode = async (index: number) => {
+    //make it artificially wait
+    await Promise.all([async () => {
+        const submission = await contestManager.contests[props.contest]?.getSubmission(props.submissions[index].id);
+        if (submission === undefined || submission instanceof Response) return;
+        viewingSubmission.value = submission;
+    }, new Promise(r => setTimeout(r, 300))]);
+    showCode.value = true;
+};
 </script>
 
 <template>
     <div style="margin-left: -4px; width: min-content;">
         <RouterLink :to="((route.params.problemId !== undefined || route.params.problemNumber !== undefined) ? '.' : '') + (props.isUpsolve ? ('./archive/' + route.params.archiveContest) : './problemList')" no-deco>
-            <InputIconButton :text="`Back to ${props.isUpsolve ? route.params.archiveContest : 'Problem List'}`" img="/assets/arrow-left.svg" color="var(--color-1)"></InputIconButton>
+            <InputIconButton :text="`Back to ${props.isUpsolve ? route.params.archiveContest : 'Problem list'}`" img="/assets/arrow-left.svg" color="var(--color-1)"></InputIconButton>
         </RouterLink>
     </div>
     <div class="problemViewPanel">
         <div class="problemViewDouble">
-            <TitledCutCornerContainer :title="problem.name" style="grid-row: span 3;" vertical-flipped no-padding>
+            <TitledCutCornerContainer :title="typeof props.data == 'string' ? 'Problem' : props.data.name" style="grid-row: span 3;" vertical-flipped no-padding>
                 <div class="problemViewSubtitle">
-                    <span v-html="`By ${problem.author}`" style="font-weight: bold; grid-row: 1;"></span>
-                    <span v-html="`${problem.constraints.memory}MB, ${problem.constraints.time}ms&emsp;|&emsp;${completionStateString(submissions.length == 0 ? ProblemCompletionState.NOT_UPLOADED : submissions[0].status)}`" style="grid-row: 2;"></span>
+                    <span v-html="`By ${typeof props.data == 'string' ? 'passwordisa' : props.data.author}`" style="font-weight: bold; grid-row: 1;"></span>
+                    <span v-html="`${typeof props.data == 'string' ? '-' : props.data.constraints.memory}MB, ${typeof props.data == 'string' ? '-' : props.data.constraints.time}ms&emsp;|&emsp;${completionStateString(submissions.length == 0 ? ProblemCompletionState.NOT_UPLOADED : submissions[0].status)}`" style="grid-row: 2;"></span>
                     <ContestProblemStatusCircle :status="submissions.length == 0 ? ProblemCompletionState.NOT_UPLOADED : submissions[0].status" style="grid-row: span 2;"></ContestProblemStatusCircle>
                 </div>
                 <div class="problemViewContent" ref="problemContent" @copy=antiGPT></div>
-                <WaitCover class="problemLoadingCover" text="Loading..." :show="problem.id == 'loading' && route.query.ignore_server === undefined"></WaitCover>
+                <WaitCover class="problemLoadingCover" text="Loading..." :show="typeof props.data == 'string' && route.query.ignore_server === undefined"></WaitCover>
             </TitledCutCornerContainer>
             <DoubleCutCornerContainer>
                 <div style="text-align: center;">
@@ -293,7 +194,7 @@ const antiGPT = (e: ClipboardEvent) => {
                         <span v-else>
                             You can submit anytime, but only the last submission is scored. You cannot submit after a round ends.
                         </span>
-                        <span v-if="contestManager.config[contestType]?.submitSolver">
+                        <span v-if="contestManager.config[props.contest]?.submitSolver">
                             <br>
                             <i>Java and Python submissions have double the stated time limit.</i>
                         </span>
@@ -301,17 +202,17 @@ const antiGPT = (e: ClipboardEvent) => {
                 </div>
                 <br>
                 <form class="problemViewSubmitForm" action="javascript:void(0)">
-                    <div class="problemViewSubmitFormInner" v-if="contestManager.config[contestType]?.submitSolver">
+                    <div class="problemViewSubmitFormInner" v-if="contestManager.config[props.contest]?.submitSolver">
                         <span>Source code:</span>
                         <InputFileUpload ref="fileUpload" @input=handleUpload accept=".c,.cpp,.py,.java"></InputFileUpload>
                         <span>Language:</span>
-                        <InputDropdown ref="languageDropdown" :items="contestManager.config[contestType]?.acceptedSolverLanguages.map((a) => ({ text: a, value: a })) ?? []" required></InputDropdown>
+                        <InputDropdown ref="languageDropdown" :items="contestManager.config[props.contest]?.acceptedSolverLanguages.map((a) => ({ text: a, value: a })) ?? []" required></InputDropdown>
                     </div>
                     <div class="problemViewSubmitFormInner" v-else>
                         <span>Answer:</span>
                         <InputTextBox v-model="answerInput"></InputTextBox>
                     </div>
-                    <InputButton ref="submitButton" :text="contestManager.config[contestType]?.submitSolver ? 'Upload Submission' : 'Submit'" type="submit" width="min-content" @click="submit" :disabled="disableSubmit"></InputButton>
+                    <InputButton ref="submitButton" :text="contestManager.config[props.contest]?.submitSolver ? 'Upload Submission' : 'Submit'" type="submit" width="min-content" @click="submit" :disabled="disableSubmit"></InputButton>
                     <div style="text-align: center; color: var(--color-3);" v-if="!serverState.loggedIn">
                         <i>You must be signed in to submit solutions</i>
                     </div>
@@ -324,10 +225,10 @@ const antiGPT = (e: ClipboardEvent) => {
                         <label class="submissionTitle" :for="'submissionCheckbox' + index">
                             <ContestProblemStatusCircle :status="submission.status"></ContestProblemStatusCircle>
                             <span style="margin-left: 8px;">{{ completionStateString(submission.status) }} ({{ submission.language }} - {{ new Date(submission.time).toLocaleString() }})</span>
-                            <!-- <button v-if="index == 0" class="submissionOpenCode" @click="viewCode()" title="View submission code"> -->
+                            <button class="submissionOpenCode" @click="() => viewCode(index)" title="View submission code">
                                 <!-- actually stupid -->
-                                <!-- <img src="../../../public/assets/open.svg"> -->
-                            <!-- </button> -->
+                                <img src="../../../public/assets/open.svg">
+                            </button>
                         </label>
                         <input type="checkbox" class="submissionCheckbox" :id="'submissionCheckbox' + index">
                         <div class="submissionDetailsWrapper">
@@ -348,19 +249,19 @@ const antiGPT = (e: ClipboardEvent) => {
         </div>
     </div>
     <!-- oops no code viewer -->
-    <!-- <Transition>
-        <div class="submissionCodeContainerWrapper" v-if="showCode">
+    <Transition>
+        <div class="submissionCodeContainerWrapper" v-if="showCode && viewingSubmission !== undefined">
             <div class="submissionCodeContainer">
-                <TitledCutCornerContainer :title="problem.submissions[0]?.lang + ' - ' + new Date(problem.submissions[0]?.time).toLocaleString()" height="100%" vertical-flipped>
+                <TitledCutCornerContainer :title="viewingSubmission.language + ' - ' + new Date(viewingSubmission.time).toLocaleString()" height="100%" vertical-flipped>
                     <codeblock class="submissionCode">
-                        {{ submissionCode }}
+                        {{ viewingSubmission.file }}
                     </codeblock>
-                    <InputCopyButton :value="submissionCode" class="submissionCodeCopy"></InputCopyButton>
+                    <InputCopyButton :value="viewingSubmission.file" class="submissionCodeCopy"></InputCopyButton>
                 </TitledCutCornerContainer>
                 <InputIconButton text="" img="/assets/close.svg" img-only img-hover-color="var(--color-2)" title="Close" class="submissionCodeClose" @click="showCode = false"></InputIconButton>
             </div>
         </div>
-    </Transition> -->
+    </Transition>
 </template>
 
 <style scoped>
