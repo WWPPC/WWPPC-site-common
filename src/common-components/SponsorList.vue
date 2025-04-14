@@ -2,7 +2,7 @@
 import { GlitchText, GlowText } from '#/text';
 import HomeSponsorLogo from '#/common-components/SponsorLogo.vue';
 import LineDivider from '#/common/LineDivider.vue';
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 
 
 type SponsorLogo = { name: string, src: string, url: string, height: string };
@@ -15,8 +15,9 @@ const props = defineProps<{
     bronze: SponsorLogo[]
 }>();
 
+const root = document.documentElement;
+
 onMounted(() => {
-    const root = document.documentElement;
     const mainDiv = document.getElementById('main') as HTMLDivElement;
 
     if (mainDiv) {
@@ -34,11 +35,16 @@ onMounted(() => {
     }
 });
 
+window.addEventListener('resize', function() {
+    let ratio = ref( 2 / window.devicePixelRatio * 15 ).value;
+    root.style.setProperty('--column-gap', ratio  + 'px');  
+})
+
 </script>
 
 <template>
     <div class="centered">
-            <GlitchText text="Sponsors" font-size="var(--font-title)" :color=$props.color glow shadow random :steps=2 on-visible></GlitchText>
+            <GlitchText text="Sponsors" font-size="var(--font-title)" :color=$props.color glow shadow random :steps=2 on-visible/>
         </div>
     <div id="main" class="sponsorColumns">
         <div v-if="partners.length!=0">
@@ -46,7 +52,7 @@ onMounted(() => {
             <GlowText v-else text="PARTNERS" font-size="var(--font-huge)" :color=$props.color shadow/>
 
             <div class="sponsors">
-                <HomeSponsorLogo v-for="sponsor in partners" :key="sponsor.name" :src="sponsor.src" :url="sponsor.url" :name="sponsor.name" :height="sponsor.height" />
+                <HomeSponsorLogo v-for="sponsor in partners" :key="sponsor.name" :src="sponsor.src" :url="sponsor.url" :name="sponsor.name" :height="sponsor.height"/>
             </div>
         </div>
 
@@ -54,7 +60,7 @@ onMounted(() => {
             <GlowText text="GOLD" font-size="var(--font-huge)" color="#FD0" shadow/>
 
             <div class="sponsors">
-                <HomeSponsorLogo v-for="sponsor in gold" :key="sponsor.name" :src="sponsor.src" :url="sponsor.url" :name="sponsor.name" :height="sponsor.height" />
+                <HomeSponsorLogo v-for="sponsor in gold" :key="sponsor.name" :src="sponsor.src" :url="sponsor.url" :name="sponsor.name" :height="sponsor.height"/>
             </div>
         </div>
 
@@ -62,7 +68,7 @@ onMounted(() => {
             <GlowText text="SILVER" font-size="var(--font-huge)" color="#CCC" shadow/>
 
             <div class="sponsors">
-                <HomeSponsorLogo v-for="sponsor in silver" :key="sponsor.name" :src="sponsor.src" :url="sponsor.url" :name="sponsor.name" :height="sponsor.height" />
+                <HomeSponsorLogo v-for="sponsor in silver" :key="sponsor.name" :src="sponsor.src" :url="sponsor.url" :name="sponsor.name" :height="sponsor.height"/>
             </div>
         </div>
 
@@ -80,6 +86,7 @@ onMounted(() => {
 
 :root {
     --width: 40vh;
+    --column-gap: 15px;
 }
 
 .sponsorColumns {
@@ -102,8 +109,8 @@ onMounted(() => {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    row-gap: 20px;
-    column-gap: 15px;
+    row-gap: 25px;
+    column-gap: var(--column-gap);
     padding: 0px 5%;
 }
 </style>
