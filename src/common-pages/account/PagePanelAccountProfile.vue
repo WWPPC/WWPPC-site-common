@@ -9,7 +9,6 @@ import { useAccountManager, gradeMaps, experienceMaps, languageMaps } from '#/mo
 import { useRoute, useRouter } from 'vue-router';
 import { useServerState } from '#/modules/ServerState';
 
-const route = useRoute();
 const router = useRouter();
 const modal = globalModal();
 const accountManager = useAccountManager();
@@ -20,7 +19,7 @@ const usernameNotEditable = ref('');
 const emailNotEditable = ref('');
 const joinCodeNotEditable = ref('');
 watch(() => accountManager.user.username, () => usernameNotEditable.value = accountManager.user.username, { immediate: true });
-watch(() => accountManager.team?.joinKey, () => joinCodeNotEditable.value = accountManager.team?.joinKey ?? '', { immediate: true });
+watch([() => accountManager.team?.id, () => accountManager.team?.joinKey], () => accountManager.team !== null && (joinCodeNotEditable.value = accountManager.team.id + accountManager.team.joinKey), { immediate: true });
 watch(() => accountManager.user.email, () => emailNotEditable.value = accountManager.user.email, { immediate: true });
 
 // oops
@@ -65,16 +64,18 @@ const createTeam = async () => {
 
 // hides join code when user is not hovering over it
 const obfuscatedJoinCode = ref('');
-const onCodeMouseEnter = () => {
-    obfuscatedJoinCode.value = accountManager.team?.joinKey ?? '';
-};
-const onCodeMouseLeave = () => {
-    obfuscatedJoinCode.value = '*'.repeat(accountManager.team?.joinKey.length ?? 6);
-};
+const hovering = ref(false);
+const onCodeMouseEnter = () => hovering.value = true;
+const onCodeMouseLeave = () => hovering.value = false;
 onMounted(() => {
-    obfuscatedJoinCode.value = '*'.repeat(accountManager.team?.joinKey.length ?? 6);
-    document.addEventListener('blur', () => obfuscatedJoinCode.value = '*'.repeat(accountManager.team?.joinKey.length ?? 6));
+    document.addEventListener('blur', () => hovering.value = false);
 });
+watch([joinCodeNotEditable, hovering], () => {
+    if (hovering.value) obfuscatedJoinCode.value = joinCodeNotEditable.value;
+    else obfuscatedJoinCode.value = '*'.repeat(joinCodeNotEditable.value.length ?? 6);
+});
+
+
 
 // danger buttons
 const showCredWait = ref(false);

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { reactive } from 'vue';
+import { reactive, watch } from 'vue';
 import { useRoute, useRouter, type RouteLocationNormalizedGeneric } from 'vue-router';
 
 import { useServerState } from './ServerState';
@@ -27,14 +27,16 @@ export const useLoginEnforcer = defineStore('loginEnforcer', {
             const serverState = useServerState();
             const route = useRoute();
             const router = useRouter();
-            const checkLogin = (to: RouteLocationNormalizedGeneric) => {
-                const trimmed = to.path.replace(/\/*$/, '');
-                return (!serverState.loggedIn && Array.from(state.include.values()).some((p) => trimmed.startsWith(p)) || state.includeExact.has(trimmed))
-                    && !(Array.from(state.exclude.values()).some((p) => trimmed.startsWith(p)) || state.excludeExact.has(trimmed));
+            const checkLogin = () => {
+                const trimmed = route.path.replace(/\/*$/, '');
+                if ((!serverState.loggedIn && route.query.ignore_server === undefined && trimmed != '/login'
+                    && Array.from(state.include.values()).some((p) => trimmed.startsWith(p)) || state.includeExact.has(trimmed))
+                    && !(Array.from(state.exclude.values()).some((p) => trimmed.startsWith(p)) || state.excludeExact.has(trimmed))) {
+                    router.push({ path: '/login', query: { redirect: route.fullPath, clearQuery: 1 } });
+                }
             };
-            router.afterEach((to, from) => {
-                if (checkLogin(to) && route.query.ignore_server === undefined) router.push({ path: '/login', query: { redirect: to.fullPath, clearQuery: 1 }});
-            });
+            router.afterEach(() => checkLogin());
+            watch(() => serverState.loggedIn, () => checkLogin());
         }
     }
 });

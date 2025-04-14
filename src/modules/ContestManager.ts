@@ -116,6 +116,7 @@ export class ContestHost {
         this.type = metadata.type;
         this.config = useServerState().serverConfig.contests[metadata.type]!;
         if (this.config === undefined) throw new TypeError(`Could not load contest as contest type ${metadata.type} not in server config`);
+        console.info('Loading contest ' + this.id);
         this.longPolling = {
             contestData: new LongPollEventReceiver<Contest>('GET', `/api/contest/${this.id}/data`),
             contestScoreboards: new LongPollEventReceiver<ScoreboardEntry[]>('GET', `/api/contest/${this.id}/scoreboards`),
