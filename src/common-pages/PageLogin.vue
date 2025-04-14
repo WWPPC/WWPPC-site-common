@@ -18,10 +18,13 @@ const modal = globalModal();
 const serverState = useServerState();
 const accountManager = useAccountManager();
 
-watch([() => route.params.page, () => serverState.loggedIn], async () => {
+watch([() => route.params.page, () => serverState.loggedIn], () => {
     // redirect away from login (if redirected to login elsewhere) if logged in
     if (route.params.page == 'login' && route.query.ignore_server === undefined) {
-        if (serverState.loggedIn) router.replace({ path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home?clearQuery', query: { clearQuery: 1 } });
+        if (serverState.loggedIn) router.replace({
+            path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home',
+            query: { clearQuery: 1 }
+        });
     } else {
         page.value = 0;
         loginError.value = '';

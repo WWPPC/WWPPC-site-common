@@ -73,7 +73,7 @@ onMounted(() => {
 watch([joinCodeNotEditable, hovering], () => {
     if (hovering.value) obfuscatedJoinCode.value = joinCodeNotEditable.value;
     else obfuscatedJoinCode.value = '*'.repeat(joinCodeNotEditable.value.length ?? 6);
-});
+}, { immediate: true });
 
 
 
