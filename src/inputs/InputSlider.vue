@@ -40,6 +40,9 @@ function input() {
 .slider::-webkit-slider-thumb {
   appearance: none;
   height: 30px;
+  width: 25px;
+  background: var(--color-1);
+  outline: 0;
   border-radius: 0%;
   border: 4px solid white;
 }
@@ -48,7 +51,7 @@ function input() {
   appearance: none;
   height: 30px;
   width: 25px;
-  background: #00FF18;
+  background: var(--color-1);
   outline: 0;
   border-radius: 0%;
   border: 4px solid white;
