@@ -16,16 +16,16 @@ export type ServerContestConfig = {
 const state = reactive<{
     connected: boolean
     loggedIn: boolean
-    serverConfig: {
+    config: {
         maxProfileImgSize: number
         contests: { [key: string]: ServerContestConfig | undefined }
     }
 }>({
     connected: false,
     loggedIn: false,
-    serverConfig: {
+    config: {
         maxProfileImgSize: 65535,
-        //TODO: remove contests from serverConfig and into the ContestManager class
+        //TODO: remove contests from config and into the ContestManager class
         contests: {}
     }
 });
@@ -94,7 +94,7 @@ watch(sessionId, (prev, curr) => {
                     color: 'var(--color-2)'
                 });
             } else {
-                state.serverConfig = await res.json();
+                state.config = await res.json();
                 console.info('Server configuration fetched');
             }
         });

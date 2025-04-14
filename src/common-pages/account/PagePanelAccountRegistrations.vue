@@ -17,7 +17,7 @@ const registrationSelected = ref('');
 const updateAvailableContestList = async () => {
     const res = await contestManager.getOpenRegistrations();
     if (res instanceof Response) {
-        modal.showModal({ title: res.statusText, content: 'Could not load upcoming contests.' + res.status , color: 'var(--color-2)' });
+        modal.showModal({ title: res.statusText, content: 'Could not load upcoming contests.' + res.status, color: 'var(--color-2)' });
         return;
     }
     contestList.value = res.filter((v) => {
@@ -32,13 +32,21 @@ const attemptRegister = async () => {
     if (registrationSelected.value == '') return;
     showRegisterWait.value = true;
     const res = await accountManager.registerContest(registrationSelected.value);
-    if (!res.ok) modal.showModal({ title: 'Could not register', content: res.statusText, color: 'red' });
+    if (!res.ok) modal.showModal({
+        title: 'Could not register',
+        content: res.statusText,
+        color: 'var(--color-2)'
+    });
     showRegisterWait.value = false;
 };
 const attemptUnregister = async (registration: string) => {
     showRegisterWait.value = true;
     const res = await accountManager.unregisterContest(registration);
-    if (!res.ok) modal.showModal({ title: 'Could not unregister', content: res.statusText, color: 'red' });
+    if (!res.ok) modal.showModal({
+        title: 'Could not unregister',
+        content: res.statusText,
+        color: 'var(--color-2)'
+    });
     showRegisterWait.value = false;
 };
 </script>
@@ -52,7 +60,7 @@ const attemptUnregister = async (registration: string) => {
                     <div class="registrationBlock">
                         <div class="registrationStatusDotUpcoming"></div>
                         {{ reg }}
-                        <InputButton class="registrationUnregister" text="Unregister" color="red" @click="attemptUnregister(reg)" glitch-on-mount></InputButton>
+                        <InputButton class="registrationUnregister" text="Unregister" color="var(--color-2)" @click="attemptUnregister(reg)" glitch-on-mount></InputButton>
                     </div>
                 </AnimateInContainer>
             </div>
@@ -123,4 +131,4 @@ const attemptUnregister = async (registration: string) => {
 .registrationBlock:hover>.registrationUnregister {
     opacity: 1;
 }
-</style>getTeamOpMessage, TeamOpResult, 
+</style>getTeamOpMessage, TeamOpResult,
