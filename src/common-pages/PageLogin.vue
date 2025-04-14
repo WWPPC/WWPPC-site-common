@@ -30,6 +30,15 @@ watch([() => route.params.page, () => serverState.loggedIn], () => {
         loginError.value = '';
     }
 });
+watch(() => serverState.connected, () => {
+    if (!serverState.connected) {
+        // oops interrupted
+        page.value = 0;
+        loginError.value = '';
+        showLoginWait.value = false;
+        showRecoveryWait.value = false;
+    }
+});
 
 const page = ref(0);
 const usernameInput = ref('');
@@ -337,6 +346,7 @@ const attemptRecovery = async () => {
 }
 
 .loginError {
+    margin-top: 0.5em;
     color: var(--color-2);
     text-align: center;
 }

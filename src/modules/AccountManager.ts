@@ -102,34 +102,6 @@ const state = reactive<{
     writeTeamErr: undefined,
     loaded: false
 });
-const writeUser = debounce(async () => {
-    // when loading data unsaved will be set to false, prevents saving data that was just loaded
-    if (!unsaved.value) return;
-    const res = await apiFetch('PUT', '/api/self/userData', {
-        ...state.user,
-        email: await RSAencrypt(state.user.email),
-        email2: await RSAencrypt(state.user.email2)
-    });
-    if (res.ok) {
-        unsaved.value = false;
-        state.writeUserErr = undefined;
-    } else {
-        state.writeUserErr = res.status + ' - ' + (await res.text());
-    }
-}, 3000);
-const writeTeam = debounce(async () => {
-    // don't write when null
-    if (state.team === null) return;
-    // when loading data unsaved will be set to false, prevents saving data that was just loaded
-    if (!unsaved2.value) return;
-    const res = await apiFetch('PUT', '/api/self/teamData', state.team);
-    if (res.ok) {
-        unsaved2.value = false;
-        state.writeTeamErr = undefined;
-    } else {
-        state.writeTeamErr = res.status + ' - ' + (await res.text());
-    }
-}, 3000);
 
 export const useAccountManager = defineStore('accountManager', {
     state: () => state,
@@ -146,18 +118,46 @@ export const useAccountManager = defineStore('accountManager', {
                 else this.loaded = false;
             });
             // autosave only when actually loaded  
+            const writeUser = debounce(async () => {
+                // when loading data unsaved will be set to false, prevents saving data that was just loaded
+                if (!unsaved.value) return;
+                const res = await apiFetch('PUT', '/api/self/userData', {
+                    ...state.user,
+                    email: await RSAencrypt(state.user.email),
+                    email2: await RSAencrypt(state.user.email2)
+                });
+                if (res.ok) {
+                    unsaved.value = false;
+                    state.writeUserErr = undefined;
+                } else {
+                    state.writeUserErr = res.status + ' - ' + (await res.text());
+                }
+            }, 3000);
+            const writeTeam = debounce(async () => {
+                // don't write when null
+                if (state.team === null) return;
+                // when loading data unsaved will be set to false, prevents saving data that was just loaded
+                if (!unsaved2.value) return;
+                const res = await apiFetch('PUT', '/api/self/teamData', state.team);
+                if (res.ok) {
+                    unsaved2.value = false;
+                    state.writeTeamErr = undefined;
+                } else {
+                    state.writeTeamErr = res.status + ' - ' + (await res.text());
+                }
+            }, 3000);
             watch(() => state.user, () => {
                 if (state.loaded) {
                     unsaved.value = true;
                     writeUser();
                 }
-            });
+            }, { deep: true });
             watch(() => state.team, () => {
                 if (state.loaded) {
                     unsaved2.value = true;
                     writeTeam();
                 }
-            });
+            }, { deep: true });
             // "your changes may not be saved" warning
             window.addEventListener('beforeunload', (e) => {
                 if ((unsaved.value || unsaved2.value) && state.loaded) e.preventDefault();
@@ -174,11 +174,11 @@ export const useAccountManager = defineStore('accountManager', {
             if (res.ok) return await res.json();
             return res;
         },
-        async fetchSelf(showErrors: boolean = true): Promise<void> {
+        async fetchSelf(showErrors: boolean = true, forceReload: boolean = false): Promise<void> {
             this.loaded = false;
             const res = await Promise.all([
                 new Promise(async (resolve) => {
-                    const res = await apiFetch('GET', '/api/self/userData');
+                    const res = await apiFetch('GET', '/api/self/userData', undefined, undefined, { cache: forceReload ? 'reload' : 'default' });
                     if (res.ok) {
                         state.user = await res.json();
                         resolve(true);
@@ -194,7 +194,7 @@ export const useAccountManager = defineStore('accountManager', {
                     }
                 }),
                 new Promise(async (resolve) => {
-                    const res = await apiFetch('GET', '/api/self/teamData');
+                    const res = await apiFetch('GET', '/api/self/teamData', undefined, undefined, { cache: forceReload ? 'reload' : 'default' });
                     if (res.ok) {
                         state.team = await res.json();
                         unsaved2.value = false;
@@ -222,22 +222,22 @@ export const useAccountManager = defineStore('accountManager', {
         },
         async createTeam(teamName: string): Promise<Response> {
             const res = await apiFetch('POST', '/api/self/team', { name: teamName });
-            this.fetchSelf();
+            this.fetchSelf(true, true);
             return res;
         },
         async joinTeam(joinCode: string): Promise<Response> {
             const res = await apiFetch('PUT', '/api/self/team', { code: joinCode });
-            this.fetchSelf();
+            this.fetchSelf(true, true);
             return res;
         },
         async leaveTeam(): Promise<Response> {
             const res = await apiFetch('DELETE', '/api/self/team');
-            this.fetchSelf();
+            this.fetchSelf(true, true);
             return res;
         },
         async kickTeam(username: string): Promise<Response> {
             const res = await apiFetch('DELETE', '/api/self/team/' + username);
-            this.fetchSelf();
+            this.fetchSelf(true, true);
             return res;
         },
         async registerContest(contest: string): Promise<Response> {

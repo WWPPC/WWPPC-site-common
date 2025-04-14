@@ -6,10 +6,12 @@ import AccountTeamUserDisp from '#/common-components/account/AccountTeamUserDisp
 import { onMounted, ref, watch } from 'vue';
 import { globalModal, ModalMode } from '#/modal';
 import { useAccountManager, gradeMaps, experienceMaps, languageMaps } from '#/modules/AccountManager';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useServerState } from '#/modules/ServerState';
+import LoadingSpinner from '#/common/LoadingSpinner.vue';
 
 const router = useRouter();
+const route = useRoute();
 const modal = globalModal();
 const accountManager = useAccountManager();
 const serverState = useServerState();
@@ -22,7 +24,7 @@ watch(() => accountManager.user.username, () => usernameNotEditable.value = acco
 watch([() => accountManager.team?.id, () => accountManager.team?.joinKey], () => accountManager.team !== null && (joinCodeNotEditable.value = accountManager.team.id + accountManager.team.joinKey), { immediate: true });
 watch(() => accountManager.user.email, () => emailNotEditable.value = accountManager.user.email, { immediate: true });
 
-// oops
+// oops spaghetti
 const gradeInput = ref('');
 const experienceInput = ref('');
 const languagesInput = ref<string[]>([]);
@@ -40,26 +42,45 @@ watch(() => accountManager.team?.bio, () => remainingBioCharacters2.value = 1024
 
 // teams
 const joinTeamCode = ref('');
-const createTeamName = ref('');
-const showWriteTeamDataWait = ref(false);
+const createTeamNameInput = ref('');
+const showTeamWait = ref(false);
 const joinTeam = async () => {
-    showWriteTeamDataWait.value = true;
-    if (joinTeamCode.value.length != 6) return;
-    await accountManager.joinTeam(joinTeamCode.value);
-    showWriteTeamDataWait.value = false;
+    showTeamWait.value = true;
+    const res = await accountManager.joinTeam(joinTeamCode.value);
+    showTeamWait.value = false;
+    if (res.status == 404 || res.status == 400) modal.showModal({
+        title: 'Invalid join code',
+        content: 'Verify your join code is correct before trying again',
+        color: 'var(--color-3)'
+    });
+    else if (!res.ok) modal.showModal({
+        title: 'Could not join team',
+        content: `${res.status} - ${await res.text()}`,
+        color: 'var(--color-2)'
+    });
 };
 const leaveTeam = async () => {
     const confirmation = await modal.showModal({ title: 'Leave team?', content: 'You are about to leave the team. Are you sure?', mode: ModalMode.CONFIRM, color: 'yellow' }).result;
     if (!confirmation) return;
-    showWriteTeamDataWait.value = true;
-    await accountManager.leaveTeam();
-    showWriteTeamDataWait.value = false;
+    showTeamWait.value = true;
+    const res = await accountManager.leaveTeam();
+    showTeamWait.value = false;
+    if (!res.ok) modal.showModal({
+        title: 'Could not leave team',
+        content: `${res.status} - ${await res.text()}`,
+        color: 'var(--color-2)'
+    });
 };
 const createTeam = async () => {
-    showWriteTeamDataWait.value = true;
-    if (createTeamName.value.length < 1 || createTeamName.value.length > 32) return;
-    await accountManager.createTeam(createTeamName.value);
-    showWriteTeamDataWait.value = false;
+    if (createTeamNameInput.value.length == 0 || createTeamNameInput.value.length > 32) return;
+    showTeamWait.value = true;
+    const res = await accountManager.createTeam(createTeamNameInput.value);
+    showTeamWait.value = false;
+    if (!res.ok) modal.showModal({
+        title: 'Could not create team',
+        content: `${res.status} - ${await res.text()}`,
+        color: 'var(--color-2)'
+    });
 };
 
 // hides join code when user is not hovering over it
@@ -75,10 +96,7 @@ watch([joinCodeNotEditable, hovering], () => {
     else obfuscatedJoinCode.value = '*'.repeat(joinCodeNotEditable.value.length ?? 6);
 }, { immediate: true });
 
-
-
 // danger buttons
-const showCredWait = ref(false);
 const currentPasswordInput = ref('');
 const newPasswordInput = ref('');
 const changePasswordEnabled = ref(false);
@@ -232,9 +250,12 @@ onMounted(clearDangerButtons);
                     <span>Biography<br>({{ remainingBioCharacters }} chars):</span>
                     <InputTextArea v-model=accountManager.user.bio width="var(--fwidth)" min-height="2em" height="4em" max-height="20em" maxlength="2048" placeholder="Describe yourself in a few short sentences!" resize="vertical"></InputTextArea>
                 </PairedGridContainer>
-                <!-- <InputButton class="profileSaveButton" type="submit" v-if=accountManager.unsavedUserChanges text="Save" color="yellow" glitch-on-mount></InputButton> -->
             </form>
-            <!-- <WaitCover text="Please wait..." :show="(showWriteDataWait || loading) && route.query.ignore_server === undefined"></WaitCover> -->
+            <WaitCover text="Loading..." :show="!accountManager.loaded && route.query.ignore_server === undefined"></WaitCover>
+            <div class="profileSaveIndicator" v-if="accountManager.unsavedUserChanges">
+                <LoadingSpinner width="1em" height="1em"></LoadingSpinner>
+                Saving...
+            </div>
         </TitledCutCornerContainer>
     </AnimateInContainer>
     <AnimateInContainer type="slideUp" :delay=200>
@@ -243,8 +264,8 @@ onMounted(clearDangerButtons);
                 <div class="profileTeamSection">
                     <h3>Join a team!</h3>
                     <form class="nowrap" action="javascript:void(0)" @submit="joinTeam">
-                        <InputTextBox v-model=joinTeamCode title="Ask team creator for join code!" placeholder="Join code" maxlength="6"></InputTextBox>
-                        <InputButton type="submit" text="Join" :disabled="joinTeamCode.length != 6"></InputButton>
+                        <InputTextBox v-model=joinTeamCode title="Ask team creator for join code!" placeholder="Join code"></InputTextBox>
+                        <InputButton type="submit" text="Join" :disabled="joinTeamCode.length == 0"></InputButton>
                     </form>
                     <br>
                     <i>Joining will sync your registrations to the team</i>
@@ -253,8 +274,8 @@ onMounted(clearDangerButtons);
                 <div class="profileTeamSection">
                     <h3>Create Team</h3>
                     <form class="nowrap" action="javascript:void(0)" @submit="createTeam">
-                        <InputTextBox v-model=createTeamName title="Name for your new team" placeholder="Team name" maxlength="32"></InputTextBox>
-                        <InputButton type="submit" text="Create" :disabled="createTeamName.length == 0"></InputButton>
+                        <InputTextBox v-model=createTeamNameInput title="Name for your new team" placeholder="Team name" maxlength="32"></InputTextBox>
+                        <InputButton type="submit" text="Create" :disabled="createTeamNameInput.length == 0"></InputButton>
                     </form>
                 </div>
             </div>
@@ -271,7 +292,6 @@ onMounted(clearDangerButtons);
                             <span>Biography<br>({{ remainingBioCharacters2 }} chars):</span>
                             <InputTextArea v-model=accountManager.team.bio width="var(--fwidth)" min-height="2em" height="4em" max-height="20em" maxlength="1024" placeholder="Describe your team in a few short sentences!" resize="vertical"></InputTextArea>
                         </PairedGridContainer>
-                        <!-- <InputButton class="profileSaveButton" type="submit" v-if=accountManager.unsavedTeamChanges text="Save" color="yellow" glitch-on-mount></InputButton> -->
                     </form>
                 </div>
             </div>
@@ -283,9 +303,13 @@ onMounted(clearDangerButtons);
                 </form>
             </div>
             <div class="profileTeamSection" v-if="accountManager.team && accountManager.team?.id !== accountManager.user.username">
-                <InputButton text="Leave Team" color="var(--color-2)" glitch-on-mount @click=leaveTeam></InputButton>
+                <InputButton text="Leave Team" color="var(--color-2)" glitch-on-mount @click="leaveTeam"></InputButton>
             </div>
-            <!-- <WaitCover text="Please wait..." :show="(showWriteTeamDataWait || loading) && route.query.ignore_server === undefined"></WaitCover> -->
+            <WaitCover text="Please wait..." :show="showTeamWait && route.query.ignore_server === undefined"></WaitCover>
+            <div class="profileSaveIndicator" v-if="accountManager.unsavedTeamChanges">
+                <LoadingSpinner width="1em" height="1em"></LoadingSpinner>
+                Saving...
+            </div>
         </TitledCutCornerContainer>
     </AnimateInContainer>
     <AnimateInContainer type="slideUp" :delay=300>
@@ -308,8 +332,6 @@ onMounted(clearDangerButtons);
             </TitledCollapsibleContainer>
         </TitledCutCornerContainer>
     </AnimateInContainer>
-    <WaitCover text="Signing in..." :show=showCredWait></WaitCover>
-    <WaitCover text="Fetching data..." :show="!accountManager.loaded"></WaitCover>
 </template>
 
 <style scoped>
@@ -363,5 +385,18 @@ onMounted(clearDangerButtons);
     width: 100%;
     min-width: 0px;
     margin: 0px 0px;
+}
+
+.profileSaveIndicator {
+    display: flex;
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    margin: 0.5em;
+    text-wrap: none;
+    align-items: center;
+    font-size: var(--font-small);
+    column-gap: 0.5em;
+    pointer-events: none;
 }
 </style>

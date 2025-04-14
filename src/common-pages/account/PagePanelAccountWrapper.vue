@@ -58,8 +58,7 @@ const changeProfileImage = (event: any) => {
 };
 const logout = async () => {
     const res = await serverState.logout();
-    if (res.ok) router.push({ path: '/' });
-    else modal.showModal({
+    if (!res.ok) modal.showModal({
         title: 'Failed to log out',
         content: `${res.status} - ${await res.text()}`,
         color: 'var(--color-2)'

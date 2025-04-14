@@ -14,8 +14,9 @@ export const serverHostname = isDev ? 'https://localhost:8000' : 'https://server
  * @returns Response
  * @throws Typical errors thrown by `fetch` calls
  */
-export async function apiFetch(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: any, query?: Record<string, string>): Promise<Response> {
+export async function apiFetch(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: any, query?: Record<string, string>, args?: Partial<RequestInit>): Promise<Response> {
     return await fetch(serverHostname + (path.startsWith('/') ? path : ('/' + path) + (query !== undefined ? new URLSearchParams(Object.entries(query)).toString() : '')), {
+        ...args,
         method: method,
         headers: body != undefined ? {
             "Content-Type": "application/json"
