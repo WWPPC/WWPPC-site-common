@@ -49,25 +49,24 @@ export const RSAencrypt = RSA.encrypt;
 
 // re-fetch server config if session changes
 const sessionId = ref('');
-const checkLoggedIn = () => {
+const checkLoggedIn = async () => {
     // will detect if disconnected/session expired
     try {
-        apiFetch('GET', '/auth/login').then(async (res) => {
-            sessionId.value = await res.text();
-            if (res.ok) {
-                // connected & logged in
-                state.connected = true;
-                state.loggedIn = true;
-            } else if (res.status == 401) {
-                // connected but not logged in
-                state.connected = true;
-                state.loggedIn = false;
-            } else {
-                // oh no
-                state.connected = false;
-                state.loggedIn = false;
-            }
-        });
+        const res = await apiFetch('GET', '/auth/login');
+        sessionId.value = await res.text();
+        if (res.ok) {
+            // connected & logged in
+            state.connected = true;
+            state.loggedIn = true;
+        } else if (res.status == 401) {
+            // connected but not logged in
+            state.connected = true;
+            state.loggedIn = false;
+        } else {
+            // oh no
+            state.connected = false;
+            state.loggedIn = false;
+        }
     } catch (err) {
         // failed to fetch - no internet is common cause for error
         state.connected = false;
@@ -100,6 +99,7 @@ watch(sessionId, (prev, curr) => {
         });
     }
 });
+watch(() => state.connected, () => console.debug('Connected: ' + state.connected));
 
 export const useServerState = defineStore('serverState', {
     state: () => state,

@@ -49,15 +49,15 @@ export class LongPollEventReceiver<E> {
 
     private async fetchLoop() {
         // initial request
-        const res = await apiFetch(this.method, this.path, undefined, { init: '1' });
-        if(res.ok) {
+        const res = await apiFetch(this.method, this.path, undefined, { init: '1' }).catch(() => new Response(null, { status: 503 }));
+        if (res.ok) {
             if (res.status != 204) this.ref.value = await res.json() as E;
         } else {
             await new Promise<void>((r) => setTimeout(() => r(), 10000));
         }
         let retryTime = 10000;
         while (this.running) {
-            const res = await apiFetch(this.method, this.path);
+            const res = await apiFetch(this.method, this.path).catch(() => new Response(null, { status: 503 }));
             if (res.ok) {
                 if (res.status != 204) this.ref.value = await res.json() as E;
                 retryTime = 10000;
