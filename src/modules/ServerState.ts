@@ -2,7 +2,8 @@ import { globalModal } from '#/modal';
 import { debounce } from '#/util/inputLimiting';
 import { apiFetch } from '#/util/netUtil';
 import { defineStore } from 'pinia';
-import { reactive } from 'vue';
+import { reactive, ref, watch } from 'vue';
+
 import type { AccountData } from './AccountManager';
 
 export type ServerContestConfig = {
@@ -46,62 +47,59 @@ const RSA: {
 
 export const RSAencrypt = RSA.encrypt;
 
+// re-fetch server config if session changes
+const sessionId = ref('');
 const checkLoggedIn = () => {
     // will detect if disconnected/session expired
     try {
-        apiFetch('GET', '/auth/login').then((res) => {
+        apiFetch('GET', '/auth/login').then(async (res) => {
+            sessionId.value = await res.text();
             if (res.ok) {
                 // connected & logged in
                 state.connected = true;
                 state.loggedIn = true;
-                // fetch config if not loaded
-                if (RSA.publicKey === null) fetchConfig();
             } else if (res.status == 401) {
                 // connected but not logged in
                 state.connected = true;
                 state.loggedIn = false;
-                // fetch config if not loaded
-                if (RSA.publicKey === null) fetchConfig();
             } else {
                 // oh no
                 state.connected = false;
                 state.loggedIn = false;
-                // remove config so it gets reloaded on reconnect
-                RSA.publicKey = null;
             }
         });
     } catch (err) {
         // failed to fetch - no internet is common cause for error
         state.connected = false;
         state.loggedIn = false;
-        // remove config so it gets reloaded on reconnect
-        RSA.publicKey = null;
     }
 };
-const fetchConfig = () => {
-    apiFetch('GET', '/auth/publicKey').then(async (res) => {
-        if (window.crypto.subtle === undefined) {
-            console.warn('<h1>Insecure context!</h1><br>The page has been opened in an insecure context and cannot perform encryption processes. Credentials and submissions will be sent in PLAINTEXT!');
-        } else {
-            RSA.publicKey = await window.crypto.subtle.importKey('jwk', await res.json(), { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
-        }
-    });
-    apiFetch('GET', '/api/config').then(async (res) => {
-        if (!res.ok) {
-            const errText = `${res.status} - ${await res.text()}`;
-            console.error(`Failed to fetch configuration:\n${errText}`);
-            const modal = globalModal();
-            modal.showModal({
-                title: 'Configuration fetch failed',
-                content: `Failed to fetch server configuration. This may interfere with some functionality.\n${errText}`,
-                color: 'var(--color-2)'
-            });
-        } else {
-            state.serverConfig = await res.json();
-            console.info('Server configuration fetched');
-        }
-    });
-};
+watch(sessionId, (prev, curr) => {
+    if (prev != curr) {
+        apiFetch('GET', '/auth/publicKey').then(async (res) => {
+            if (window.crypto.subtle === undefined) {
+                console.warn('<h1>Insecure context!</h1><br>The page has been opened in an insecure context and cannot perform encryption processes. Credentials and submissions will be sent in PLAINTEXT!');
+            } else {
+                RSA.publicKey = await window.crypto.subtle.importKey('jwk', await res.json(), { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
+            }
+        });
+        apiFetch('GET', '/api/config').then(async (res) => {
+            if (!res.ok) {
+                const errText = `${res.status} - ${await res.text()}`;
+                console.error(`Failed to fetch configuration:\n${errText}`);
+                const modal = globalModal();
+                modal.showModal({
+                    title: 'Configuration fetch failed',
+                    content: `Failed to fetch server configuration. This may interfere with some functionality.\n${errText}`,
+                    color: 'var(--color-2)'
+                });
+            } else {
+                state.serverConfig = await res.json();
+                console.info('Server configuration fetched');
+            }
+        });
+    }
+});
 
 export const useServerState = defineStore('serverState', {
     state: () => state,

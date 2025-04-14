@@ -130,15 +130,15 @@ const writeTeam = debounce(async () => {
         state.writeTeamErr = res.status + ' - ' + (await res.text());
     }
 }, 3000);
-  
+// autosave only when actually loaded  
 watch(() => state.user, () => {
-    if (useServerState().loggedIn) {
+    if (state.loaded) {
         unsaved.value = true;
         writeUser();
     }
 });
 watch(() => state.team, () => {
-    if (useServerState().loggedIn) {
+    if (state.loaded) {
         unsaved2.value = true;
         writeTeam();
     }
@@ -146,7 +146,7 @@ watch(() => state.team, () => {
 
 // "your changes may not be saved" warning
 window.addEventListener('beforeunload', (e) => {
-    if (unsaved.value || unsaved2.value) e.preventDefault();
+    if ((unsaved.value || unsaved2.value) && state.loaded) e.preventDefault();
 });
 
 export const useAccountManager = defineStore('accountManager', {
