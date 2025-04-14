@@ -1,44 +1,43 @@
 <script setup lang="ts">
 import { InputLinkButton } from '#/inputs';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
-// import { glitchTextTransition } from '#/text';
-import { ref, onMounted, computed } from 'vue';
-import { useContestManager, type Problem } from '#/modules/ContestManager';
+import { ProblemCompletionState, type Problem, type Submission } from '#/modules/ContestManager';
 
 const props = defineProps<{
     // add archive host later
-    contest: string
-    problemId: string
+    data: string | Problem
+    submission?: Submission
     archive?: boolean
 }>();
-
-const contestManager = useContestManager();
-
-const problem = ref<Problem>();
-
-onMounted(async () => {
-    if (contestManager.contests[props.contest] === undefined) return;
-    const data = await contestManager.contests[props.contest]!.getProblem(props.problemId);
-    if (data instanceof Response) {
-        console.log("buh error", props.problemId);
-        return;
-    }
-    problem.value = data;
-});
 </script>
 
 <template>
-    <div class="contestProblemListProblem">
-        <!-- <span class="contestProblemListProblemId">
-            {{ props.data.round + 1 }}-{{ props.data.number + 1 }}
-        </span> -->
-        <!-- <span class="problemListCircle">
-            <ContestProblemStatusCircle :status="props.data.status"></ContestProblemStatusCircle>
-        </span> -->
-        <span class="contestProblemListProblemName"><b>{{ problem?.name ?? "Loading..." }}</b></span>
-        <span class="contestProblemListProblemAuthor"><i>{{ problem?.author ?? "Loading..." }}</i></span>
+    <div class="contestProblemListProblem" v-if="typeof props.data == 'string'">
+        <span class="contestProblemListProblemId">
+            ??-??
+        </span>
+        <span class="problemListCircle">
+            <ContestProblemStatusCircle :status="props.submission === undefined ? ProblemCompletionState.NOT_UPLOADED : props.submission.status"></ContestProblemStatusCircle>
+        </span>
+        <span class="contestProblemListProblemName"><b>Loading...</b></span>
+        <span class="contestProblemListProblemAuthor"><i>By Loading...</i></span>
         <span class="contestProblemListProblemButton">
-            <RouterLink v-if="problem?.id" :to="`./problemView/${problem.id}`" no-deco>
+            <RouterLink :to="`./problemView/${props.data}`" no-deco>
+                <InputLinkButton text="View" width="100px" height="36px" border></InputLinkButton>
+            </RouterLink>
+        </span>
+    </div>
+    <div class="contestProblemListProblem" v-else>
+        <span class="contestProblemListProblemId">
+            {{ props.data.round + 1 }}-{{ props.data.number + 1 }}
+        </span>
+        <span class="problemListCircle">
+            <ContestProblemStatusCircle :status="props.submission === undefined ? ProblemCompletionState.NOT_UPLOADED : props.submission.status"></ContestProblemStatusCircle>
+        </span>
+        <span class="contestProblemListProblemName"><b>{{ props.data.name }}</b></span>
+        <span class="contestProblemListProblemAuthor"><i>By {{ props.data.author }}</i></span>
+        <span class="contestProblemListProblemButton">
+            <RouterLink :to="`./problemView/${props.data.round}_${props.data.number}`" no-deco>
                 <InputLinkButton text="View" width="100px" height="36px" border></InputLinkButton>
             </RouterLink>
         </span>

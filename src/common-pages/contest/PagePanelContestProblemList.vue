@@ -15,7 +15,7 @@ const contestType = props.contest;
 
 const serverState = useServerState();
 const contestManager = useContestManager();
-const contestData = computed(() => contestManager.contests[contestType]?.contest);
+const contestData = computed(() => contestManager.contests[contestType]?.data.contest);
 </script>
 
 <template>
@@ -23,13 +23,13 @@ const contestData = computed(() => contestManager.contests[contestType]?.contest
         <div class="problemListWrapper">
             <AngledTitledContainer title="Problems" height="100%">
                 <div v-if="contestManager.config[contestType]?.rounds" class="problemList">
-                    <AnimateInContainer type="slideUp" v-for="(round, index) in  contestData?.rounds.filter((r) => r.problems.length > 0)" :key=round.round :delay="index * 200">
+                    <AnimateInContainer type="slideUp" v-for="(round, index) in contestData?.rounds.filter((r) => r.problems.length > 0)" :key=round.round :delay="index * 200">
                         <ContestProblemListRound :data=round></ContestProblemListRound>
                     </AnimateInContainer>
                 </div>
                 <div v-else class="problemList">
-                    <AnimateInContainer type="fade" v-for="(problem, index) in contestData?.rounds[0]?.problems" :key=problem :delay="index * 50">
-                        <ContestProblemListProblem :problemId=problem :contest="props.contest"></ContestProblemListProblem>
+                    <AnimateInContainer type="fade" v-for="(problem, index) in contestData?.rounds[0]?.problems" :key="typeof problem == 'string' ? problem : problem.id" :delay="index * 50">
+                        <ContestProblemListProblem :data=problem></ContestProblemListProblem>
                     </AnimateInContainer>
                 </div>
                 <NotFound v-if="false"></NotFound>

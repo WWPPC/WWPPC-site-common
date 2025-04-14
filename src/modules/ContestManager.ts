@@ -49,10 +49,22 @@ export type Problem = {
     }
 }
 export type Submission = {
+    id: UUID
     time: number
     language: string
     scores: Score[]
     status: ProblemCompletionState
+    analysis: boolean
+}
+export type SubmissionDetail = {
+    id: UUID
+    username: string
+    team: string | null
+    problemId: UUID
+    time: number
+    file: string
+    language: string
+    scores: Score[]
     analysis: boolean
 }
 export type Score = {
@@ -105,9 +117,11 @@ export class ContestHost {
     readonly data = reactive<{
         contest: Contest | undefined,
         scoreboard: ScoreboardEntry[] | undefined
+        submissions: Map<UUID, Submission[] | undefined>
     }>({
         contest: undefined,
-        scoreboard: undefined
+        scoreboard: undefined,
+        submissions: new Map()
     });
     private readonly problemCache: Map<UUID, Problem> = new Map();
 
@@ -149,14 +163,16 @@ export class ContestHost {
                     }).catch((err) => {
                         // uh oh offline (ServerState will deal with disconnection)
                     });
+                    this.getSubmissions(pId);
                 }
             }
             this.data.contest = dat;
         });
+        watch(this.longPolling.contestScoreboards.ref, () => this.data.scoreboard = this.longPolling.contestScoreboards.value);
     }
 
     async submitProblem(problemId: UUID, solution: string, language: string): Promise<Response> {
-        return await apiFetch('POST', `/api/contest/${this.id}/submit/${problemId}`, {
+        return apiFetch('POST', `/api/contest/${this.id}/submit/${problemId}`, {
             file: solution,
             language: language
         });
@@ -166,6 +182,12 @@ export class ContestHost {
         if (!this.longPolling.submissionData.has(problemId))
             this.longPolling.submissionData.set(problemId, new LongPollEventReceiver('GET', '/api/contest/submissions/' + problemId))
         return this.longPolling.submissionData.get(problemId)!.ref;
+    }
+
+    async getSubmission(submissionId: UUID): Promise<SubmissionDetail | Response> {
+        const res = await apiFetch('GET', `/api/contest/${this.id}/submission/${submissionId}`);
+        if (res.ok) return res.json();
+        return res;
     }
 
     close(): void {
