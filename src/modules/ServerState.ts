@@ -75,14 +75,14 @@ const checkLoggedIn = async () => {
 };
 watch(sessionId, (prev, curr) => {
     if (prev != curr) {
-        apiFetch('GET', '/auth/publicKey').then(async (res) => {
+        apiFetch('GET', '/auth/publicKey', undefined, undefined, { cache: 'no-store' }).then(async (res) => {
             if (window.crypto.subtle === undefined) {
                 console.warn('<h1>Insecure context!</h1><br>The page has been opened in an insecure context and cannot perform encryption processes. Credentials and submissions will be sent in PLAINTEXT!');
             } else {
                 RSA.publicKey = await window.crypto.subtle.importKey('jwk', await res.json(), { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
             }
         });
-        apiFetch('GET', '/api/config').then(async (res) => {
+        apiFetch('GET', '/api/config', undefined, undefined, { cache: 'no-store' }).then(async (res) => {
             if (!res.ok) {
                 const errText = `${res.status} - ${await res.text()}`;
                 console.error(`Failed to fetch configuration:\n${errText}`);

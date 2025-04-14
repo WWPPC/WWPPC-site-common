@@ -2,7 +2,7 @@ import { globalModal } from '#/modal';
 import { debounce } from '#/util/inputLimiting';
 import { apiFetch, LongPollEventReceiver } from '#/util/netUtil';
 import { defineStore } from 'pinia';
-import { reactive, ref, watch } from 'vue';
+import { reactive, ref, toRaw, watch } from 'vue';
 
 import { useServerState } from './ServerState';
 
@@ -56,16 +56,11 @@ export type Submission = {
     status: ProblemCompletionState
     analysis: boolean
 }
-export type SubmissionDetail = {
-    id: UUID
+export type SubmissionDetail = Submission & {
     username: string
     team: string | null
     problemId: UUID
-    time: number
     file: string
-    language: string
-    scores: Score[]
-    analysis: boolean
 }
 export type Score = {
     state: ScoreState
@@ -140,31 +135,32 @@ export class ContestHost {
         // automatically load new problems in the background
         watch(this.longPolling.contestData.ref, () => {
             // structuredClone prevents reactivity triggering itself when problems are added
-            const dat = structuredClone(this.longPolling.contestData.ref.value);
+            const dat = structuredClone(toRaw(this.longPolling.contestData.ref.value));
             if (dat !== undefined) for (const round of dat.rounds) {
                 for (let i in round.problems) {
                     // problems fetch concurrently because no await, also pId always string here
                     const pId = round.problems[i] as string;
                     if (this.problemCache.has(pId)) round.problems[i] = this.problemCache.get(pId)!;
-                    else apiFetch('GET', `/api/contest/${this.id}/problem/${pId}`).then(async (res) => {
-                        if (res.ok) {
-                            const p: Problem = await res.json();
-                            round.problems[i] = p;
-                            this.problemCache.set(p.id, p);
-                        } else {
-                            const errText = `${res.status} - ${await res.text()}`;
-                            console.error(`Failed to fetch problem:\n${errText}`);
-                            const modal = globalModal();
-                            modal.showModal({
-                                title: 'Problem fetch failed',
-                                content: `Failed to fetch problem ${pId}.\n${errText}`,
-                                color: 'var(--color-2)'
-                            });
-                        }
-                    }).catch((err) => {
-                        // uh oh offline (ServerState will deal with disconnection)
-                    });
-                    this.getSubmissions(pId);
+                    else {
+                        apiFetch('GET', `/api/contest/${this.id}/problem/${pId}`).then(async (res) => {
+                            if (res.ok) {
+                                const p: Problem = await res.json();
+                                round.problems[i] = p;
+                                this.problemCache.set(p.id, p);
+                            } else {
+                                const errText = `${res.status} - ${await res.text()}`;
+                                console.error(`Failed to fetch problem:\n${errText}`);
+                                const modal = globalModal();
+                                modal.showModal({
+                                    title: 'Problem fetch failed',
+                                    content: `Failed to fetch problem ${pId}.\n${errText}`,
+                                    color: 'var(--color-2)'
+                                });
+                            }
+                        }).catch((err) => {
+                            // uh oh offline (ServerState will deal with disconnection)
+                        });
+                    }
                 }
             }
             this.data.contest = dat;

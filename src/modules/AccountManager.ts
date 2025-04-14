@@ -114,7 +114,7 @@ export const useAccountManager = defineStore('accountManager', {
             const serverState = useServerState();
             // fetch on connect and unload on disconnect
             watch(() => serverState.loggedIn, () => {
-                if (serverState.loggedIn) this.fetchSelf();
+                if (serverState.loggedIn) this.fetchSelf(true, true);
                 else this.loaded = false;
             });
             // autosave only when actually loaded  
