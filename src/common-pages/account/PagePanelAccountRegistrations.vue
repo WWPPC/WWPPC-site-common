@@ -15,38 +15,30 @@ const contestList = ref<{ text: string, value: string }[]>([]);
 const registrationSelected = ref('');
 
 const updateAvailableContestList = async () => {
-    const res = await contestManager.getContestList();
-    if (res instanceof Error) {
-        modal.showModal({ title: res.message, content: 'Could not load upcoming contests.', color: 'red' });
+    const res = await contestManager.getOpenRegistrations();
+    if (res instanceof Response) {
+        modal.showModal({ title: res.statusText, content: 'Could not load upcoming contests.' + res.status , color: 'var(--color-2)' });
         return;
     }
     contestList.value = res.filter((v) => {
-        return !accountManager.registrations.includes(v) && !accountManager.pastRegistrations.includes(v)
+        return !accountManager.team?.registrations.includes(v) && !accountManager.user.pastRegistrations.includes(v)
     }).map((c) => ({ text: c, value: c })) ?? [];
 };
 onMounted(updateAvailableContestList);
-watch(() => accountManager.registrations, updateAvailableContestList);
+watch(() => accountManager.team?.registrations, updateAvailableContestList);
 
 const showRegisterWait = ref(false);
 const attemptRegister = async () => {
     if (registrationSelected.value == '') return;
     showRegisterWait.value = true;
     const res = await accountManager.registerContest(registrationSelected.value);
-    if (res != TeamOpResult.SUCCESS) modal.showModal({ title: 'Could not register', content: getTeamOpMessage(res), color: 'red' });
-    await Promise.all([
-        accountManager.updateOwnUserData(),
-        updateAvailableContestList()
-    ]);
+    if (!res.ok) modal.showModal({ title: 'Could not register', content: res.statusText, color: 'red' });
     showRegisterWait.value = false;
 };
 const attemptUnregister = async (registration: string) => {
     showRegisterWait.value = true;
     const res = await accountManager.unregisterContest(registration);
-    if (res != TeamOpResult.SUCCESS) modal.showModal({ title: 'Could not register', content: getTeamOpMessage(res), color: 'red' });
-    await Promise.all([
-        accountManager.updateOwnUserData(),
-        updateAvailableContestList()
-    ]);
+    if (!res.ok) modal.showModal({ title: 'Could not unregister', content: res.statusText, color: 'red' });
     showRegisterWait.value = false;
 };
 </script>
@@ -54,9 +46,9 @@ const attemptUnregister = async (registration: string) => {
 <template>
     <AnimateInContainer type="slideUp" :delay=100>
         <TitledCutCornerContainer title="Your contests" hover-animation="lift">
-            <div class="roundedBlock" v-if="accountManager.registrations.length > 0">
+            <div class="roundedBlock" v-if="accountManager.team?.registrations && accountManager.team.registrations.length > 0">
                 <h3>Upcoming</h3>
-                <AnimateInContainer type="fade" v-for="(reg, i) in accountManager.registrations" :key="i" :delay="i * 200" single>
+                <AnimateInContainer type="fade" v-for="(reg, i) in accountManager.team.registrations" :key="i" :delay="i * 200" single>
                     <div class="registrationBlock">
                         <div class="registrationStatusDotUpcoming"></div>
                         {{ reg }}
@@ -64,16 +56,16 @@ const attemptUnregister = async (registration: string) => {
                     </div>
                 </AnimateInContainer>
             </div>
-            <div class="roundedBlock" v-if="accountManager.pastRegistrations.length > 0">
+            <div class="roundedBlock" v-if="accountManager.user.pastRegistrations.length > 0">
                 <h3>Past</h3>
-                <AnimateInContainer type="fade" v-for="(reg, i) in accountManager.pastRegistrations" :key="i" :delay="i * 200" single>
+                <AnimateInContainer type="fade" v-for="(reg, i) in accountManager.user.pastRegistrations" :key="i" :delay="i * 200" single>
                     <div class="registrationBlock">
                         <div class="registrationStatusDotCompleted"></div>
                         {{ reg }}
                     </div>
                 </AnimateInContainer>
             </div>
-            <h3 v-if="accountManager.registrations.length == 0 && accountManager.pastRegistrations.length == 0">
+            <h3 v-if="accountManager.team?.registrations.length == 0 && accountManager.user.pastRegistrations.length == 0">
                 You are not registered for any contests!
             </h3>
             <WaitCover text="Please wait..." :show="showRegisterWait"></WaitCover>

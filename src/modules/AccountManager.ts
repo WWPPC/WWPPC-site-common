@@ -5,6 +5,7 @@ import { reactive, ref, watch } from 'vue';
 import { RSAencrypt, useServerState } from './ServerState';
 import { debounce } from '#/util/inputLimiting';
 import { globalModal } from '#/modal';
+import { useRouter } from 'vue-router';
 
 /**Descriptor for an account (see server docs) */
 export type AccountData = {
@@ -130,24 +131,6 @@ const writeTeam = debounce(async () => {
         state.writeTeamErr = res.status + ' - ' + (await res.text());
     }
 }, 3000);
-// autosave only when actually loaded  
-watch(() => state.user, () => {
-    if (state.loaded) {
-        unsaved.value = true;
-        writeUser();
-    }
-});
-watch(() => state.team, () => {
-    if (state.loaded) {
-        unsaved2.value = true;
-        writeTeam();
-    }
-});
-
-// "your changes may not be saved" warning
-window.addEventListener('beforeunload', (e) => {
-    if ((unsaved.value || unsaved2.value) && state.loaded) e.preventDefault();
-});
 
 export const useAccountManager = defineStore('accountManager', {
     state: () => state,
@@ -163,6 +146,23 @@ export const useAccountManager = defineStore('accountManager', {
                 if (serverState.loggedIn) this.fetchSelf();
                 else this.loaded = false;
             });
+            // autosave only when actually loaded  
+            watch(() => state.user, () => {
+                if (state.loaded) {
+                    unsaved.value = true;
+                    writeUser();
+                }
+            });
+            watch(() => state.team, () => {
+                if (state.loaded) {
+                    unsaved2.value = true;
+                    writeTeam();
+                }
+            });
+            // "your changes may not be saved" warning
+            window.addEventListener('beforeunload', (e) => {
+                if ((unsaved.value || unsaved2.value) && state.loaded) e.preventDefault();
+            });
         },
         // account data
         async fetchAccountData(username: string): Promise<AccountData | Response> {
@@ -176,14 +176,13 @@ export const useAccountManager = defineStore('accountManager', {
             return res;
         },
         async fetchSelf(showErrors: boolean = true): Promise<void> {
-            // concurrent fetch using immediately invoked functions
-            const res = await Promise.all<boolean>([
-                (async () => {
+            this.loaded = false;
+            const res = await Promise.all([
+                new Promise(async (resolve) => {
                     const res = await apiFetch('GET', '/api/self/userData');
                     if (res.ok) {
                         state.user = await res.json();
-                        unsaved.value = false;
-                        return true;
+                        resolve(true);
                     } else if (showErrors) {
                         const errText = `${res.status} - ${await res.text()}`;
                         globalModal().showModal({
@@ -192,20 +191,20 @@ export const useAccountManager = defineStore('accountManager', {
                             color: 'var(--color-2)'
                         });
                         console.error('Failed to fetch user data:\n', errText);
+                        resolve(false);
                     }
-                    return false;
-                })(),
-                (async () => {
+                }),
+                new Promise(async (resolve) => {
                     const res = await apiFetch('GET', '/api/self/teamData');
                     if (res.ok) {
                         state.team = await res.json();
                         unsaved2.value = false;
-                        return true;
+                        resolve(true);
                     } else if (res.status == 404) {
                         // special case if not on team
                         state.team = null;
                         unsaved2.value = false;
-                        return true;
+                        resolve(true);
                     } else if (showErrors) {
                         const errText = `${res.status} - ${await res.text()}`;
                         globalModal().showModal({
@@ -214,9 +213,10 @@ export const useAccountManager = defineStore('accountManager', {
                             color: 'var(--color-2)'
                         });
                         console.error('Failed to fetch team data:\n', errText);
+                        resolve(false);
                     }
                     return false;
-                })()
+                })
             ]);
             // only need to load once - unloading doesn't exist
             if (res.every(r => r)) state.loaded = true;

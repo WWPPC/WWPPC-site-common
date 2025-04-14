@@ -158,6 +158,7 @@ const logout = async () => {
     line-break: anywhere;
     word-break: break-all;
     text-overflow: ellipsis;
+    text-align: center;
 }
 
 .accountUserUsername {
