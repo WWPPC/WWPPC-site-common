@@ -22,7 +22,7 @@ defineProps<{
 }
 
 .sponsorImg {
-    width: 100%;
+    width: 90%;
     height: v-bind("$props.height");
     filter: grayscale(1) brightness(1000) contrast(1000);
     transition: 150ms cubic-bezier(0.5, 0.5, 0.5, 2) transform, 50ms linear filter;
