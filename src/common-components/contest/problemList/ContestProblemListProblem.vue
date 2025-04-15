@@ -25,6 +25,7 @@ const submissions = computed(() => {
             ??-??
         </span>
         <span class="problemListCircle">
+            <!-- pretty sure it's always undefined the way it's set up but whatever -->
             <ContestProblemStatusCircle :status="submissions[0] === undefined ? ProblemCompletionState.NOT_UPLOADED : submissions[0].status"></ContestProblemStatusCircle>
         </span>
         <span class="contestProblemListProblemName"><b>Loading...</b></span>

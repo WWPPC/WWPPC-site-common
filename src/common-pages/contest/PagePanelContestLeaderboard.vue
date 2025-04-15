@@ -5,6 +5,7 @@ import { useAccountManager } from '#/modules/AccountManager';
 import { useContestManager } from '#/modules/ContestManager';
 import GlitchSectionTitle from '#/common-components/GlitchSectionTitle.vue';
 import { throttle } from '#/util/inputLimiting';
+import { GlowText } from '#/text';
 
 const props = defineProps<{
     contest: string
@@ -32,6 +33,10 @@ watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(asyn
             penalty: entry.penalty
         };
     }));
+    results.sort((a, b) => {
+        if (b.score - a.score !== 0) return b.score - a.score; //higher score is better
+        return a.penalty - b.penalty; //lower penalty is better
+    });
     scoreboard.value = results;
     scoreboardLoaded.value = true;
 }, 5000));
