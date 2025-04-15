@@ -110,7 +110,6 @@ const submit = async () => {
 // submit button
 const disableSubmitMessage = ref('');
 const disableSubmit = computed(() => {
-    console.log(toRaw(contestManager.config[props.contest]))
     if (typeof props.data == 'string') return true;
     if (contestManager.config[props.contest]?.submitSolver) {
         if (languageDropdown.value == undefined || languageDropdown.value?.value == '' || fileUpload.value?.files == null || fileUpload.value?.files.item(0) == null) return true;

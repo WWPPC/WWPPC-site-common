@@ -134,33 +134,30 @@ export class ContestHost {
             submissionData: new Map()
         };
         // automatically load new problems in the background
-        watch(this.longPolling.contestData.ref, () => {
+        watch(this.longPolling.contestData.ref, async () => {
             // structuredClone prevents reactivity triggering itself when problems are added
-            const dat = structuredClone(toRaw(this.longPolling.contestData.ref.value));
+            const dat = toRaw(this.longPolling.contestData.ref.value);
             if (dat !== undefined) for (const round of dat.rounds) {
                 for (let i in round.problems) {
                     // problems fetch concurrently because no await, also pId always string here
                     const pId = round.problems[i] as string;
                     if (this.problemCache.has(pId)) round.problems[i] = this.problemCache.get(pId)!;
                     else {
-                        apiFetch('GET', `/api/contest/${this.id}/problem/${pId}`).then(async (res) => {
-                            if (res.ok) {
+                        const res = await apiFetch('GET', `/api/contest/${this.id}/problem/${pId}`);
+                        if (res.ok) {
                                 const p: Problem = await res.json();
                                 round.problems[i] = p;
                                 this.problemCache.set(p.id, p);
-                            } else {
-                                const errText = `${res.status} - ${await res.text()}`;
-                                console.error(`Failed to fetch problem:\n${errText}`);
-                                const modal = globalModal();
-                                modal.showModal({
-                                    title: 'Problem fetch failed',
-                                    content: `Failed to fetch problem ${pId}.\n${errText}`,
-                                    color: 'var(--color-2)'
-                                });
-                            }
-                        }).catch((err) => {
-                            // uh oh offline (ServerState will deal with disconnection)
-                        });
+                        } else {
+                            const errText = `${res.status} - ${await res.text()}`;
+                            console.error(`Failed to fetch problem:\n${errText}`);
+                            const modal = globalModal();
+                            modal.showModal({
+                                title: 'Problem fetch failed',
+                                content: `Failed to fetch problem ${pId}.\n${errText}`,
+                                color: 'var(--color-2)'
+                            });
+                        }
                     }
                 }
             }
