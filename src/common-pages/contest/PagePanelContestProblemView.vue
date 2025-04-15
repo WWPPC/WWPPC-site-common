@@ -10,7 +10,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
 import { useServerState } from '#/modules/ServerState';
-import { completionStateString, type ContestMetadata, type Problem, ProblemCompletionState, type Submission, type SubmissionDetail, useContestManager } from '#/modules/ContestManager';
+import { completionStateString, type ContestMetadata, type Problem, ProblemCompletionState, type Submission, type SubmissionFull, useContestManager } from '#/modules/ContestManager';
 import latexify from '#/util/katexify';
 
 const props = defineProps<{
@@ -158,7 +158,7 @@ const antiGPT = (e: ClipboardEvent) => {
 
 // view submission code
 const showCode = ref(false);
-const viewingSubmission = ref<SubmissionDetail>();
+const viewingSubmission = ref<SubmissionFull>();
 const viewCode = async (index: number) => {
     //make it artificially wait
     await Promise.all([async () => {

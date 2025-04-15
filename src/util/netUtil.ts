@@ -15,7 +15,7 @@ export const serverHostname = isDev ? 'https://localhost:8000' : 'https://server
  * @throws Typical errors thrown by `fetch` calls
  */
 export async function apiFetch(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: any, query?: Record<string, string>, args?: Partial<RequestInit>): Promise<Response> {
-    return await fetch(serverHostname + (path.startsWith('/') ? path : ('/' + path)) + (query !== undefined ? '?' + new URLSearchParams(Object.entries(query)).toString() : ''), {
+    return await fetch(serverHostname + (path.startsWith('/') ? path : ('/' + path)) + (query !== undefined ? ('?' + new URLSearchParams(Object.entries(query)).toString()) : ''), {
         ...args,
         method: method,
         headers: body != undefined ? {
@@ -50,7 +50,7 @@ export class LongPollEventReceiver<E> {
 
     private async fetchLoop() {
         // initial request
-        const res = await apiFetch(this.method, this.path, undefined, { init: '1'}, { cache: 'no-store' }).catch(() => new Response(null, { status: 503 }));
+        const res = await apiFetch(this.method, this.path, undefined, { init: '1' }, { cache: 'no-store' }).catch(() => new Response(null, { status: 503 }));
         if (res.ok) {
             if (res.status != 204) this.ref.value = await res.json() as E;
         } else {
