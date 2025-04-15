@@ -86,8 +86,22 @@ const submitUpload = async () => {
     }
 };
 
-// other uploads
+// submit button
 const answerInput = ref('');
+const disableSubmit = computed(() => {
+    if (typeof props.data == 'string') return true;
+    if (contestManager.config[props.contest]?.submitSolver) {
+        if (languageDropdown.value == undefined || languageDropdown.value?.value == '' || fileUpload.value?.files == null || fileUpload.value?.files.item(0) == null) return true;
+    } else {
+        if (answerInput.value.trim() == '') return true;
+    }
+    if (!props.isUpsolve) {
+        if (contestManager.contests[props.contest]?.data.contest == null) return true;
+        if ((contestManager.contests[props.contest]?.data.contest?.rounds[props.data.round].startTime ?? 0) > Date.now()) return true;
+        if ((contestManager.contests[props.contest]?.data.contest?.rounds[props.data.round].endTime ?? Infinity) <= Date.now()) return true;
+    }
+    return false;
+});
 const submit = async () => {
     if (contestManager.config[props.contest]?.submitSolver) {
         await submitUpload();
@@ -106,24 +120,6 @@ const submit = async () => {
         // answerInput.value = '';
     }
 };
-
-// submit button
-const disableSubmitMessage = ref('');
-const disableSubmit = computed(() => {
-    console.log(toRaw(contestManager.config[props.contest]))
-    if (typeof props.data == 'string') return true;
-    if (contestManager.config[props.contest]?.submitSolver) {
-        if (languageDropdown.value == undefined || languageDropdown.value?.value == '' || fileUpload.value?.files == null || fileUpload.value?.files.item(0) == null) return true;
-    } else {
-        if (answerInput.value.trim() == '') return true;
-    }
-    if (!props.isUpsolve) {
-        if (contestManager.contests[props.contest]?.data.contest == null) return true;
-        if ((contestManager.contests[props.contest]?.data.contest?.rounds[props.data.round].startTime ?? 0) > Date.now()) return true;
-        if ((contestManager.contests[props.contest]?.data.contest?.rounds[props.data.round].endTime ?? Infinity) <= Date.now()) return true;
-    }
-    return false;
-});
 
 // thing for katex
 const problemContent = ref('');
