@@ -11,7 +11,7 @@ const props = defineProps<{
 <template>
     <h2>Round {{ props.data.round + 1 }}</h2>
     <CutCornerContainer>
-        <AnimateInContainer type="fade" v-for="(problem, index) in props.data.problems" :key="typeof problem == 'string' ? problem : problem.id" :delay="index * 100">
+        <AnimateInContainer type="fade" v-for="(problem, index) in props.data.problems" :key="typeof problem == 'string' ? problem : problem.id" :delay="index * 25">
             <ContestProblemListProblem :data=problem></ContestProblemListProblem>
         </AnimateInContainer>
     </CutCornerContainer>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GlitchText } from '#/text';
+import { GlowText } from '#/text';
 import LoadingSpinner from '#/common/LoadingSpinner.vue';
 import { onMounted, ref } from 'vue';
 import { useAccountManager } from '#/modules/AccountManager';
@@ -36,7 +36,7 @@ onMounted(async ()=>{
 </script>
 
 <template>
-    <GlitchText text="Leaderboards" class="leaderboardTitle" font-size="var(--font-title)" color="var(--color-1)" shadow glow :steps=2 :delay=10 random on-visible></GlitchText>
+    <GlowText text="Leaderboards" class="leaderboardTitle" font-size="var(--font-title)" color="var(--color-1)" shadow glow></GlowText>
     <div class="centered">
         <!-- todo: add button to update the leaderboard -->
         <div class="leaderboard">

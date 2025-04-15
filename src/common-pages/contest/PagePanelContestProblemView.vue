@@ -6,7 +6,7 @@ import InputDropdown from '#/inputs/InputDropdown.vue'; // this is required for 
 import WaitCover from '#/common/WaitCover.vue';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
 import ContestProblemSubmissionCase from '#/common-components/contest/ContestProblemSubmissionCase.vue';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
 import { useServerState } from '#/modules/ServerState';
@@ -19,6 +19,7 @@ const props = defineProps<{
     contest: string
     isUpsolve?: boolean //i'm nuking this property, we can add it back after the contest
 }>();
+// console.log(props);
 
 const route = useRoute();
 const router = useRouter();
@@ -33,7 +34,7 @@ const loadErrorModal = (title: string, content: string) => {
         content: content + '<br>Click <code>OK</code> to return to problem list.',
         color: 'var(--color-2)'
     }).result.then(() => {
-        router.push(`./problemList`);
+        router.push(`../problemList`);
     });
 };
 
@@ -108,17 +109,20 @@ const submit = async () => {
 };
 
 // submit button spaghetti
-const disableSubmit = ref(true);
-const updateSubmitButton = () => {
-    disableSubmit.value = typeof props.data == 'string' || (contestManager.config[props.contest]?.submitSolver && (languageDropdown.value == undefined || languageDropdown.value?.value == '' || fileUpload.value?.files == null || fileUpload.value?.files.item(0) == null))
-        || (!contestManager.config[props.contest]?.submitSolver && answerInput.value.trim() == '')
-        || (!props.isUpsolve && (contestManager.contests[props.contest]?.data.contest == null
-            || (contestManager.contests[props.contest]?.data.contest?.rounds[props.data.round].startTime ?? 0) > Date.now()
-            || (contestManager.contests[props.contest]?.data.contest?.rounds[props.data.round].endTime ?? Infinity) <= Date.now()));
-};
-watch(() => languageDropdown.value?.value, updateSubmitButton);
-watch(() => fileUpload.value?.files, updateSubmitButton);
-watch(() => answerInput.value, updateSubmitButton);
+const disableSubmit = computed(() => {
+    if (typeof props.data == 'string') return true;
+    if (contestManager.config[props.contest]?.submitSolver) {
+        if (languageDropdown.value == undefined || languageDropdown.value?.value == '' || fileUpload.value?.files == null || fileUpload.value?.files.item(0) == null) return true;
+    } else {
+        if (answerInput.value.trim() == '') return true;
+    }
+    if (!props.isUpsolve) {
+        if (contestManager.contests[props.contest]?.data.contest == null) return true;
+        if ((contestManager.contests[props.contest]?.data.contest?.rounds[props.data.round].startTime ?? 0) > Date.now()) return true;
+        if ((contestManager.contests[props.contest]?.data.contest?.rounds[props.data.round].endTime ?? Infinity) <= Date.now()) return true;
+    }
+    return false;
+});
 
 // thing for katex
 // using ref instead of v-html fix?
@@ -127,7 +131,7 @@ watch(() => typeof props.data == 'string' ? props.data : props.data.content, () 
     if (typeof props.data != 'string') {
         latexify(props.data.content).then((html) => {if (problemContent.value) problemContent.value.innerHTML = html});
     }
-});
+}, { immediate: true });
 const hints = [
     "Make sure to name the input variable `ich`",
     "Make sure to name the input variable `heat`",

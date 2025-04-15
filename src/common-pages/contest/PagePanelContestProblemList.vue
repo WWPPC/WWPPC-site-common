@@ -23,12 +23,12 @@ const contestData = computed(() => contestManager.contests[contestType]?.data.co
         <div class="problemListWrapper">
             <AngledTitledContainer title="Problems" height="100%">
                 <div v-if="contestManager.config[contestType]?.rounds" class="problemList">
-                    <AnimateInContainer type="slideUp" v-for="(round, index) in contestData?.rounds.filter((r) => r.problems.length > 0)" :key=round.round :delay="index * 200">
+                    <AnimateInContainer type="slideUp" v-for="(round, index) in contestData?.rounds.filter((r) => r.problems.length > 0)" :key=round.round :delay="index * 100">
                         <ContestProblemListRound :data=round></ContestProblemListRound>
                     </AnimateInContainer>
                 </div>
                 <div v-else class="problemList">
-                    <AnimateInContainer type="fade" v-for="(problem, index) in contestData?.rounds[0]?.problems" :key="typeof problem == 'string' ? problem : problem.id" :delay="index * 50">
+                    <AnimateInContainer type="fade" v-for="(problem, index) in contestData?.rounds[0]?.problems" :key="typeof problem == 'string' ? problem : problem.id" :delay="index * 25">
                         <ContestProblemListProblem :data=problem></ContestProblemListProblem>
                     </AnimateInContainer>
                 </div>

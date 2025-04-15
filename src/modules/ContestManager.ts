@@ -213,7 +213,8 @@ watch(runningContests.ref, debounce(() => {
                         try {
                             const res = await useContestManager().getContestInfo(contest);
                             if (res instanceof Response) throw res;
-                            state.contests[contest] = new ContestHost(res);
+                            //contest type not the contest id (for example "WWPIT" instead of "WWPIT Spring 2025")
+                            state.contests[res.type] = new ContestHost(res);
                         } catch (err) {
                             globalModal().showModal({
                                 title: 'Could not connect ContestHost',
