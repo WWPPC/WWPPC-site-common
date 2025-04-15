@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 const props = defineProps<{
     title?: string
     width?: string
@@ -13,6 +14,7 @@ const props = defineProps<{
     backgroundColor?: string
     placeholder?: string
     resize?: 'vertical' | 'horizontal' | 'both' | 'none'
+    disableTyping?: boolean
 }>();
 const emit = defineEmits<{
     (e: 'input', value: string): any
@@ -24,10 +26,18 @@ function input() {
 defineExpose({
     value: text
 });
+
+// function to disable typing 
+function disabled(event: KeyboardEvent) {
+  if (props.disableTyping) {
+    event.preventDefault();
+  }
+}
+
 </script>
 
 <template>
-    <textarea class="uiTextArea" @input=input v-model=text :title=props.title :placeholder=props.placeholder></textarea>
+    <textarea class="uiTextArea" @input=input v-model=text :title=props.title :placeholder=props.placeholder @keydown="disabled"></textarea>
 </template>
 
 <style scoped>
