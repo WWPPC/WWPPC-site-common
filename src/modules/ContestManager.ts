@@ -178,7 +178,7 @@ export class ContestHost {
 
     getSubmissions(problemId: UUID): Ref<Submission[] | undefined> {
         if (!this.longPolling.submissionData.has(problemId))
-            this.longPolling.submissionData.set(problemId, new LongPollEventReceiver('GET', '/api/contest/submissions/' + problemId))
+            this.longPolling.submissionData.set(problemId, new LongPollEventReceiver('GET', `/api/contest/${this.id}/submissions/${problemId}`))
         return this.longPolling.submissionData.get(problemId)!.ref;
     }
 
