@@ -15,14 +15,14 @@ const contestManager = useContestManager();
 
 const scoreboardLoaded = ref<boolean>(false);
 const scoreboard = ref<{
-    team: string,
+    team: number,
     name: string,
     score: number,
     penalty: number
 }[]>([]);
 onMounted(async ()=>{
     await Promise.all((contestManager.contests[contestType]?.data.scoreboard ?? []).map(async (entry) => {
-        const teamRes = await accountManager.fetchTeamData(entry.team);
+        const teamRes = await accountManager.fetchTeamData(entry.team.toString(36));
         return {
             team: entry.team,
             name: teamRes instanceof Response ? entry.team : teamRes.name,
@@ -42,7 +42,7 @@ onMounted(async ()=>{
         <div class="leaderboard">
             <div class="leaderboardItem" v-for="(item, i) of scoreboard" :key="i">
                 {{ i + 1 }}.
-                <RouterLink :to="'/team/@' + item.team">{{ item.name }}</RouterLink>
+                <RouterLink :to="'/team/@' + item.team.toString(36)">{{ item.name }}</RouterLink>
                 - {{ item.score }} solved, {{ item.penalty }} penalty
             </div>
         </div>

@@ -21,7 +21,7 @@ const usernameNotEditable = ref('');
 const emailNotEditable = ref('');
 const joinCodeNotEditable = ref('');
 watch(() => accountManager.user.username, () => usernameNotEditable.value = accountManager.user.username, { immediate: true });
-watch([() => accountManager.team?.id, () => accountManager.team?.joinKey], () => accountManager.team !== null && (joinCodeNotEditable.value = accountManager.team.id + accountManager.team.joinKey), { immediate: true });
+watch([() => accountManager.team?.id, () => accountManager.team?.joinKey], () => accountManager.team !== null && (joinCodeNotEditable.value = accountManager.team.id.toString(36) + accountManager.team.joinKey), { immediate: true });
 watch(() => accountManager.user.email, () => emailNotEditable.value = accountManager.user.email, { immediate: true });
 
 // oops spaghetti
@@ -302,7 +302,7 @@ onMounted(clearDangerButtons);
                     <InputCopyButton :value="joinCodeNotEditable ?? ''"></InputCopyButton>
                 </form>
             </div>
-            <div class="profileTeamSection" v-if="accountManager.team && accountManager.team?.id !== accountManager.user.username">
+            <div class="profileTeamSection" v-if="accountManager.team && accountManager.team !== null">
                 <InputButton text="Leave Team" color="var(--color-2)" glitch-on-mount @click="leaveTeam"></InputButton>
             </div>
             <WaitCover text="Please wait..." :show="showTeamWait && route.query.ignore_server === undefined"></WaitCover>

@@ -23,9 +23,9 @@ export type AccountData = {
     pastRegistrations: string[]
     team: string | null
 }
-/**Descriptor for a team (see server docs) - note "join code" is team id + "join key" */
+/**Descriptor for a team (see server docs) - note "join code" is base 36 representation of `id` + `joinKey` */
 export type TeamData = {
-    id: string
+    id: number
     name: string
     bio: string
     members: string[]

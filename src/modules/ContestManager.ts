@@ -95,7 +95,7 @@ export function completionStateString(status: ProblemCompletionState): string {
 }
 
 export type ScoreboardEntry = {
-    team: string
+    team: number
     score: number
     penalty: number
 }
@@ -136,7 +136,7 @@ export class ContestHost {
         // automatically load new problems in the background
         watch(this.longPolling.contestData.ref, async () => {
             // structuredClone prevents reactivity triggering itself when problems are added
-            const dat = toRaw(this.longPolling.contestData.ref.value);
+            const dat = structuredClone(toRaw(this.longPolling.contestData.ref.value));
             if (dat !== undefined) for (const round of dat.rounds) {
                 for (let i in round.problems) {
                     // problems fetch concurrently because no await, also pId always string here
