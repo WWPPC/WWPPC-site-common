@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import LoadingSpinner from '#/common/LoadingSpinner.vue';
-import { onMounted, ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useAccountManager } from '#/modules/AccountManager';
 import { useContestManager } from '#/modules/ContestManager';
 import GlitchSectionTitle from '#/common-components/GlitchSectionTitle.vue';
+import { throttle } from '#/util/inputLimiting';
 
 const props = defineProps<{
     contest: string
@@ -20,23 +21,26 @@ const scoreboard = ref<{
     score: number,
     penalty: number
 }[]>([]);
-onMounted(async ()=>{
-    await Promise.all((contestManager.contests[contestType]?.data.scoreboard ?? []).map(async (entry) => {
+watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(async () => {
+    scoreboardLoaded.value = false;
+    const results = await Promise.all((contestManager.contests[contestType]?.data.scoreboard ?? { scores: [], frozen: false }).scores.map(async (entry) => {
         const teamRes = await accountManager.fetchTeamData(entry.team.toString(36));
         return {
             team: entry.team,
-            name: teamRes instanceof Response ? entry.team : teamRes.name,
-            // penalty is stored as the fractional part of the score, see scorer.ts
+            name: teamRes instanceof Response ? entry.team.toString() : teamRes.name,
             score: Math.ceil(entry.score),
-            penalty: Math.floor((Math.ceil(entry.score) - entry.score) * 1000000)
+            penalty: entry.penalty
         };
     }));
+    scoreboard.value = results;
     scoreboardLoaded.value = true;
-});
+}, 5000));
 </script>
 
 <template>
     <GlitchSectionTitle text="Leaderboards" font-size="var(--font-title)"></GlitchSectionTitle>
+    <GlitchSectionTitle v-if="contestManager.contests[contestType]?.data.scoreboard?.frozen" text="Standings frozen" font-size="var(--font-large)"></GlitchSectionTitle>
+    <br>
     <div class="centered">
         <!-- todo: add button to update the leaderboard -->
         <div class="leaderboard">

@@ -15,8 +15,6 @@ import latexify from '#/util/katexify';
 import { throttle } from '#/util/inputLimiting';
 
 const props = defineProps<{
-    data: Problem | string
-    submissions: Submission[]
     contest: string
     isUpsolve?: boolean //i'm nuking this property, we can add it back after the contest
 }>();
@@ -26,6 +24,18 @@ const router = useRouter();
 const serverState = useServerState();
 const contestManager = useContestManager();
 const modal = globalModal();
+
+const problem = computed(() => {
+    const contest = contestManager.contests.WWPIT?.data.contest;
+    if (contest === undefined) return 'Loading...';
+    if (route.params.problemRound === undefined || route.params.problemNumber === undefined) return 'Loading...';
+    return contest.rounds[parseInt(route.params.problemRound.toString())].problems[parseInt(route.params.problemNumber.toString())];
+});
+const submissions = computed(() => {
+    const allSubmissions = contestManager.contests.WWPIT?.data.submissions;
+    if (allSubmissions === undefined) return [];
+    return allSubmissions.get(typeof problem.value == 'string' ? problem.value : problem.value.id) ?? [];
+});
 
 // placeholder data behind loading cover
 const loadErrorModal = (title: string, content: string) => {
@@ -38,8 +48,8 @@ const loadErrorModal = (title: string, content: string) => {
     });
 };
 
-watch(() => typeof props.data == 'string' ? props.data : props.data.name, () => {
-    setTitlePanel(typeof props.data == 'string' ? props.data : props.data.name);
+watch(() => typeof problem.value == 'string' ? problem.value : problem.value.name, () => {
+    setTitlePanel(typeof problem.value == 'string' ? problem.value : problem.value.name);
 });
 
 // uploads
@@ -77,7 +87,7 @@ const submitUpload = async () => {
         modal.showModal({ title: 'No file selected', content: 'No file was selected!', color: 'var(--color-2)' });
         return;
     }
-    const res = await contestManager.contests[props.contest]!.submitProblem(typeof props.data == 'string' ? props.data : props.data.id, await file.text(), (languageDropdown.value.value as string));
+    const res = await contestManager.contests[props.contest]!.submitProblem(typeof problem.value == 'string' ? problem.value : problem.value.id, await file.text(), (languageDropdown.value.value as string));
     if (!res.ok) {
         loadErrorModal(res.statusText, "HTTP error " + res.status.toString());
     } else {
@@ -90,7 +100,7 @@ const submitUpload = async () => {
 // submit button
 const answerInput = ref('');
 const disableSubmit = computed(() => {
-    if (typeof props.data == 'string') return true;
+    if (typeof problem.value == 'string') return true;
     if (contestManager.config[props.contest]?.submitSolver) {
         if (languageDropdown.value == undefined || languageDropdown.value?.value == '' || fileUpload.value?.files == null || fileUpload.value?.files.item(0) == null) return true;
     } else {
@@ -98,8 +108,8 @@ const disableSubmit = computed(() => {
     }
     if (!props.isUpsolve) {
         if (contestManager.contests[props.contest]?.data.contest == null) return true;
-        if ((contestManager.contests[props.contest]?.data.contest?.rounds[props.data.round].startTime ?? 0) > Date.now()) return true;
-        if ((contestManager.contests[props.contest]?.data.contest?.rounds[props.data.round].endTime ?? Infinity) <= Date.now()) return true;
+        if ((contestManager.contests[props.contest]?.data.contest?.rounds[problem.value.round].startTime ?? 0) > Date.now()) return true;
+        if ((contestManager.contests[props.contest]?.data.contest?.rounds[problem.value.round].endTime ?? Infinity) <= Date.now()) return true;
     }
     return false;
 });
@@ -124,9 +134,9 @@ const submit = async () => {
 
 // thing for katex
 const problemContent = ref('');
-watch(() => typeof props.data == 'string' ? props.data : props.data.content, async () => {
-    if (typeof props.data == 'string') problemContent.value = 'Loading problem text...';
-    else problemContent.value = await latexify(props.data.content);
+watch(() => typeof problem.value == 'string' ? problem.value : problem.value.content, async () => {
+    if (typeof problem.value == 'string') problemContent.value = 'Loading problem text...';
+    else problemContent.value = await latexify(problem.value.content);
 }, { immediate: true });
 
 // insert "hints" into copied problem statement to "help" GPT
@@ -159,7 +169,7 @@ const antiGPT = (e: ClipboardEvent) => {
 const showCode = ref(false);
 const viewingSubmission = ref<SubmissionFull>();
 const viewCode = throttle(async (index: number) => {
-    const submission = await contestManager.contests[props.contest]?.getSubmission(props.submissions[index].id);
+    const submission = await contestManager.contests[props.contest]?.getSubmission(submissions.value[index].id);
     if (submission === undefined || submission instanceof Response) return;
     viewingSubmission.value = submission;
     showCode.value = true;
@@ -174,14 +184,14 @@ const viewCode = throttle(async (index: number) => {
     </div>
     <div class="problemViewPanel">
         <div class="problemViewDouble">
-            <TitledCutCornerContainer :title="typeof props.data == 'string' ? 'Problem' : props.data.name" style="grid-row: span 3;" vertical-flipped no-padding>
+            <TitledCutCornerContainer :title="typeof problem == 'string' ? 'Problem' : problem.name" style="grid-row: span 3;" vertical-flipped no-padding>
                 <div class="problemViewSubtitle">
-                    <span v-html="`By ${typeof props.data == 'string' ? 'passwordisa' : props.data.author}`" style="font-weight: bold; grid-row: 1;"></span>
-                    <span v-html="`${typeof props.data == 'string' ? '-' : props.data.constraints.memory}MB, ${typeof props.data == 'string' ? '-' : props.data.constraints.time}ms&emsp;|&emsp;${completionStateString(submissions.length == 0 ? ProblemCompletionState.NOT_UPLOADED : submissions[0].status)}`" style="grid-row: 2;"></span>
+                    <span v-html="`By ${typeof problem == 'string' ? 'passwordisa' : problem.author}`" style="font-weight: bold; grid-row: 1;"></span>
+                    <span v-html="`${typeof problem == 'string' ? '-' : problem.constraints.memory}MB, ${typeof problem == 'string' ? '-' : problem.constraints.time}ms&emsp;|&emsp;${completionStateString(submissions.length == 0 ? ProblemCompletionState.NOT_UPLOADED : submissions[0].status)}`" style="grid-row: 2;"></span>
                     <ContestProblemStatusCircle :status="submissions.length == 0 ? ProblemCompletionState.NOT_UPLOADED : submissions[0].status" style="grid-row: span 2;"></ContestProblemStatusCircle>
                 </div>
                 <div class="problemViewContent" v-html="problemContent" @copy=antiGPT></div>
-                <WaitCover class="problemLoadingCover" text="Loading..." :show="typeof props.data == 'string' && route.query.ignore_server === undefined"></WaitCover>
+                <WaitCover class="problemLoadingCover" text="Loading..." :show="typeof problem == 'string' && route.query.ignore_server === undefined"></WaitCover>
             </TitledCutCornerContainer>
             <DoubleCutCornerContainer>
                 <div style="text-align: center;">

@@ -1,15 +1,22 @@
 <script setup lang="ts">
 import { InputLinkButton } from '#/inputs';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
-import { ProblemCompletionState, type Problem, type Submission } from '#/modules/ContestManager';
+import { ProblemCompletionState, useContestManager, type Problem, type Submission } from '#/modules/ContestManager';
 import { AnimateInContainer } from '#/containers';
+import { computed } from 'vue';
 
 const props = defineProps<{
     // add archive host later
     data: string | Problem
-    submission?: Submission
     archive?: boolean
 }>();
+
+const contestManager = useContestManager();
+const submissions = computed(() => {
+    const allSubmissions = contestManager.contests.WWPIT?.data.submissions;
+    if (allSubmissions === undefined) return [];
+    return allSubmissions.get(typeof props.data == 'string' ? props.data : props.data.id) ?? [];
+});
 </script>
 
 <template>
@@ -18,7 +25,7 @@ const props = defineProps<{
             ??-??
         </span>
         <span class="problemListCircle">
-            <ContestProblemStatusCircle :status="props.submission === undefined ? ProblemCompletionState.NOT_UPLOADED : props.submission.status"></ContestProblemStatusCircle>
+            <ContestProblemStatusCircle :status="submissions[0] === undefined ? ProblemCompletionState.NOT_UPLOADED : submissions[0].status"></ContestProblemStatusCircle>
         </span>
         <span class="contestProblemListProblemName"><b>Loading...</b></span>
         <span class="contestProblemListProblemAuthor"><i>By Loading...</i></span>
@@ -35,7 +42,7 @@ const props = defineProps<{
             {{ props.data.round + 1 }}-{{ props.data.number + 1 }}
         </span>
         <span class="problemListCircle">
-            <ContestProblemStatusCircle :status="props.submission === undefined ? ProblemCompletionState.NOT_UPLOADED : props.submission.status"></ContestProblemStatusCircle>
+            <ContestProblemStatusCircle :status="submissions[0] === undefined ? ProblemCompletionState.NOT_UPLOADED : submissions[0].status"></ContestProblemStatusCircle>
         </span>
         <span class="contestProblemListProblemName"><b>{{ props.data.name }}</b></span>
         <span class="contestProblemListProblemAuthor"><i>By {{ props.data.author }}</i></span>

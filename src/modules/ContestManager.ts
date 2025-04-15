@@ -6,7 +6,6 @@ import { reactive, toRaw, watch } from 'vue';
 
 import { useServerState } from './ServerState';
 
-import type { Ref } from 'vue';
 import type { ServerContestConfig } from './ServerState';
 import { useAccountManager } from './AccountManager';
 
@@ -99,6 +98,10 @@ export type ScoreboardEntry = {
     score: number
     penalty: number
 }
+export type Scoreboard = {
+    scores: ScoreboardEntry[]
+    frozen: boolean
+}
 
 export class ContestHost {
     readonly id: string;
@@ -106,13 +109,13 @@ export class ContestHost {
     readonly config: ServerContestConfig;
     readonly longPolling: {
         readonly contestData: LongPollEventReceiver<Contest>
-        readonly contestScoreboards: LongPollEventReceiver<ScoreboardEntry[]>
+        readonly contestScoreboards: LongPollEventReceiver<Scoreboard>
         readonly contestNotifications: LongPollEventReceiver<never>
         readonly submissionData: Map<UUID, LongPollEventReceiver<Submission[]>>
     };
     readonly data = reactive<{
         contest: Contest | undefined,
-        scoreboard: ScoreboardEntry[] | undefined
+        scoreboard: Scoreboard | undefined
         submissions: Map<UUID, Submission[] | undefined>
     }>({
         contest: undefined,
@@ -129,7 +132,7 @@ export class ContestHost {
         console.info('Loading contest ' + this.id);
         this.longPolling = {
             contestData: new LongPollEventReceiver<Contest>('GET', `/api/contest/${this.id}/data`),
-            contestScoreboards: new LongPollEventReceiver<ScoreboardEntry[]>('GET', `/api/contest/${this.id}/scoreboards`),
+            contestScoreboards: new LongPollEventReceiver<Scoreboard>('GET', `/api/contest/${this.id}/scoreboards`),
             contestNotifications: new LongPollEventReceiver<never>('GET', `/api/contest/${this.id}/notifications`),
             submissionData: new Map()
         };
