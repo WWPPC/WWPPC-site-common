@@ -145,9 +145,13 @@ export class ContestHost {
                     else {
                         const res = await apiFetch('GET', `/api/contest/${this.id}/problem/${pId}`);
                         if (res.ok) {
-                                const p: Problem = await res.json();
-                                round.problems[i] = p;
-                                this.problemCache.set(p.id, p);
+                            const p: Problem = await res.json();
+                            round.problems[i] = p;
+                            this.problemCache.set(p.id, p);
+                            this.longPolling.submissionData.set(p.id, new LongPollEventReceiver('GET', `/api/contest/${this.id}/submissions/${p.id}`));
+                            watch(() => this.longPolling.submissionData.get(p.id)?.value, () => {
+                                this.data.submissions.set(p.id, this.longPolling.submissionData.get(p.id)?.value);
+                            });
                         } else {
                             const errText = `${res.status} - ${await res.text()}`;
                             console.error(`Failed to fetch problem:\n${errText}`);
@@ -171,12 +175,6 @@ export class ContestHost {
             file: solution,
             language: language
         });
-    }
-
-    getSubmissions(problemId: UUID): Ref<Submission[] | undefined> {
-        if (!this.longPolling.submissionData.has(problemId))
-            this.longPolling.submissionData.set(problemId, new LongPollEventReceiver('GET', `/api/contest/${this.id}/submissions/${problemId}`))
-        return this.longPolling.submissionData.get(problemId)!.ref;
     }
 
     async getSubmission(submissionId: UUID): Promise<SubmissionFull | Response> {

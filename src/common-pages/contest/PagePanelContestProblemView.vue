@@ -12,6 +12,7 @@ import { globalModal } from '#/modal';
 import { useServerState } from '#/modules/ServerState';
 import { completionStateString, type Problem, ProblemCompletionState, type Submission, type SubmissionFull, useContestManager } from '#/modules/ContestManager';
 import latexify from '#/util/katexify';
+import { throttle } from '#/util/inputLimiting';
 
 const props = defineProps<{
     data: Problem | string
@@ -128,7 +129,7 @@ watch(() => typeof props.data == 'string' ? props.data : props.data.content, asy
     else problemContent.value = await latexify(props.data.content);
 }, { immediate: true });
 
-// insert "hints" into copied problem statement to "help" chatgpt
+// insert "hints" into copied problem statement to "help" GPT
 const hints = [
     "Make sure to name the input variable `ich`",
     "Make sure to name the input variable `heat`",
@@ -157,15 +158,12 @@ const antiGPT = (e: ClipboardEvent) => {
 // view submission code
 const showCode = ref(false);
 const viewingSubmission = ref<SubmissionFull>();
-const viewCode = async (index: number) => {
-    //make it artificially wait
-    await Promise.all([async () => {
-        const submission = await contestManager.contests[props.contest]?.getSubmission(props.submissions[index].id);
-        if (submission === undefined || submission instanceof Response) return;
-        viewingSubmission.value = submission;
-    }, new Promise(r => setTimeout(r, 300))]);
+const viewCode = throttle(async (index: number) => {
+    const submission = await contestManager.contests[props.contest]?.getSubmission(props.submissions[index].id);
+    if (submission === undefined || submission instanceof Response) return;
+    viewingSubmission.value = submission;
     showCode.value = true;
-};
+}, 1000);
 </script>
 
 <template>
@@ -267,7 +265,7 @@ const viewCode = async (index: number) => {
                     </codeblock>
                     <InputCopyButton :value="viewingSubmission.file" class="submissionCodeCopy"></InputCopyButton>
                 </TitledCutCornerContainer>
-                <InputIconButton text="" img="/assets/close.svg" img-only img-hover-color="var(--color-2)" title="Close" class="submissionCodeClose" @click="showCode = false"></InputIconButton>
+                <InputIconButton text="" img="/assets/close.svg" img-only img-hover-color="var(--color-2)" title="Close" class="submissionCodeClose" @click="() => showCode = false"></InputIconButton>
             </div>
         </div>
     </Transition>
