@@ -5,6 +5,7 @@ const props = defineProps<{
   min?: number
   max?: number
   step?: number
+  trackWidth?: number
 }>();
 
 const val = defineModel<number>({ default: 0 });
@@ -20,7 +21,7 @@ function input() {
 
 <template>
   <div>
-    <input type="range" v-model="val" :min="props.min" :max="props.max" :step="props.step" @input="input" class="slider"/>
+    <input type="range" v-model="val" :min="props.min" :max="props.max" :step="props.step" :trackWidth="props.trackWidth" @input="input" class="slider"/>
   </div>
 </template>
 
@@ -29,7 +30,7 @@ function input() {
 
 .slider {
   appearance: none;
-  width: 100%;
+  width: v-bind("$props.trackWidth ?? '100%'");
   height: 25px;
   background: rgb(34, 34, 34);
   outline: white;
