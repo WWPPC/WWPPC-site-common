@@ -165,7 +165,8 @@ export class ContestHost {
                 }
             }
             this.data.contest = dat;
-        });
+            console.log(toRaw(this.data))
+        }, { immediate: true });
         watch(this.longPolling.contestScoreboards.ref, () => this.data.scoreboard = this.longPolling.contestScoreboards.value);
     }
 
