@@ -20,10 +20,10 @@ const buttonText = ref('Log in');
 const updateDisp = () => {
     if (serverState.loggedIn) {
         name.value = accountManager.user.displayName;
-        glitchTextTransition(buttonText.value, 'Account', (text) => { buttonText.value = text; }, 40, 1, 10, 2).promise;
+        glitchTextTransition(buttonText.value, 'Account', (text) => { buttonText.value = text; }, 40, 1, 10, 1).promise;
     } else {
         name.value = 'Not signed in';
-        glitchTextTransition(buttonText.value, 'Log in', (text) => { buttonText.value = text; }, 40, 1, 10, 2).promise;
+        glitchTextTransition(buttonText.value, 'Log in', (text) => { buttonText.value = text; }, 40, 1, 10, 1).promise;
     }
 }
 

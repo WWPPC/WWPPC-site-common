@@ -2,7 +2,7 @@
 import { useContestManager } from '#/modules/ContestManager';
 import { useRoute } from 'vue-router';
 import { onMounted, ref, watch } from 'vue';
-import { GlowText } from '#/text';
+import { GlitchText } from '#/text';
 import TimerDisplay from '#/common/TimerDisplay.vue';
 
 const props = defineProps<{
@@ -83,7 +83,7 @@ watch(nextTime, () => emit('next', nextTime.value.getTime()));
 <template>
     <Transition>
         <div :class="'timer' + ($props.big ? '2' : '')" v-if="contestManager.contests[contestType] != null || route.query.ignore_server !== undefined" v-show="show">
-            <GlowText v-if="!props.timerOnly" :text="round" :class="'timerText' + ($props.big ? '2' : '')" :shadow="$props.big" :glow="$props.big"></GlowText>
+            <GlitchText v-if="!props.timerOnly" :text="round" :class="'timerText' + ($props.big ? '2' : '')" :shadow="$props.big" :glow="$props.big" on-visible></GlitchText>
             <TimerDisplay type="auto-timer" :to="nextTime" :class="'timerTime' + ($props.big ? '2' : '')" :shadow="$props.big" :glow="$props.big" :color="color" :flashing="flashColor != ''" :flash-color="flashColor == color ? undefined : flashColor" @zero="updateTime"></TimerDisplay>
         </div>
     </Transition>
@@ -98,19 +98,20 @@ watch(nextTime, () => emit('next', nextTime.value.getTime()));
 }
 
 .timer {
-    min-width: 200px;
+    font-size: var(--font-48);
+    min-width: 5em;
+    max-width: 5em;
     grid-template-rows: 48px 48px;
-    transition: 500ms min-width;
 }
 
 .timerText {
-    font-size: 20px;
+    font-size: var(--font-20);
     text-wrap: balance;
     transition: 500ms font-size;
 }
 
 .timerText2 {
-    font-size: 48px;
+    font-size: var(--font-48);
     text-wrap: nowrap;
 }
 
@@ -141,30 +142,23 @@ watch(nextTime, () => emit('next', nextTime.value.getTime()));
 
 .v-leave-from,
 .v-enter-to {
-    min-width: 150px;
-    max-width: 150px;
+    min-width: 10em;
+    max-width: 10em;
     opacity: 1;
 }
 
 @media (max-width: 700px) {
     .timer {
-        min-width: 110px;
-        max-width: 110px;
         margin-left: -16px;
+        font-size: var(--font-28);
     }
 
     .timerText {
-        font-size: 16px;
+        font-size: var(--font-16);
     }
 
     .timerTime {
-        font-size: 30px;
-    }
-
-    .v-leave-from,
-    .v-enter-to {
-        min-width: 110px;
-        max-width: 110px;
+        font-size: var(--font-28);
     }
 }
 </style>

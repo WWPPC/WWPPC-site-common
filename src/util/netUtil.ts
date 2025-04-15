@@ -1,5 +1,5 @@
 import { isDev } from '#/index';
-import { ref } from 'vue';
+import { ref, toRaw } from 'vue';
 
 import type { Ref } from 'vue';
 
@@ -15,7 +15,7 @@ export const serverHostname = isDev ? 'https://localhost:8000' : 'https://server
  * @throws Typical errors thrown by `fetch` calls
  */
 export async function apiFetch(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: any, query?: Record<string, string>, args?: Partial<RequestInit>): Promise<Response> {
-    return await fetch(serverHostname + (path.startsWith('/') ? path : ('/' + path)) + (query !== undefined ? '?' + new URLSearchParams(Object.entries(query)).toString() : ''), {
+    return await fetch(serverHostname + (path.startsWith('/') ? path : ('/' + path)) + (query !== undefined ? ('?' + new URLSearchParams(Object.entries(query)).toString()) : ''), {
         ...args,
         method: method,
         headers: body != undefined ? {
@@ -49,22 +49,18 @@ export class LongPollEventReceiver<E> {
     }
 
     private async fetchLoop() {
-        // initial request
-        const res = await apiFetch(this.method, this.path, undefined, { init: '1'}, { cache: 'no-store' }).catch(() => new Response(null, { status: 503 }));
-        if (res.ok) {
-            if (res.status != 204) this.ref.value = await res.json() as E;
-        } else {
-            await new Promise<void>((r) => setTimeout(() => r(), 10000));
-        }
+        let initReq = true;
         let retryTime = 10000;
         while (this.running) {
-            const res = await apiFetch(this.method, this.path, undefined, undefined, { cache: 'no-store' }).catch(() => new Response(null, { status: 503 }));
+            const res = await apiFetch(this.method, this.path, undefined, initReq ? { init: '1' } : undefined, { cache: 'no-store' }).catch(() => new Response(null, { status: 503 }));
             if (res.ok) {
                 if (res.status != 204) this.ref.value = await res.json() as E;
                 retryTime = 10000;
+                initReq = false;
             } else {
                 await new Promise<void>((r) => setTimeout(() => r(), Math.min(120000, retryTime)));
                 retryTime *= 1.5;
+                initReq = true;
             }
         }
     }

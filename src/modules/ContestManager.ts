@@ -2,7 +2,7 @@ import { globalModal } from '#/modal';
 import { debounce } from '#/util/inputLimiting';
 import { apiFetch, LongPollEventReceiver } from '#/util/netUtil';
 import { defineStore } from 'pinia';
-import { reactive, ref, toRaw, watch } from 'vue';
+import { reactive, toRaw, watch } from 'vue';
 
 import { useServerState } from './ServerState';
 
@@ -57,7 +57,7 @@ export type Submission = {
     status: ProblemCompletionState
     analysis: boolean
 }
-export type SubmissionDetail = Submission & {
+export type SubmissionFull = Submission & {
     username: string
     team: string | null
     problemId: UUID
@@ -165,7 +165,7 @@ export class ContestHost {
                 }
             }
             this.data.contest = dat;
-        });
+        }, { immediate: true });
         watch(this.longPolling.contestScoreboards.ref, () => this.data.scoreboard = this.longPolling.contestScoreboards.value);
     }
 
@@ -182,7 +182,7 @@ export class ContestHost {
         return this.longPolling.submissionData.get(problemId)!.ref;
     }
 
-    async getSubmission(submissionId: UUID): Promise<SubmissionDetail | Response> {
+    async getSubmission(submissionId: UUID): Promise<SubmissionFull | Response> {
         const res = await apiFetch('GET', `/api/contest/${this.id}/submission/${submissionId}`);
         if (res.ok) return res.json();
         return res;
@@ -229,7 +229,7 @@ const updateRunningContests = debounce(() => {
         }
         for (const contest in state.contests) {
             if (!runningContests.ref.value.includes(contest)) {
-                state.contests[contest]!.close();
+                state.contests[contest]?.close();
                 state.contests[contest] = undefined;
             }
         }
@@ -245,11 +245,11 @@ export const useContestManager = defineStore('contestManager', {
     },
     actions: {
         init() {
+            const serverState = useServerState();
             const accountManager = useAccountManager();
-            //a little bit spaghetti but it should work
-            watch(() => accountManager.team?.registrations, () => {
-                updateRunningContests();
-            });
+            // a little bit spaghetti but it should work
+            watch(() => accountManager.team?.registrations, () => updateRunningContests());
+            watch(() => serverState.loggedIn, () => updateRunningContests())
         },
         async getUpcoming(): Promise<string[] | Response> {
             const res = await apiFetch('GET', '/api/contest/upcoming');

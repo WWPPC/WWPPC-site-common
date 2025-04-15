@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { GlowText } from '#/text';
 import LoadingSpinner from '#/common/LoadingSpinner.vue';
 import { onMounted, ref } from 'vue';
 import { useAccountManager } from '#/modules/AccountManager';
 import { useContestManager } from '#/modules/ContestManager';
+import GlitchSectionTitle from '#/common-components/GlitchSectionTitle.vue';
 
 const props = defineProps<{
     contest: string
@@ -36,7 +36,7 @@ onMounted(async ()=>{
 </script>
 
 <template>
-    <GlowText text="Leaderboards" class="leaderboardTitle" font-size="var(--font-title)" color="var(--color-1)" shadow glow></GlowText>
+    <GlitchSectionTitle text="Leaderboards" font-size="var(--font-title)"></GlitchSectionTitle>
     <div class="centered">
         <!-- todo: add button to update the leaderboard -->
         <div class="leaderboard">
@@ -59,13 +59,6 @@ onMounted(async ()=>{
 </template>
 
 <style scoped>
-.leaderboardTitle {
-    transform-origin: top;
-    transform: translate3D(0px, -20vh, -50px) scale(150%);
-    z-index: -1;
-    text-align: center;
-}
-
 .leaderboard {
     position: absolute;
     display: flex;

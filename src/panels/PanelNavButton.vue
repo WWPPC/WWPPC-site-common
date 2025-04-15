@@ -29,10 +29,10 @@ let currentAnimation: AsyncTextTransition | null = null;
 function mouseover() {
     if (blockingAnimation?.finished == false) return;
     currentAnimation?.cancel();
-    currentAnimation = glitchTextTransition(props.text, props.text, (text) => { buttonText.value = text; }, 20, 4, 5, 1);
+    currentAnimation = glitchTextTransition(props.text, props.text, (text) => { buttonText.value = text; }, 40, 2, 5, 1);
 }
 onMounted(() => {
-    blockingAnimation = glitchTextTransition(buttonText.value, props.text, (text) => { buttonText.value = text; }, 20, 2, 15, 1);
+    blockingAnimation = glitchTextTransition(buttonText.value, props.text, (text) => { buttonText.value = text; }, 40, 1, 15, 1);
 });
 </script>
 
