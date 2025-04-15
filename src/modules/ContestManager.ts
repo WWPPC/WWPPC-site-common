@@ -8,6 +8,7 @@ import { useServerState } from './ServerState';
 
 import type { Ref } from 'vue';
 import type { ServerContestConfig } from './ServerState';
+import { useAccountManager } from './AccountManager';
 
 type UUID = string;
 
@@ -203,7 +204,7 @@ const state = reactive<{
 
 // automatically create contest hosts for new contests (debounce just in case it updates a lot)
 const runningContests = new LongPollEventReceiver<string[]>('GET', '/api/contest/running');
-watch(runningContests.ref, debounce(() => {
+const updateRunningContests = debounce(() => {
     if (runningContests.ref.value !== undefined) {
         for (const contest of runningContests.ref.value) {
             if (state.contests[contest] === undefined) {
@@ -233,7 +234,8 @@ watch(runningContests.ref, debounce(() => {
             }
         }
     }
-}, 1000));
+}, 1000);
+watch(runningContests.ref, updateRunningContests);
 
 export const useContestManager = defineStore('contestManager', {
     state: () => state,
@@ -242,6 +244,13 @@ export const useContestManager = defineStore('contestManager', {
         runningContests: () => Object.keys(state.contests)
     },
     actions: {
+        init() {
+            const accountManager = useAccountManager();
+            //a little bit spaghetti but it should work
+            watch(() => accountManager.team?.registrations, () => {
+                updateRunningContests();
+            });
+        },
         async getUpcoming(): Promise<string[] | Response> {
             const res = await apiFetch('GET', '/api/contest/upcoming');
             if (res.ok) return await res.json();

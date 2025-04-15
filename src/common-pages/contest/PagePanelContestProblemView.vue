@@ -19,7 +19,6 @@ const props = defineProps<{
     contest: string
     isUpsolve?: boolean //i'm nuking this property, we can add it back after the contest
 }>();
-// console.log(props);
 
 const route = useRoute();
 const router = useRouter();
