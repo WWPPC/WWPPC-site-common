@@ -10,11 +10,11 @@ const props = defineProps<{
 const val = defineModel<number>({ default: 0 });
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: number): void
+  (e: 'input', value: number): void
 }>();
 
 function input() {
-  emit('update:modelValue', val.value);
+  emit('input', val.value);
 }
 </script>
 
