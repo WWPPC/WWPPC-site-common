@@ -2,6 +2,7 @@
 import { InputLinkButton } from '#/inputs';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
 import { ProblemCompletionState, type Problem, type Submission } from '#/modules/ContestManager';
+import { AnimateInContainer } from '#/containers';
 
 const props = defineProps<{
     // add archive host later
@@ -22,9 +23,11 @@ const props = defineProps<{
         <span class="contestProblemListProblemName"><b>Loading...</b></span>
         <span class="contestProblemListProblemAuthor"><i>By Loading...</i></span>
         <span class="contestProblemListProblemButton">
-            <RouterLink :to="`./problemView/${props.data}`" no-deco>
-                <InputLinkButton text="View" width="100px" height="36px" border></InputLinkButton>
-            </RouterLink>
+            <AnimateInContainer type="fade" :delay="100">
+                <RouterLink :to="`./problemView/${props.data}`" no-deco>
+                    <InputLinkButton text="View" width="100px" height="36px" border glitch-on-mount></InputLinkButton>
+                </RouterLink>
+            </AnimateInContainer>
         </span>
     </div>
     <div class="contestProblemListProblem" v-else>
@@ -38,7 +41,7 @@ const props = defineProps<{
         <span class="contestProblemListProblemAuthor"><i>By {{ props.data.author }}</i></span>
         <span class="contestProblemListProblemButton">
             <RouterLink :to="`./problemView/${props.data.round}_${props.data.number}`" no-deco>
-                <InputLinkButton text="View" width="100px" height="36px" border></InputLinkButton>
+                <InputLinkButton text="View" width="100px" height="36px" border glitch-on-mount></InputLinkButton>
             </RouterLink>
         </span>
     </div>

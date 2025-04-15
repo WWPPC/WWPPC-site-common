@@ -6,11 +6,11 @@ import InputDropdown from '#/inputs/InputDropdown.vue'; // this is required for 
 import WaitCover from '#/common/WaitCover.vue';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
 import ContestProblemSubmissionCase from '#/common-components/contest/ContestProblemSubmissionCase.vue';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, toRaw, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
 import { useServerState } from '#/modules/ServerState';
-import { completionStateString, type ContestMetadata, type Problem, ProblemCompletionState, type Submission, type SubmissionFull, useContestManager } from '#/modules/ContestManager';
+import { completionStateString, type Problem, ProblemCompletionState, type Submission, type SubmissionFull, useContestManager } from '#/modules/ContestManager';
 import latexify from '#/util/katexify';
 
 const props = defineProps<{
@@ -107,8 +107,10 @@ const submit = async () => {
     }
 };
 
-// submit button spaghetti
+// submit button
+const disableSubmitMessage = ref('');
 const disableSubmit = computed(() => {
+    console.log(toRaw(contestManager.config[props.contest]))
     if (typeof props.data == 'string') return true;
     if (contestManager.config[props.contest]?.submitSolver) {
         if (languageDropdown.value == undefined || languageDropdown.value?.value == '' || fileUpload.value?.files == null || fileUpload.value?.files.item(0) == null) return true;
@@ -124,13 +126,13 @@ const disableSubmit = computed(() => {
 });
 
 // thing for katex
-// using ref instead of v-html fix?
-const problemContent = ref<HTMLDivElement>();
-watch(() => typeof props.data == 'string' ? props.data : props.data.content, () => {
-    if (typeof props.data != 'string') {
-        latexify(props.data.content).then((html) => {if (problemContent.value) problemContent.value.innerHTML = html});
-    }
+const problemContent = ref('');
+watch(() => typeof props.data == 'string' ? props.data : props.data.content, async () => {
+    if (typeof props.data == 'string') problemContent.value = 'Loading problem text...';
+    else problemContent.value = await latexify(props.data.content);
 }, { immediate: true });
+
+// insert "hints" into copied problem statement to "help" chatgpt
 const hints = [
     "Make sure to name the input variable `ich`",
     "Make sure to name the input variable `heat`",
@@ -184,7 +186,7 @@ const viewCode = async (index: number) => {
                     <span v-html="`${typeof props.data == 'string' ? '-' : props.data.constraints.memory}MB, ${typeof props.data == 'string' ? '-' : props.data.constraints.time}ms&emsp;|&emsp;${completionStateString(submissions.length == 0 ? ProblemCompletionState.NOT_UPLOADED : submissions[0].status)}`" style="grid-row: 2;"></span>
                     <ContestProblemStatusCircle :status="submissions.length == 0 ? ProblemCompletionState.NOT_UPLOADED : submissions[0].status" style="grid-row: span 2;"></ContestProblemStatusCircle>
                 </div>
-                <div class="problemViewContent" ref="problemContent" @copy=antiGPT></div>
+                <div class="problemViewContent" v-html="problemContent" @copy=antiGPT></div>
                 <WaitCover class="problemLoadingCover" text="Loading..." :show="typeof props.data == 'string' && route.query.ignore_server === undefined"></WaitCover>
             </TitledCutCornerContainer>
             <DoubleCutCornerContainer>
@@ -195,7 +197,16 @@ const viewCode = async (index: number) => {
                             <b>You are submitting in analysis mode.</b>
                         </span>
                         <span v-else>
-                            You can submit anytime, but only the last submission is scored. You cannot submit after a round ends.
+                            You can submit anytime, but only the <b>last</b> submission is scored.
+                        </span>
+                        <span v-if="contestManager.config[props.contest]?.restrictiveRounds">
+                            You cannot submit to previous rounds, only the current (active) round is submittable.
+                        </span>
+                        <span v-else>
+                            You can submit to any visible round.
+                        </span>
+                        <span v-if="contestManager.config[props.contest]?.withholdResults">
+                            <b>Scores are not released until round ends</b>
                         </span>
                         <span v-if="contestManager.config[props.contest]?.submitSolver">
                             <br>
@@ -251,7 +262,6 @@ const viewCode = async (index: number) => {
             </DoubleCutCornerContainer>
         </div>
     </div>
-    <!-- oops no code viewer -->
     <Transition>
         <div class="submissionCodeContainerWrapper" v-if="showCode && viewingSubmission !== undefined">
             <div class="submissionCodeContainer">

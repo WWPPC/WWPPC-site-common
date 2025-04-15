@@ -2,7 +2,7 @@ import { globalModal } from '#/modal';
 import { debounce } from '#/util/inputLimiting';
 import { apiFetch, LongPollEventReceiver } from '#/util/netUtil';
 import { defineStore } from 'pinia';
-import { reactive, ref, toRaw, watch } from 'vue';
+import { reactive, toRaw, watch } from 'vue';
 
 import { useServerState } from './ServerState';
 
@@ -165,7 +165,6 @@ export class ContestHost {
                 }
             }
             this.data.contest = dat;
-            console.log(toRaw(this.data))
         }, { immediate: true });
         watch(this.longPolling.contestScoreboards.ref, () => this.data.scoreboard = this.longPolling.contestScoreboards.value);
     }

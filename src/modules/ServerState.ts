@@ -8,6 +8,9 @@ import type { AccountData } from './AccountManager';
 
 export type ServerContestConfig = {
     rounds: boolean
+    restrictiveRounds: boolean
+    scoreFreezeTime: number
+    withholdResults: number
     submitSolver: boolean
     acceptedSolverLanguages: string[]
     maxSubmissionSize: number
