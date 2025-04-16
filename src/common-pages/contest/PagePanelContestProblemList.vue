@@ -7,6 +7,7 @@ import { useContestManager, type Contest } from '#/modules/ContestManager';
 import ContestProblemListProblem from '#/common-components/contest/problemList/ContestProblemListProblem.vue';
 import { useServerState } from '#/modules/ServerState';
 import { computed, onMounted, ref, watch } from 'vue';
+import GlowText from '#/text/GlowText.vue';
 
 const props = defineProps<{
     contest: string
@@ -22,6 +23,9 @@ const contestData = computed(() => contestManager.contests[contestType]?.data.co
     <div class="problemListWrapperWrapper centered">
         <div class="problemListWrapper">
             <AngledTitledContainer title="Problems" height="100%">
+                <div class="centered" v-if="contestData?.rounds.every(round => round.problems.length === 0)">
+                    <GlowText text="No problems released yet" color="var(--color-3)" glow shadow font-size="var(--font-large)"></GlowText>
+                </div>
                 <div v-if="contestManager.config[contestType]?.rounds" class="problemList">
                     <AnimateInContainer type="slideUp" v-for="(round, index) in contestData?.rounds.filter((r) => r.problems.length > 0 && Date.now() >= r.startTime)" :key=round.round :delay="index * 200">
                         <ContestProblemListRound :data=round></ContestProblemListRound>

@@ -4,9 +4,8 @@ import ContestTimer from '#/common-components/contest/ContestTimer.vue';
 import ContestRoundDisplay from '#/common-components/contest/ContestRoundDisplay.vue';
 import { AnimateInContainer, TitledCutCornerContainer } from '#/containers';
 import { InputIconButton } from '#/inputs';
-import { GlitchText } from '#/text';
-import { useContestManager } from '#/modules/ContestManager';
 import GlitchSectionTitle from '#/common-components/GlitchSectionTitle.vue';
+import { useContestManager } from '#/modules/ContestManager';
 
 const props = defineProps<{
     contest: string
@@ -19,7 +18,7 @@ const contestManager = useContestManager();
 <template>
     <div class="fullBlock stretchBlock">
         <div class="timerContainer">
-            <GlitchSectionTitle :text="contestManager.contests[contestType]?.data.contest?.id ?? 'Not in contest'" font-size="var(--font-title)"></GlitchSectionTitle>
+            <GlitchSectionTitle :text="contestManager.contests[contestType]?.data.contest?.id ?? 'Not in contest'" font-size="var(--font-small-title)"></GlitchSectionTitle>
             <ContestTimer big :contest="props.contest"></ContestTimer>
         </div>
         <div style="flex-grow: 1"></div>

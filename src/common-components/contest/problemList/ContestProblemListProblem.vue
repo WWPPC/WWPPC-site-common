@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { InputLinkButton } from '#/inputs';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
-import { ProblemCompletionState, useContestManager, type Problem, type Submission } from '#/modules/ContestManager';
+import { ProblemCompletionState, useContestManager, type Problem } from '#/modules/ContestManager';
 import { AnimateInContainer } from '#/containers';
 import { computed } from 'vue';
 

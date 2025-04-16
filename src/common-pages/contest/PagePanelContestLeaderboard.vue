@@ -5,7 +5,6 @@ import { useAccountManager } from '#/modules/AccountManager';
 import { useContestManager } from '#/modules/ContestManager';
 import GlitchSectionTitle from '#/common-components/GlitchSectionTitle.vue';
 import { throttle } from '#/util/inputLimiting';
-import { GlowText } from '#/text';
 
 const props = defineProps<{
     contest: string
@@ -44,9 +43,10 @@ watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(asyn
 
 <template>
     <GlitchSectionTitle text="Leaderboards" font-size="var(--font-title)"></GlitchSectionTitle>
-    <GlitchSectionTitle v-if="contestManager.contests[contestType]?.data.scoreboard?.frozen" text="Standings frozen" font-size="var(--font-large)"></GlitchSectionTitle>
-    <br>
+    <GlitchSectionTitle v-if="contestManager.contests[contestType]?.data.scoreboard?.frozen" text="Standings frozen" font-size="var(--font-large)" color="var(--color-3)"></GlitchSectionTitle>
+    <GlitchSectionTitle v-if="scoreboardLoaded && scoreboard.length === 0" text="No entries on leaderboard" font-size="var(--font-large)" color="var(--color-3)"></GlitchSectionTitle>
     <div class="centered">
+        <br>
         <!-- todo: add button to update the leaderboard -->
         <div class="leaderboard">
             <div class="leaderboardItem" v-for="(item, i) of scoreboard" :key="i">
