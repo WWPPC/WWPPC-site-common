@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { type ContestScore, ContestScoreState } from '#/scripts/ContestManager';
+import { type Score, ScoreState } from '#/modules/ContestManager';
 import { globalModal } from '#/modal';
 
 const props = defineProps<{
-    case: ContestScore
+    case: Score
     number: number
 }>();
 
 const modal = globalModal();
 
-const submissionVerdict = () => props.case.state == ContestScoreState.CORRECT ? '*' : props.case.state == ContestScoreState.INCORRECT ? 'X' : props.case.state == ContestScoreState.TIME_LIM_EXCEEDED ? 'T' : props.case.state == ContestScoreState.MEM_LIM_EXCEEDED ? 'M' : '!';
-const submissionVerdictLong = () => props.case.state == ContestScoreState.CORRECT ? 'Accepted' : props.case.state == ContestScoreState.INCORRECT ? 'Incorrect answer' : props.case.state == ContestScoreState.TIME_LIM_EXCEEDED ? 'Time limit exceeded' : props.case.state == ContestScoreState.MEM_LIM_EXCEEDED ? 'Memory limit exceeded' : props.case.state == ContestScoreState.RUNTIME_ERROR ? 'Runtime error' : 'Compilation error';
+const submissionVerdict = () => props.case.state == ScoreState.CORRECT ? '*' : props.case.state == ScoreState.INCORRECT ? 'X' : props.case.state == ScoreState.TIME_LIM_EXCEEDED ? 'T' : props.case.state == ScoreState.MEM_LIM_EXCEEDED ? 'M' : '!';
+const submissionVerdictLong = () => props.case.state == ScoreState.CORRECT ? 'Accepted' : props.case.state == ScoreState.INCORRECT ? 'Incorrect answer' : props.case.state == ScoreState.TIME_LIM_EXCEEDED ? 'Time limit exceeded' : props.case.state == ScoreState.MEM_LIM_EXCEEDED ? 'Memory limit exceeded' : props.case.state == ScoreState.RUNTIME_ERROR ? 'Runtime error' : 'Compilation error';
 
 const showModal = () => {
     modal.showModal({
         title: 'Test Case ' + (props.number + 1),
         content: `Time: ${props.case.time}ms | Memory: ${props.case.memory}MB<br>Subtask: ${props.case.subtask}<br>Verdict: ${submissionVerdictLong()}`,
-        color: props.case.state == ContestScoreState.CORRECT ? 'var(--color-1)' : 'var(--color-2)'
+        color: props.case.state == ScoreState.CORRECT ? 'var(--color-1)' : 'var(--color-2)'
     });
 };
 </script>
@@ -38,9 +38,9 @@ const showModal = () => {
     min-width: 64px;
     height: 64px;
     border-radius: 4px;
-    background-color: v-bind("$props.case.state == ContestScoreState.CORRECT ? 'color-mix(in srgb, var(--color-1) 50%, transparent 50%)' : 'color-mix(in srgb, var(--color-2) 50%, transparent 50%)'");
+    background-color: v-bind("$props.case.state == ScoreState.CORRECT ? 'color-mix(in srgb, var(--color-1) 50%, transparent 50%)' : 'color-mix(in srgb, var(--color-2) 50%, transparent 50%)'");
     border: 2px solid;
-    border-color: v-bind("$props.case.state == ContestScoreState.CORRECT ? 'var(--color-1)' : 'var(--color-2)'");
+    border-color: v-bind("$props.case.state == ScoreState.CORRECT ? 'var(--color-1)' : 'var(--color-2)'");
     cursor: pointer;
 }
 

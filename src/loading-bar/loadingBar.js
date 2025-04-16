@@ -6,9 +6,12 @@ const errorListener = (err) => {
     loadingCover.style.opacity = 1;
     canLoad = false;
 };
+window.addEventListener('error', errorListener);
 document.addEventListener('DOMContentLoaded', async () => {
-    loadingCover.style.opacity = 0;
-    loadingCover.style.pointerEvents = 'none';
+    if (canLoad) {
+        loadingCover.style.opacity = 0;
+        loadingCover.style.pointerEvents = 'none';
+    }
     await Promise.all([
         new Promise((resolve) => window.addEventListener('load', resolve)),
         new Promise((resolve) => setTimeout(resolve, 200))
@@ -20,6 +23,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     loadingCover.remove();
     window.removeEventListener('error', errorListener);
-    if (document.getElementById('root').children.length == 0) window.location.reload();
 });
-window.addEventListener('error', errorListener);

@@ -25,7 +25,7 @@ function click() {
 const buttonText = ref(props.glitchOnMount ? props.text.replace(/./g, ' ') : props.text);
 if (props.glitchOnMount) {
     onMounted(() => {
-        glitchTextTransition(buttonText.value, props.text, (text) => { buttonText.value = text; }, 40, 1, 15, 1);
+        glitchTextTransition(buttonText.value, props.text, (text) => { buttonText.value = text; }, 40, 2, 10, 1);
     });
 }
 watch(() => props.text, () => buttonText.value = props.text);

@@ -1,25 +1,21 @@
 <script setup lang="ts">
-import { useConnectionEnforcer } from '#/scripts/ConnectionEnforcer';
 import LoadingCover from '#/common/LoadingCover.vue';
 import NotFound from '#/common/NotFound.vue';
 import OnScreenHook from '#/common/OnScreenHook.vue';
 import { AnimateInContainer, CutCornerContainer, PairedGridContainer, TitledCutCornerContainer, TitledDoubleCutCornerContainer } from '#/containers';
 import { useRoute } from 'vue-router';
-import { experienceMaps, gradeMaps, languageMaps, type TeamData, useAccountManager, type AccountData } from '#/scripts/AccountManager';
-import { nextTick, onMounted, ref, watch } from 'vue';
+import { experienceMaps, gradeMaps, languageMaps, type TeamData, useAccountManager, type AccountData } from '#/modules/AccountManager';
+import { onMounted, ref, watch } from 'vue';
 import { InputDropdown, InputTextBox } from '#/inputs';
-import { useServerConnection } from '#/scripts/ServerConnection';
-import { autoGlitchTextTransition } from '#/text';
-import { setTitlePanel } from '#/scripts/title';
+import { autoFlipTextTransition, autoGlitchTextTransition } from '#/text';
+import { setTitlePanel } from '#/title';
 import AccountTeamUserDisp from '#/common-components/account/AccountTeamUserDisp.vue';
+import { globalModal } from '#/modal';
 
 const route = useRoute();
 
-const serverConnection = useServerConnection();
-const connectionEnforcer = useConnectionEnforcer();
+const modal = globalModal();
 const accountManager = useAccountManager();
-
-connectionEnforcer.connectionInclude.add('/user');
 
 const userData = ref<AccountData | null>(null);
 const teamData = ref<TeamData | null>(null);
@@ -28,17 +24,26 @@ const loadUserData = async () => {
     userData.value = null;
     teamData.value = null;
     showLoading.value = true;
-    await serverConnection.handshakePromise;
-    await nextTick();
     if (route.params.userView != null) {
-        await Promise.all([
-            accountManager.getUserData(route.params.userView.toString()).then((v) => {
-                if (!(v instanceof Error)) userData.value = v;
-            }),
-            accountManager.getTeamData(route.params.userView.toString()).then((v) => {
-                if (!(v instanceof Error)) teamData.value = v;
-            })
-        ]);
+        const accRes = await accountManager.fetchAccountData(route.params.userView.toString());
+        if (accRes instanceof Response) {
+            if (accRes.status != 404) {
+                modal.showModal({ title: accRes.statusText, content: "Could not fetch user " + accRes.status, color: "var(--color-2)" });
+            }
+            //@spsquared how do i make this show the 404 page
+            return;
+        }
+        userData.value = accRes;
+        if (userData.value.team !== null) {
+            const teamRes = await accountManager.fetchTeamData(userData.value.team);
+            if (teamRes instanceof Response) {
+                if (teamRes.status != 404) {
+                    modal.showModal({ title: teamRes.statusText, content: "Could not fetch team " + teamRes.status, color: "var(--color-2)" });
+                }
+                return;
+            }
+            teamData.value = teamRes;
+        }
     }
     showLoading.value = false;
 };
@@ -46,11 +51,11 @@ watch(() => route.params, () => {
     if (route.params.page != 'user' || route.query.ignore_server !== undefined) return;
     loadUserData();
 });
-const username = autoGlitchTextTransition(() => '@' + (userData.value?.username ?? ''), 40, 1, 10, 3, true);
-const displayName = autoGlitchTextTransition(() => userData.value?.displayName ?? '', 40, 1, 10, 3, true);
-const biography = autoGlitchTextTransition(() => userData.value?.bio ?? '', 40, 2, 10);
-const teamName = autoGlitchTextTransition(() => teamData.value?.teamName ?? '', 40, 1, 10, 3, true);
-const teamBio = autoGlitchTextTransition(() => teamData.value?.teamBio ?? '', 40, 2, 10);
+const username = autoGlitchTextTransition(() => '@' + (userData.value?.username ?? ''), 20, 2, 10, 3, true);
+const displayName = autoGlitchTextTransition(() => userData.value?.displayName ?? '', 20, 2, 10, 3, true);
+const biography = autoFlipTextTransition(() => userData.value?.bio ?? '', 20, 4);
+const teamName = autoGlitchTextTransition(() => teamData.value?.name ?? '', 20, 2, 10, 3, true);
+const teamBio = autoFlipTextTransition(() => teamData.value?.bio ?? '', 20, 4);
 const grade = ref('');
 const experience = ref('');
 const languages = ref<string[]>([]);
@@ -75,13 +80,13 @@ const largeHeader = ref(true);
                     <PairedGridContainer style="font-size: var(--font-small);">
                         <span>Name:</span>
                         <InputTextBox :value="userData?.firstName + ' ' + userData?.lastName" width="var(--fwidth)" disabled></InputTextBox>
-                        <span>School:</span>
-                        <InputTextBox :value="userData?.school" width="var(--fwidth)" disabled></InputTextBox>
+                        <span>School / Organization:</span>
+                        <InputTextBox :value="userData?.organization" width="var(--fwidth)" disabled></InputTextBox>
                         <span>Grade Level:</span>
                         <InputDropdown v-model="grade" width="var(--fwidth)" :items="gradeMaps" disabled></InputDropdown>
                         <span>Experience Level:</span>
                         <InputDropdown v-model="experience" width="var(--fwidth)" :items="experienceMaps" disabled></InputDropdown>
-                        <span>Known Languages:</span>
+                        <span>Familiar Languages:</span>
                         <InputDropdown v-model="languages" width="var(--fwidth)" height="6em" :items="languageMaps" multiple disabled></InputDropdown>
                     </PairedGridContainer>
                 </TitledCutCornerContainer>
@@ -91,15 +96,19 @@ const largeHeader = ref(true);
                     </p>
                 </TitledDoubleCutCornerContainer>
                 <TitledCutCornerContainer title="Team" hover-animation="lift" align="center" height="100%" style="grid-row: span 2; max-height: 80vh;">
-                    <div class="userViewTeamGrid">
+                    <div class="userViewTeamGrid" v-if="teamData !== null">
                         <div class="userViewTeamList">
-                            <AccountTeamUserDisp v-for="user in teamData?.teamMembers" :key="user" :user="user" :team="teamData!.team"></AccountTeamUserDisp>
+                            <AccountTeamUserDisp v-for="user in teamData.members" :key="user" :user="user" :team="userData!.team!"></AccountTeamUserDisp>
                         </div>
                         <div>
                             <TitledCutCornerContainer :title="teamName" vertical-flipped>
                                 {{ teamBio }}
                             </TitledCutCornerContainer>
                         </div>
+                    </div>
+                    <div v-else>
+                        <!-- wow a v-else how rare -->
+                        {{ userData?.displayName }} is not on a team.
                     </div>
                 </TitledCutCornerContainer>
             </div>
@@ -114,7 +123,7 @@ const largeHeader = ref(true);
                         <div class="userViewProfileRegistrationsHeader">
                             <h3>Registrations</h3>
                         </div>
-                        <AnimateInContainer type="slideUp" v-for="(reg, i) in userData?.registrations" :key="i" :delay="i * 200" single>
+                        <AnimateInContainer type="slideUp" v-for="(reg, i) in teamData?.registrations" :key="i" :delay="i * 200" single>
                             <span class="registrationLine">
                                 <div class="registrationStatusDotUpcoming"></div>
                                 {{ reg }}
@@ -126,7 +135,7 @@ const largeHeader = ref(true);
                                 {{ reg }}
                             </span>
                         </AnimateInContainer>
-                        <span v-if="!userData?.registrations.length && !userData?.pastRegistrations.length">
+                        <span v-if="!teamData?.registrations.length && !userData?.pastRegistrations.length">
                             This user is not registered for any contests
                         </span>
                     </CutCornerContainer>
@@ -135,7 +144,7 @@ const largeHeader = ref(true);
         </div>
     </div>
     <NotFound v-if="route.params.userView == undefined || userData === null"></NotFound>
-    <LoadingCover text="Loading..." ignore-server :show="showLoading"></LoadingCover>
+    <LoadingCover text="Loading..." :show="showLoading"></LoadingCover>
 </template>
 
 <style scoped>

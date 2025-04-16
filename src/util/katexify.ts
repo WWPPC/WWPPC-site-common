@@ -7,14 +7,14 @@ export async function latexify(str: string): Promise<string> {
             return renderToString(match.substring(2, match.length - 2).trim(), { throwOnError: false });
         } catch (e) {
             console.error(e);
-            return "<span style='color: red'>Math error</span>";
+            return '<span style="color: red>Math error</span>';
         }
     }).replace(/\$.+?\$/gm, (match) => {
         try {
             return renderToString(match.substring(1, match.length - 1).trim(), { throwOnError: false });
         } catch (e) {
             console.error(e);
-            return "<span style='color: red'>Math error</span>";
+            return '<span style="color: red">Math error</span>';
         }
     });
 }

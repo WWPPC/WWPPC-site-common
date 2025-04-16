@@ -4,8 +4,7 @@ import { InputButton } from '#/inputs';
 import LoadingSpinner from '#/common/LoadingSpinner.vue';
 import { globalModal, ModalMode } from '#/modal';
 import { onMounted, ref, watch } from 'vue';
-import { type AccountData, getTeamOpMessage, TeamOpResult, useAccountManager } from '#/scripts/AccountManager';
-import recaptcha from '#/scripts/recaptcha';
+import { type AccountData, useAccountManager } from '#/modules/AccountManager';
 
 const props = defineProps<{
     user: string
@@ -19,21 +18,19 @@ const accountManager = useAccountManager();
 const data = ref<AccountData | null>(null);
 
 watch(() => props.user, async () => {
-    const res = await accountManager.getUserData(props.user);
-    if (!(res instanceof Error)) data.value = res;
-});
-onMounted(async () => {
-    const res = await accountManager.getUserData(props.user);
-    if (!(res instanceof Error)) data.value = res;
-});
+    const res = await accountManager.fetchAccountData(props.user);
+    if (!(res instanceof Response)) data.value = res;
+}, { immediate: true });
 
 const kick = async () => {
     const confirmation = await modal.showModal({ title: 'Kick from team?', content: `You are about to kick ${data.value?.displayName} (@${props.user}) from the team. Are you sure?`, mode: ModalMode.INPUT, color: 'yellow' }).result;
     if (!confirmation) return;
-    const token = await recaptcha.execute('kick_team');
-    const res = await accountManager.kickTeam(props.user, token);
-    if (res != TeamOpResult.SUCCESS) modal.showModal({ title: 'Could not kick from team', content: getTeamOpMessage(res), color: 'red' });
-    await accountManager.updateOwnUserData();
+    const res = await accountManager.kickTeam(props.user);
+    if (!res.ok) modal.showModal({
+        title: 'Could not kick from team',
+        content: await res.text(),
+        color: 'var(--color-2)'
+    });
 };
 </script>
 
@@ -53,7 +50,7 @@ const kick = async () => {
                     </Transition>
                 </div>
             </RouterLink>
-            <InputButton class="kickButton" text="Kick" color="red" @click="kick()" v-if="$props.allowKick && $props.user !== accountManager.username && $props.user !== $props.team"></InputButton>
+            <InputButton class="kickButton" text="Kick" color="var(--color-2)" @click="kick()" v-if="$props.allowKick && $props.user !== accountManager.user.username && $props.user !== $props.team"></InputButton>
         </div>
     </AnimateInContainer>
 </template>

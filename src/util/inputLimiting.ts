@@ -6,6 +6,7 @@ import { ref, type Ref } from "vue";
  * with debounced calls to the input function.
  * @param fn Function to debounce.
  * @param ms Inactive time before calling the input function
+ * @returns Wrapped function
  */
 export function debounce<F extends (...args: any[]) => void>(fn: F, ms: number): (...args: Parameters<F>) => void {
     let timeout: NodeJS.Timeout = setTimeout(() => {});
@@ -20,7 +21,7 @@ export function debounce<F extends (...args: any[]) => void>(fn: F, ms: number):
  * with throttled calls to the input function.
  * @param fn Function to throttle
  * @param ms Minimum time between successes calls to the input function
- * @returns 
+ * @returns Wrapped function
  */
 export function throttle<F extends (...args: any[]) => void>(fn: F, ms: number): (...args: Parameters<F>) => void {
     let timeout: NodeJS.Timeout = setTimeout(() => {});
@@ -43,6 +44,7 @@ export function throttle<F extends (...args: any[]) => void>(fn: F, ms: number):
  * Add a debounce delay from an input ref, returning a ref with debounced update behavior.
  * @param input Ref to use as un-debounced input
  * @param ms Inactive time before updating output
+ * @returns Ref with delayed update
  */
 export function debounceRef<T>(input: Ref<T>, ms: number): Ref<T> {
     const output: Ref<T> = ref(input.value) as Ref<T>;
@@ -58,6 +60,7 @@ export function debounceRef<T>(input: Ref<T>, ms: number): Ref<T> {
  * Add a throttling limiter from an input ref, returning a ref with throttled update behavior.
  * @param input Ref to use as un-throttled input
  * @param ms Minimum time between successive updates of output
+ * @returns Ref with delayed update
  */
 export function throttleRef<T>(input: Ref<T>, ms: number): Ref<T> {
     const output: Ref<T> = ref(input.value) as Ref<T>;

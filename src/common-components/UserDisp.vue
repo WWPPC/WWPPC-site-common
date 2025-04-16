@@ -3,10 +3,10 @@ import { InputButton } from '#/inputs';
 import { glitchTextTransition } from '#/text';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { useServerConnection } from '#/scripts/ServerConnection';
-import { useAccountManager } from '#/scripts/AccountManager';
+import { useServerState } from '#/modules/ServerState';
+import { useAccountManager } from '#/modules/AccountManager';
 
-const serverConnection = useServerConnection();
+const serverState = useServerState();
 const accountManager = useAccountManager();
 const route = useRoute();
 const ignoreServer = ref(route.query.ignore_server !== undefined);
@@ -17,38 +17,28 @@ watch(() => route.query, () => {
 const name = ref('Not signed in');
 const buttonText = ref('Log in');
 
-serverConnection.onconnect(() => {
-    serverConnection.handshakePromise.then(() => {
-        if (serverConnection.loggedIn) {
-            glitchTextTransition(buttonText.value, 'Account', (text) => { buttonText.value = text; }, 40, 1, 10, 2).promise;
-            name.value = accountManager.displayName;
-        }
-    });
-});
-onMounted(() => {
-    serverConnection.handshakePromise.then(() => {
-        if (serverConnection.loggedIn) {
-            glitchTextTransition(buttonText.value, 'Account', (text) => { buttonText.value = text; }, 40, 1, 10, 2).promise;
-            name.value = accountManager.displayName;
-        }
-    });
-});
-watch(() => accountManager.displayName, () => {
-    if (serverConnection.loggedIn) name.value = accountManager.displayName;
-});
-serverConnection.ondisconnect(() => {
-    name.value = 'Not signed in';
-    glitchTextTransition(buttonText.value, 'Sign in', (text) => { buttonText.value = text; }, 40, 1, 10, 2).promise;
-});
+const updateDisp = () => {
+    if (serverState.loggedIn) {
+        name.value = accountManager.user.displayName;
+        glitchTextTransition(buttonText.value, 'Account', (text) => { buttonText.value = text; }, 40, 1, 10, 1).promise;
+    } else {
+        name.value = 'Not signed in';
+        glitchTextTransition(buttonText.value, 'Log in', (text) => { buttonText.value = text; }, 40, 1, 10, 1).promise;
+    }
+}
+
+watch(() => accountManager.user.displayName, updateDisp);
+watch(() => serverState.loggedIn, updateDisp);
+onMounted(updateDisp);
 </script>
 
 <template v-slot:userDisp>
     <div class="userDispContainer">
         <div class="userDispUser">
-            <img :src=accountManager.profileImage class="userDispProfileImg" v-if="serverConnection.loggedIn || ignoreServer">
+            <img :src=accountManager.user.profileImage class="userDispProfileImg" v-if="serverState.loggedIn || ignoreServer">
             <div class="userDispUserName">{{ name }}</div>
         </div>
-        <RouterLink :to="serverConnection.loggedIn ? '/account' : `/login?redirect=${route.fullPath}&clearQuery=1`" class="userDispButtonWrapper">
+        <RouterLink :to="serverState.loggedIn ? '/account' : `/login?redirect=${route.fullPath}&clearQuery=1`" class="userDispButtonWrapper">
             <InputButton :text=buttonText width="100%" font="20px"></InputButton>
         </RouterLink>
     </div>

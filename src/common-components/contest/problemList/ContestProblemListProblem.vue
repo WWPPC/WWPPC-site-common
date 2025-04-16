@@ -1,41 +1,55 @@
 <script setup lang="ts">
 import { InputLinkButton } from '#/inputs';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
-import { glitchTextTransition } from '#/text';
-import { ref, onMounted } from 'vue';
-import { type ContestProblem } from '#/scripts/ContestManager';
+import { ProblemCompletionState, useContestManager, type Problem } from '#/modules/ContestManager';
+import { AnimateInContainer } from '#/containers';
+import { computed } from 'vue';
 
 const props = defineProps<{
-    data: ContestProblem
+    // add archive host later
+    data: string | Problem
     archive?: boolean
 }>();
 
-const nameText = ref<string>('');
-const authorText = ref<string>('');
-onMounted(() => {
-    if (props.archive) {
-        nameText.value = props.data.name;
-        authorText.value = 'Author: ' + props.data.author;
-    } else setTimeout(() => {
-        glitchTextTransition('', props.data.name, (t) => { nameText.value = t; }, 40);
-        glitchTextTransition('', 'Author: ' + props.data.author, (t) => { authorText.value = t; }, 40);
-    }, (props.data.round ?? 0) * 200 + (props.data.number ?? 0) * 100);
+const contestManager = useContestManager();
+const submissions = computed(() => {
+    const allSubmissions = contestManager.contests.WWPIT?.data.submissions;
+    if (allSubmissions === undefined) return [];
+    return allSubmissions.get(typeof props.data == 'string' ? props.data : props.data.id) ?? [];
 });
 </script>
 
 <template>
-    <div class="contestProblemListProblem">
+    <div class="contestProblemListProblem" v-if="typeof props.data == 'string'">
+        <span class="contestProblemListProblemId">
+            ??-??
+        </span>
+        <span class="problemListCircle">
+            <!-- pretty sure it's always undefined the way it's set up but whatever -->
+            <ContestProblemStatusCircle :status="submissions[0] === undefined ? ProblemCompletionState.NOT_UPLOADED : submissions[0].status"></ContestProblemStatusCircle>
+        </span>
+        <span class="contestProblemListProblemName"><b>{{ data }}</b></span>
+        <span class="contestProblemListProblemAuthor"><i>By Loading...</i></span>
+        <span class="contestProblemListProblemButton">
+            <AnimateInContainer type="fade" :delay="100">
+                <RouterLink :to="`./problemView/${props.data}`" no-deco>
+                    <InputLinkButton text="View" width="100px" height="36px" border glitch-on-mount></InputLinkButton>
+                </RouterLink>
+            </AnimateInContainer>
+        </span>
+    </div>
+    <div class="contestProblemListProblem" v-else>
         <span class="contestProblemListProblemId">
             {{ props.data.round + 1 }}-{{ props.data.number + 1 }}
         </span>
         <span class="problemListCircle">
-            <ContestProblemStatusCircle :status="props.data.status"></ContestProblemStatusCircle>
+            <ContestProblemStatusCircle :status="submissions[0] === undefined ? ProblemCompletionState.NOT_UPLOADED : submissions[0].status"></ContestProblemStatusCircle>
         </span>
-        <span class="contestProblemListProblemName"><b>{{ nameText }}</b></span>
-        <span class="contestProblemListProblemAuthor"><i>{{ authorText }}</i></span>
+        <span class="contestProblemListProblemName"><b>{{ props.data.name }}</b></span>
+        <span class="contestProblemListProblemAuthor"><i>By {{ props.data.author }}</i></span>
         <span class="contestProblemListProblemButton">
-            <RouterLink :to="props.archive ? `./archiveView/${props.data.contest}/${props.data.round}/${props.data.number}` : `./problemView/${props.data.round}_${props.data.number}`" no-deco>
-                <InputLinkButton text="View" width="100px" height="36px" border></InputLinkButton>
+            <RouterLink :to="`./problemView/${props.data.round}_${props.data.number}`" no-deco>
+                <InputLinkButton text="View" width="100px" height="36px" border glitch-on-mount></InputLinkButton>
             </RouterLink>
         </span>
     </div>

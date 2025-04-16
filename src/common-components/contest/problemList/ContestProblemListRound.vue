@@ -1,25 +1,17 @@
 <script setup lang="ts">
-import type { ContestRound } from '#/scripts/ContestManager';
+import type { Round } from '#/modules/ContestManager';
 import ContestProblemListProblem from './ContestProblemListProblem.vue';
 import { AnimateInContainer, CutCornerContainer } from '#/containers';
-import { ref, onMounted } from 'vue';
-import { glitchTextTransition } from '#/text';
 
 const props = defineProps<{
-    data: ContestRound
+    data: Round
 }>();
-const roundText = ref<string>('');
-onMounted(() => {
-    setTimeout(() => {
-        glitchTextTransition('', 'Round ' + (props.data.number + 1), (t) => { roundText.value = t; }, 40, 1, 10, 2);
-    }, props.data.number * 200);
-})
 </script>
 
 <template>
-    <h2>{{ roundText }}</h2>
+    <h2>Round {{ props.data.round + 1 }}</h2>
     <CutCornerContainer>
-        <AnimateInContainer type="fade" v-for="(problem, index) in props.data.problems" :key=problem.number :delay="index * 100">
+        <AnimateInContainer type="fade" v-for="(problem, index) in props.data.problems" :key="typeof problem == 'string' ? problem : problem.id" :delay="index * 50">
             <ContestProblemListProblem :data=problem></ContestProblemListProblem>
         </AnimateInContainer>
     </CutCornerContainer>

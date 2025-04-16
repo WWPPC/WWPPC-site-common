@@ -2,7 +2,7 @@
 import { onMounted, ref, watch } from 'vue';
 import { glitchTextTransition, type AsyncTextTransition } from '#/text';
 import { useRoute } from 'vue-router';
-import { isMobile } from '#/scripts/userAgent';
+import { isMobile } from '#/util/userAgent';
 
 const props = defineProps<{
     text: string
@@ -50,6 +50,7 @@ onMounted(() => {
     text-decoration: none;
     text-align: center;
     align-content: center;
+    white-space-collapse: preserve-breaks;
     background-color: transparent;
     font-family: 'Source Code Pro', Courier, monospace;
     transition: 100ms cubic-bezier(0.6, 1, 0.5, 1.6) background-color;

@@ -2,113 +2,187 @@
 import { PanelBody, PanelHeader, PanelMain, PanelView, PanelNavLargeLogo } from '#/panels';
 import { InputButton, InputDropdown, InputTextBox } from '#/inputs';
 import { PairedGridContainer } from '#/containers';
-import LoadingCover from '#/common/LoadingCover.vue';
 import WaitCover from '#/common/WaitCover.vue';
+import LoadingCover from '#/common/LoadingCover.vue';
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
-import { useServerConnection } from '#/scripts/ServerConnection';
-import { languageMaps, experienceMaps, gradeMaps, useAccountManager, validateCredentials, getAccountOpMessage, AccountOpResult } from '#/scripts/AccountManager';
-import { useConnectionEnforcer } from '#/scripts/ConnectionEnforcer';
-import recaptcha from '#/scripts/recaptcha';
+import { useServerState } from '#/modules/ServerState';
+import { languageMaps, experienceMaps, gradeMaps, useAccountManager } from '#/modules/AccountManager';
 
 const router = useRouter();
 const route = useRoute();
 
 // connection modals
 const modal = globalModal();
-const serverConnection = useServerConnection();
-const connectionEnforcer = useConnectionEnforcer();
+const serverState = useServerState();
 const accountManager = useAccountManager();
 
-connectionEnforcer.connectionInclude.add('/login');
-
-watch(() => route.params.page, async () => {
+watch([() => route.params.page, () => serverState.loggedIn], () => {
+    // redirect away from login (if redirected to login elsewhere) if logged in
     if (route.params.page == 'login' && route.query.ignore_server === undefined) {
-        serverConnection.handshakePromise.then(() => {
-            if (serverConnection.loggedIn) router.replace({ path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home?clearQuery', query: { clearQuery: 1 } });
+        if (serverState.loggedIn) router.replace({
+            path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home',
+            query: { clearQuery: 1 }
         });
     } else {
         page.value = 0;
+        loginError.value = '';
+    }
+});
+watch(() => serverState.connected, () => {
+    if (!serverState.connected) {
+        // oops interrupted
+        page.value = 0;
+        loginError.value = '';
+        showLoginWait.value = false;
+        showRecoveryWait.value = false;
     }
 });
 
+const page = ref(0);
 const usernameInput = ref('');
 const passwordInput = ref('');
-const page = ref(0);
 const firstNameInput = ref('');
 const lastNameInput = ref('');
 const emailInput = ref('');
-const schoolInput = ref('');
+const email2Input = ref('');
+const organizationInput = ref('');
 const gradeInput = ref('');
 const experienceInput = ref('');
 const languageInput = ref<string[]>([]);
+const loginError = ref('');
 const showLoginWait = ref(false);
 const showRecoveryWait = ref(false);
 const attemptedRecovery = ref(false);
-const attemptLogin = async () => {
-    if (usernameInput.value.trim() == '' || passwordInput.value == '') return;
-    if (!validateCredentials(usernameInput.value, passwordInput.value)) {
-        modal.showModal({ title: 'Invalid username or password', content: 'Username must be less than or equal to 16 characters and contain only lowercase alphanumeric (a-z, 0-9) and "-" and "_" characters.', color: 'var(--color-2)' });
-        return;
+const validateCredentials = (checkPass: boolean = true): boolean => {
+    if (!serverState.connected) {
+        loginError.value = 'Server connection failed';
+        return false;
     }
-    showLoginWait.value = true;
-    const token = await recaptcha.execute('login');
-    const res = await accountManager.login(usernameInput.value, passwordInput.value, token);
-    showLoginWait.value = false;
-    if (res == 0) router.push({ path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home', query: { clearQuery: 1 } });
-    else modal.showModal({ title: 'Could not log in:', content: getAccountOpMessage(res), color: 'var(--color-2)' });
+    if (usernameInput.value.length == 0) {
+        loginError.value = 'Please enter username';
+        return false;
+    }
+    if (usernameInput.value.length > 16) {
+        loginError.value = 'Username must be less than 16 characters in length';
+        return false;
+    }
+    if (!/^[a-z]([a-z0-9-]*[a-z0-9])?$/.test(usernameInput.value)) {
+        loginError.value = 'Username must contain only lowercase letters (a-z), numbers (0-9), underscores ("_"), and dashes ("-").';
+        return false;
+    }
+    if (!checkPass) return true;
+    if (passwordInput.value.length == 0) {
+        loginError.value = 'Please enter a password';
+        return false;
+    }
+    if (passwordInput.value.length > 1024) {
+        loginError.value = 'Password must be less than 1024 characters in length';
+    }
+    return true;
 };
-const toSignUp = () => {
-    if (usernameInput.value.trim() == '' || passwordInput.value == '') return;
-    if (!validateCredentials(usernameInput.value, passwordInput.value)) {
-        modal.showModal({ title: 'Invalid username or password', content: 'Username must be less than or equal to 16 characters and contain only lowercase alphanumeric (a-z, 0-9) and "-" and "_" characters.', color: 'var(--color-2)' });
+const attemptLogin = async () => {
+    if (!validateCredentials()) return;
+    loginError.value = '';
+    showLoginWait.value = true;
+    const res = await serverState.login(usernameInput.value, passwordInput.value);
+    showLoginWait.value = false;
+    if (res.ok) {
+        router.push({
+            path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home',
+            query: { clearQuery: 1 }
+        });
+    } else {
+        loginError.value = await res.text();
+    }
+};
+const toSignUp = async () => {
+    if (!validateCredentials()) return;
+    loginError.value = '';
+    // warn if account already exists
+    showLoginWait.value = true;
+    const res = await accountManager.fetchAccountData(usernameInput.value);
+    showLoginWait.value = false;
+    if (res instanceof Response) {
+        if (res.status != 404) {
+            loginError.value = await res.text();
+            return;
+        }
+    } else {
+        loginError.value = 'Account already exists';
         return;
     }
+    // reset fields because sometimes it doesn't do that
     firstNameInput.value = '';
     lastNameInput.value = '';
     emailInput.value = '';
-    schoolInput.value = '';
+    email2Input.value = '';
+    organizationInput.value = '';
     gradeInput.value = '';
     experienceInput.value = '';
     languageInput.value = [];
     page.value = 1;
 };
 const attemptSignup = async () => {
-    if (!validateCredentials(usernameInput.value, passwordInput.value) || ((firstNameInput.value.trim()) == '') || ((lastNameInput.value.trim()) == '') || ((schoolInput.value.trim()) == '') || ((emailInput.value.trim()) == '') || gradeInput.value == '' || experienceInput.value == '') return;
+    if (!validateCredentials()) return;
+    if (firstNameInput.value.trim().length == 0 || lastNameInput.value.trim().length == 0 || emailInput.value.trim().length == 0
+        || gradeInput.value == '' || experienceInput.value == '') {
+        loginError.value = 'Please fill out all required fields';
+        return;
+    }
+    loginError.value = '';
     showLoginWait.value = true;
-    const token = await recaptcha.execute('signup');
-    const res = await accountManager.signup(usernameInput.value, passwordInput.value, token, {
+    const res = await serverState.signup(usernameInput.value, passwordInput.value, {
         firstName: firstNameInput.value.trim(),
         lastName: lastNameInput.value.trim(),
         email: emailInput.value.trim(),
-        school: schoolInput.value.trim(),
+        email2: email2Input.value.trim(),
+        organization: organizationInput.value.trim(),
         grade: Number(gradeInput.value),
         experience: Number(experienceInput.value),
         languages: languageInput.value
     });
     showLoginWait.value = false;
-    if (res == 0) router.push({ path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home', query: { clearQuery: 1 } });
-    else modal.showModal({ title: 'Could not sign up:', content: getAccountOpMessage(res), color: 'var(--color-2)' });
+    if (res.ok) {
+        router.push({
+            path: (typeof route.query.redirect == 'string' ? route.query.redirect : (route.query.redirect ?? [])[0]) ?? '/home',
+            query: { clearQuery: 1 }
+        });
+    } else {
+        loginError.value = await res.text();
+    }
 };
 const toRecovery = async () => {
+    if (!validateCredentials(false)) return;
+    loginError.value = '';
     emailInput.value = '';
     page.value = 2;
 };
 const attemptRecovery = async () => {
-    if (!validateCredentials(usernameInput.value, 'oof') || ((emailInput.value.trim()) == '')) return;
+    if (!validateCredentials(false)) return;
+    if (attemptedRecovery.value) return;
+    attemptedRecovery.value = true;
+    loginError.value = '';
     showRecoveryWait.value = true;
-    const token = await recaptcha.execute('recoverpassword');
-    const res = await accountManager.requestRecovery(usernameInput.value, emailInput.value, token);
+    const res = await serverState.requestRecovery(usernameInput.value, emailInput.value);
     showRecoveryWait.value = false;
-    if (res == AccountOpResult.SUCCESS) {
-        modal.showModal({ title: 'Recovery email sent', content: 'The recovery email was sent and should arrive in your inbox within 10 minutes.', color: 'var(--color-1)' });
-        attemptedRecovery.value = true;
-    } else modal.showModal({
-        title: 'Could not send recovery email:',
-        content: res == AccountOpResult.ALREADY_EXISTS ? 'An email was already sent recently' : res == AccountOpResult.NOT_EXISTS ? 'Account not found' : res == AccountOpResult.INCORRECT_CREDENTIALS ? 'Inputted email does not match account record' : res == AccountOpResult.SESSION_EXPIRED ? 'Session expired' : res == AccountOpResult.ERROR ? 'Internal error' : res == AccountOpResult.CAPTCHA_FAILED ? 'ReCAPTCHA check failed' : res == AccountOpResult.NOT_CONNECTED ? 'Not connected to server' : 'Unknown error (this is a bug?)',
-        color: 'var(--color-2)'
-    });
+    if (res.ok) {
+        loginError.value = '';
+        modal.showModal({
+            title: 'Recovery email sent',
+            content: 'The recovery email was sent and should arrive in your inbox within 10 minutes.',
+            color: 'var(--color-1)'
+        });
+    } else {
+        const message = await res.text();
+        loginError.value = message;
+        modal.showModal({
+            title: 'Could not send recovery email:',
+            content: message,
+            color: 'var(--color-2)'
+        });
+    }
 };
 </script>
 
@@ -131,11 +205,12 @@ const attemptRecovery = async () => {
                                     <h1 class="loginVerticalHeader">Log In</h1>
                                     <form class="loginVertical" action="javascript:void(0)">
                                         <InputTextBox v-model="usernameInput" placeholder="Username" style="margin-bottom: 8px;" width="208px" title="Username (alphanumeric and/or dash/underscore)" maxlength="16" autocomplete="username" autocapitalize="off" pattern="[a-z0-9\-_]*" highlight-invalid required></InputTextBox>
-                                        <InputTextBox v-model="passwordInput" placeholder="Password" type="password" style="margin-bottom: 8px;" width="208px" title="Password" maxlength="1024" autocomplete="current-password" required></InputTextBox>
+                                        <InputTextBox v-model="passwordInput" placeholder="Password" type="password" style="margin-bottom: 8px;" width="208px" title="Password" autocomplete="current-password" required></InputTextBox>
                                         <span>
-                                            <InputButton text="Log In" type="submit" @click="attemptLogin" width="100px" title="Log in" glitchOnMount :disabled=showLoginWait></InputButton>
-                                            <InputButton text="Sign Up" type="submit" @click="toSignUp" width="100px" title="Continue to create a new account" glitchOnMount :disabled=showLoginWait></InputButton>
+                                            <InputButton text="Log In" type="submit" @click="attemptLogin" width="100px" title="Log in" glitchOnMount :disabled="showLoginWait || usernameInput.length == 0 || passwordInput.length == 0"></InputButton>
+                                            <InputButton text="Sign Up" type="submit" @click="toSignUp" width="100px" title="Continue to create a new account" glitchOnMount :disabled="showLoginWait || usernameInput.length == 0 || passwordInput.length == 0"></InputButton>
                                         </span>
+                                        <span v-if="loginError != ''" class="loginError">{{ loginError }}</span>
                                         <span class="loginForgotPassword" @click="toRecovery">Forgot password?</span>
                                     </form>
                                 </div>
@@ -157,8 +232,9 @@ const attemptRecovery = async () => {
                                             <InputTextBox v-model="firstNameInput" width="var(--hwidth)" title="First name" placeholder="First name" maxlength="32" autocomplete="given-name" required></InputTextBox>
                                             <InputTextBox v-model="lastNameInput" width="var(--hwidth)" title="Last Name" placeholder="Last name" maxlength="32" autocomplete="family-name" required></InputTextBox>
                                         </span>
-                                        <InputTextBox v-model="schoolInput" style="margin-bottom: 8px;" width="var(--fwidth)" title="Your school name" placeholder="School name" maxlength="64" required></InputTextBox>
-                                        <InputTextBox v-model="emailInput" type="email" name="email" style="margin-bottom: 8px;" width="var(--fwidth)" title="Email" placeholder="Email" maxlength="32" required highlight-invalid></InputTextBox>
+                                        <InputTextBox v-model="organizationInput" style="margin-bottom: 8px;" width="var(--fwidth)" title="Your school or organization name" placeholder="School / Organization" maxlength="64"></InputTextBox>
+                                        <InputTextBox v-model="emailInput" type="email" style="margin-bottom: 8px;" width="var(--fwidth)" title="Your email" placeholder="Email" maxlength="32" required highlight-invalid></InputTextBox>
+                                        <InputTextBox v-model="email2Input" type="email" style="margin-bottom: 8px;" width="var(--fwidth)" title="Your parent/guardian email (optional)" placeholder="Parent/guardian email (optional)" maxlength="32" highlight-invalid></InputTextBox>
                                         <PairedGridContainer width="var(--fwidth)" style="margin-bottom: 6px;">
                                             <span>
                                                 Grade Level:
@@ -169,11 +245,12 @@ const attemptRecovery = async () => {
                                             </span>
                                             <InputDropdown v-model="experienceInput" width="calc(100% - 4px)" :items="experienceMaps" title="Your experience level with competitive programming" required></InputDropdown>
                                             <span>
-                                                Known languages:<br>(use CTRL/SHIFT)
+                                                Familiar languages:<br>(use CTRL/SHIFT)
                                             </span>
-                                            <InputDropdown v-model="languageInput" width="calc(100% - 4px)" :items="languageMaps" title="What programming languages have you used in contest?" height="80px" multiple></InputDropdown>
+                                            <InputDropdown v-model="languageInput" width="calc(100% - 4px)" :items="languageMaps" title="Programming languages you're familiear with" height="80px" multiple></InputDropdown>
                                         </PairedGridContainer>
                                         <InputButton text="Sign Up" type="submit" width="var(--fwidth)" glitchOnMount :disabled="showLoginWait"></InputButton>
+                                        <span v-if="loginError != ''" class="loginError">{{ loginError }}</span>
                                     </form>
                                 </div>
                             </div>
@@ -195,15 +272,16 @@ const attemptRecovery = async () => {
                                         <InputTextBox v-model="emailInput" type="email" name="email" style="margin: 8px 0px;" width="var(--fwidth)" title="Email" placeholder="Email" maxlength="32" required highlight-invalid></InputTextBox>
                                         <InputButton text="Reset Password" type="submit" width="var(--fwidth)" glitchOnMount :disabled="attemptedRecovery || showLoginWait"></InputButton>
                                         <span v-if="attemptedRecovery"><i>Reload to try again</i></span>
+                                        <span v-if="loginError != ''" class="loginError">{{ loginError }}</span>
                                     </form>
                                 </div>
                             </div>
                         </div>
                     </Transition>
                 </div>
-                <WaitCover text="Signing in..." :show=showLoginWait></WaitCover>
-                <WaitCover text="Sending email..." :show=showRecoveryWait></WaitCover>
-                <LoadingCover text="Connecting..." ignore-server></LoadingCover>
+                <WaitCover text="Signing in..." :show="showLoginWait"></WaitCover>
+                <WaitCover text="Sending email..." :show="showRecoveryWait"></WaitCover>
+                <LoadingCover text="Connecting..." :show="!serverState.connected"></LoadingCover>
             </PanelBody>
         </PanelMain>
     </PanelView>
@@ -265,6 +343,12 @@ const attemptRecovery = async () => {
     text-decoration: underline;
     cursor: pointer;
     margin-top: 8px;
+}
+
+.loginError {
+    margin-top: 0.5em;
+    color: var(--color-2);
+    text-align: center;
 }
 
 @keyframes loginLogoBob {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-import { setTitlePage } from '#/scripts/title';
+import { setTitlePage } from '#/title';
 import { watch, nextTick, getCurrentInstance } from 'vue';
 
 const props = defineProps<{

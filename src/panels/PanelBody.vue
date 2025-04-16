@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-import { setTitlePanel } from '#/scripts/title';
+import { setTitlePanel } from '#/title';
 import { watch, nextTick, getCurrentInstance } from 'vue';
-import { isMobile } from '#/scripts/userAgent';
+import { isMobile } from '#/util/userAgent';
 
 const route = useRoute();
 const props = defineProps<{
@@ -32,7 +32,7 @@ if ((route.params.panel === undefined && props.isDefault && route.params.catchAl
                 </div>
             </div>
             <div class="panelBodyCopyrightNotice">
-                Copyright &copy; 2024 WWPPC
+                Copyright &copy; 2025 WWPPC
             </div>
         </div>
     </Transition>

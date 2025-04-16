@@ -48,6 +48,7 @@ function input() {
   border: 4px solid white;
 }
 
+
 .slider::-moz-range-thumb {
   appearance: none;
   height: 30px;

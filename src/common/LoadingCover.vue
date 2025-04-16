@@ -1,21 +1,15 @@
 <script setup lang="ts">
-import { useServerConnection } from '#/scripts/ServerConnection';
 import LoadingSquare from './LoadingSquare.vue';
-import { useRoute } from 'vue-router';
 
 defineProps<{
     text: string
-    ignoreServer?: boolean
-    show?: boolean
+    show: boolean
 }>();
-
-const serverConnection = useServerConnection();
-const route = useRoute();
 </script>
 
 <template>
     <Transition name="loading-cover">
-        <div class="loadingCoverContainer" v-if="$props.show || (!serverConnection.handshakeComplete && (route.query.ignore_server === undefined || !$props.ignoreServer))">
+        <div class="loadingCoverContainer" v-if="$props.show">
             <div class="loadingCoverSquareWrapper">
                 <LoadingSquare></LoadingSquare>
             </div>

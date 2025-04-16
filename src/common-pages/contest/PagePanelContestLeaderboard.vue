@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { GlitchText } from '#/text';
 import LoadingSpinner from '#/common/LoadingSpinner.vue';
-import { onMounted, ref, watch } from 'vue';
-import { useAccountManager } from '#/scripts/AccountManager';
-import { useContestManager } from '#/scripts/ContestManager';
+import { ref, watch } from 'vue';
+import { useAccountManager } from '#/modules/AccountManager';
+import { useContestManager } from '#/modules/ContestManager';
+import GlitchSectionTitle from '#/common-components/GlitchSectionTitle.vue';
+import { throttle } from '#/util/inputLimiting';
 
 const props = defineProps<{
     contest: string
@@ -13,42 +14,48 @@ const contestType = props.contest;
 const accountManager = useAccountManager();
 const contestManager = useContestManager();
 
-const scoreboard = ref<{ username: string, displayName: string, score: number, penalty: number }[]>([]);
-const update = async () => {
-    if (contestManager.contests[contestType]?.scoreboard == null) scoreboard.value = [];
-    else scoreboard.value = await Promise.all(contestManager.contests[contestType].scoreboard.map(async (s) => {
-        const teamData = await accountManager.getTeamData(s.username);
+const scoreboardLoaded = ref<boolean>(false);
+const scoreboard = ref<{
+    team: number,
+    name: string,
+    score: number,
+    penalty: number
+}[]>([]);
+watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(async () => {
+    scoreboardLoaded.value = false;
+    const results = await Promise.all((contestManager.contests[contestType]?.data.scoreboard ?? { scores: [], frozen: false }).scores.map(async (entry) => {
+        const teamRes = await accountManager.fetchTeamData(entry.team.toString(36));
         return {
-            username: s.username,
-            displayName: (teamData instanceof Error) ? s.username : teamData.teamName,
-            score: Math.ceil(s.score),
-            penalty: Math.floor((Math.ceil(s.score) - s.score) * 1000000) // penalty is stored as the fractional part of the score, see scorer.ts
+            team: entry.team,
+            name: teamRes instanceof Response ? entry.team.toString() : teamRes.name,
+            score: Math.ceil(entry.score),
+            penalty: entry.penalty
         };
     }));
-};
-watch(() => contestManager.contests[contestType]?.scoreboard, update);
-onMounted(update);
-
-// buh
-const scoreboardIsNull = ref(true);
-onMounted(() => scoreboardIsNull.value = contestManager.contests[contestType]?.scoreboard == null);
-watch(() => contestManager.contests[contestType], () => contestManager.contests[contestType]?.onBuh(() => {
-    update();
-    scoreboardIsNull.value = contestManager.contests[contestType]?.scoreboard == null;
-}));
+    results.sort((a, b) => {
+        if (b.score - a.score !== 0) return b.score - a.score; //higher score is better
+        return a.penalty - b.penalty; //lower penalty is better
+    });
+    scoreboard.value = results;
+    scoreboardLoaded.value = true;
+}, 5000), { immediate: true });
 </script>
 
 <template>
-    <GlitchText text="Leaderboards" class="leaderboardTitle" font-size="var(--font-title)" color="var(--color-1)" shadow glow :steps=2 :delay=10 random on-visible></GlitchText>
+    <GlitchSectionTitle text="Leaderboards" font-size="var(--font-title)"></GlitchSectionTitle>
+    <GlitchSectionTitle v-if="contestManager.contests[contestType]?.data.scoreboard?.frozen" text="Standings frozen" font-size="var(--font-large)" color="var(--color-3)"></GlitchSectionTitle>
+    <GlitchSectionTitle v-if="scoreboardLoaded && scoreboard.length === 0" text="No entries on leaderboard" font-size="var(--font-large)" color="var(--color-3)"></GlitchSectionTitle>
     <div class="centered">
+        <br>
+        <!-- todo: add button to update the leaderboard -->
         <div class="leaderboard">
             <div class="leaderboardItem" v-for="(item, i) of scoreboard" :key="i">
                 {{ i + 1 }}.
-                <RouterLink :to="'/user/@' + item.username">{{ item.displayName }}</RouterLink>
+                <RouterLink :to="'/team/@' + item.team.toString(36)">{{ item.name }}</RouterLink>
                 - {{ item.score }} solved, {{ item.penalty }} penalty
             </div>
         </div>
-        <div v-if="scoreboardIsNull" style="display: flex; flex-direction: column; align-items: center;">
+        <div v-if="!scoreboardLoaded" style="display: flex; flex-direction: column; align-items: center;">
             <div style="width: 10vw; height: 10vw">
                 <LoadingSpinner></LoadingSpinner>
             </div>
@@ -61,13 +68,6 @@ watch(() => contestManager.contests[contestType], () => contestManager.contests[
 </template>
 
 <style scoped>
-.leaderboardTitle {
-    transform-origin: top;
-    transform: translate3D(0px, -20vh, -50px) scale(150%);
-    z-index: -1;
-    text-align: center;
-}
-
 .leaderboard {
     position: absolute;
     display: flex;

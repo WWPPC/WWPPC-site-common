@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Accordion } from '#/accordion';
-import { isMobile } from '#/scripts/userAgent';
+import { isMobile } from '#/util/userAgent';
 import { inject, ref, watch } from 'vue';
 
 const props = defineProps<{
@@ -91,7 +91,7 @@ export default {
     width: v-bind("$props.width ?? 'initial'");
     border: 4px solid;
     border-color: v-bind("$props.borderColor ?? 'white'");
-    border-top: v-bind("isInAccordion ? 'none' : '4px solid'");
+    border-top: v-bind("isInAccordion ? 'none' : '4px solid ' + $props.borderColor");
     background-color: black;
     text-align: left;
     will-change: transform;
@@ -99,6 +99,7 @@ export default {
 }
 
 .headeredCollapsibleContainer:first-child {
+    border-color: v-bind("$props.borderColor ?? 'white'");
     border-top: 4px solid;
 }
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import TimeDisplay from '#/common/TimeDisplay.vue';
-import { useContestManager } from '#/scripts/ContestManager';
+import { useContestManager } from '#/modules/ContestManager';
 import { onMounted, ref, watch } from 'vue';
 import ContestTimer from './ContestTimer.vue';
 
@@ -15,7 +15,7 @@ const currentRound = ref(0);
 const roundTimes = ref<{ label: string, time: number }[]>([]);
 const updateRoundTimes = () => {
     roundTimes.value = [];
-    const contest = contestManager.contests[contestType];
+    const contest = contestManager.contests[contestType]?.data;
     if (contest == undefined || contest.contest == null || contest.contest.rounds.length == 0) return;
     const times: { label: string, time: number }[] = [];
     const now = Date.now();
@@ -47,7 +47,7 @@ const updateRoundTimes = () => {
     if (currentRound.value == -1) currentRound.value = times.length - 1;
     roundTimes.value = times;
 };
-watch(() => contestManager.contests[contestType]?.contest, updateRoundTimes);
+watch(() => contestManager.contests[contestType]?.data.contest, updateRoundTimes);
 onMounted(updateRoundTimes);
 </script>
 
