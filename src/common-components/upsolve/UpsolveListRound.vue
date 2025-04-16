@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import { autoGlitchTextTransition } from '#/text';
 import { AnimateInContainer, TitledCollapsibleContainer } from '#/containers';
 import LoadingBar from '#/common/LoadingBar.vue';
@@ -73,4 +73,4 @@ if (!props.minimized) {
 .archiveListRoundDropdown {
     margin: -4px -4px;
 }
-</style>
+</style> -->

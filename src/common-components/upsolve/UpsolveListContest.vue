@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import { autoGlitchTextTransition } from '#/text';
 import { AnimateInContainer, CutCornerContainer } from '#/containers';
 import ArchiveListRound from './UpsolveListRound.vue';
@@ -58,4 +58,4 @@ const load = async () => {
     text-decoration: underline;
     cursor: pointer;
 }
-</style>
+</style> -->

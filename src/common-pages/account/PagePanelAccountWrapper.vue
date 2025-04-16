@@ -71,7 +71,7 @@ const logout = async () => {
         <div class="accountUserDisp">
             <label class="accountUserDispImgContainer">
                 <img class="accountUserDispImg" :src=accountManager.user.profileImage alt="Profile picture">
-                <img v-if="props.allowProfileImgChange" class="accountuserDispImgReplaceOverlay" src="../../../WWPPC-site-common/public/assets/upload.svg" title="Upload profile image">
+                <img v-if="props.allowProfileImgChange" class="accountuserDispImgReplaceOverlay" src="../../../public/assets/upload.svg" title="Upload profile image">
                 <input v-if="props.allowProfileImgChange" type="file" class="accountUserDispImgUpload" accept="image/png,image/jpeg" @change=changeProfileImage>
             </label>
             <span class="accountUserDisplayName">{{ dispName }}</span>
