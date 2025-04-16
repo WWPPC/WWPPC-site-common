@@ -3,10 +3,10 @@ import NotFound from '#/common/NotFound.vue';
 import WaitCover from '#/common/WaitCover.vue';
 import { AnimateInContainer, AngledTitledContainer } from '#/containers';
 import ContestProblemListRound from '#/common-components/contest/problemList/ContestProblemListRound.vue';
-import { useContestManager } from '#/modules/ContestManager';
+import { useContestManager, type Contest } from '#/modules/ContestManager';
 import ContestProblemListProblem from '#/common-components/contest/problemList/ContestProblemListProblem.vue';
 import { useServerState } from '#/modules/ServerState';
-import { computed } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const props = defineProps<{
     contest: string
@@ -23,7 +23,7 @@ const contestData = computed(() => contestManager.contests[contestType]?.data.co
         <div class="problemListWrapper">
             <AngledTitledContainer title="Problems" height="100%">
                 <div v-if="contestManager.config[contestType]?.rounds" class="problemList">
-                    <AnimateInContainer type="slideUp" v-for="(round, index) in contestData?.rounds.filter((r) => r.problems.length > 0)" :key=round.round :delay="index * 200">
+                    <AnimateInContainer type="slideUp" v-for="(round, index) in contestData?.rounds.filter((r) => r.problems.length > 0 && Date.now() >= r.startTime)" :key=round.round :delay="index * 200">
                         <ContestProblemListRound :data=round></ContestProblemListRound>
                     </AnimateInContainer>
                 </div>

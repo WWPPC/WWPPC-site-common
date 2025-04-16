@@ -39,7 +39,7 @@ watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(asyn
     });
     scoreboard.value = results;
     scoreboardLoaded.value = true;
-}, 5000));
+}, 5000), { immediate: true });
 </script>
 
 <template>

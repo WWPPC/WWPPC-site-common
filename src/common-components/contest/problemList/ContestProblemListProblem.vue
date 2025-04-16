@@ -28,7 +28,7 @@ const submissions = computed(() => {
             <!-- pretty sure it's always undefined the way it's set up but whatever -->
             <ContestProblemStatusCircle :status="submissions[0] === undefined ? ProblemCompletionState.NOT_UPLOADED : submissions[0].status"></ContestProblemStatusCircle>
         </span>
-        <span class="contestProblemListProblemName"><b>Loading...</b></span>
+        <span class="contestProblemListProblemName"><b>{{ data }}</b></span>
         <span class="contestProblemListProblemAuthor"><i>By Loading...</i></span>
         <span class="contestProblemListProblemButton">
             <AnimateInContainer type="fade" :delay="100">
