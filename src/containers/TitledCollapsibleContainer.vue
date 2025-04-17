@@ -95,7 +95,7 @@ export default {
     background-color: black;
     text-align: left;
     will-change: transform;
-    overflow: hidden;
+    overflow: clip;
 }
 
 .headeredCollapsibleContainer:first-child {
