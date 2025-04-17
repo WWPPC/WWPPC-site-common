@@ -258,6 +258,9 @@ onMounted(clearDangerButtons);
                 <LoadingSpinner width="1em" height="1em"></LoadingSpinner>
                 Saving...
             </div>
+            <div class="profileSaveError" v-if="accountManager.writeUserErr !== undefined">
+                {{ accountManager.writeUserErr }}
+            </div>
         </TitledCutCornerContainer>
     </AnimateInContainer>
     <AnimateInContainer type="slideUp" :delay=200>
@@ -311,6 +314,9 @@ onMounted(clearDangerButtons);
             <div class="profileSaveIndicator" v-if="accountManager.unsavedTeamChanges">
                 <LoadingSpinner width="1em" height="1em"></LoadingSpinner>
                 Saving...
+            </div>
+            <div class="profileSaveError" v-if="accountManager.writeTeamErr !== undefined">
+                {{ accountManager.writeTeamErr }}
             </div>
         </TitledCutCornerContainer>
     </AnimateInContainer>
@@ -399,6 +405,17 @@ onMounted(clearDangerButtons);
     align-items: center;
     font-size: var(--font-small);
     column-gap: 0.5em;
+    pointer-events: none;
+}
+
+.profileSaveError {
+    position: fixed;
+    bottom: calc(2 * var(--font-small));
+    right: 0px;
+    margin: 0.5em;
+    font-size: var(--font-small);
+    white-space-collapse: preserve;
+    color: var(--color-2);
     pointer-events: none;
 }
 </style>
