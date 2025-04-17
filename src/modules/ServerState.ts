@@ -163,9 +163,11 @@ export const useServerState = defineStore('serverState', {
             })
         },
         async deleteAccount(password: string): Promise<Response> {
-            return await apiFetch('DELETE', '/auth/delete', {
+            const res = await apiFetch('DELETE', '/auth/delete', {
                 password: await RSAencrypt(password),
             });
+            if (res.ok) state.loggedIn = false;
+            return res;
         },
         async logout(): Promise<Response> {
             const res = await apiFetch('DELETE', '/auth/logout');
