@@ -217,6 +217,12 @@ const deleteAccount = async () => {
         content: `${res.status} - ${await res.text()}`,
         color: 'var(--color-2)'
     });
+    const res2 = await serverState.logout();
+    if (!res2.ok) modal.showModal({
+        title: 'Failed to log out',
+        content: `${res2.status} - ${await res2.text()}`,
+        color: 'var(--color-2)'
+    });
 };
 const clearDangerButtons = () => {
     currentPasswordInput.value = '';
