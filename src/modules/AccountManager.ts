@@ -21,7 +21,7 @@ export type AccountData = {
     experience: number
     languages: string[]
     pastRegistrations: string[]
-    team: string | null
+    team: number | null
 }
 /**Descriptor for a team (see server docs) - note "join code" is base 36 representation of `id` + `joinKey` */
 export type TeamData = {
@@ -169,7 +169,7 @@ export const useAccountManager = defineStore('accountManager', {
             if (res.ok) return await res.json();
             return res;
         },
-        async fetchTeamData(team: string): Promise<TeamData | Response> {
+        async fetchTeamData(team: number): Promise<TeamData | Response> {
             const res = await apiFetch('GET', '/api/teamData/' + team);
             if (res.ok) return await res.json();
             return res;

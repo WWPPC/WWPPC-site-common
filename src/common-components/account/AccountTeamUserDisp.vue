@@ -8,7 +8,7 @@ import { type AccountData, useAccountManager } from '#/modules/AccountManager';
 
 const props = defineProps<{
     user: string
-    team: string
+    team: number
     allowKick?: boolean
 }>();
 
@@ -50,7 +50,7 @@ const kick = async () => {
                     </Transition>
                 </div>
             </RouterLink>
-            <InputButton class="kickButton" text="Kick" color="var(--color-2)" @click="kick()" v-if="$props.allowKick && $props.user !== accountManager.user.username && $props.user !== $props.team"></InputButton>
+            <InputButton class="kickButton" text="Kick" color="var(--color-2)" @click="kick()" v-if="$props.allowKick && $props.user !== accountManager.user.username"></InputButton>
         </div>
     </AnimateInContainer>
 </template>

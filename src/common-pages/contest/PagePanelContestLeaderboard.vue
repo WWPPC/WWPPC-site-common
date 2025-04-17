@@ -24,7 +24,7 @@ const scoreboard = ref<{
 watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(async () => {
     scoreboardLoaded.value = false;
     const results = await Promise.all((contestManager.contests[contestType]?.data.scoreboard ?? { scores: [], frozen: false }).scores.map(async (entry) => {
-        const teamRes = await accountManager.fetchTeamData(entry.team.toString(36));
+        const teamRes = await accountManager.fetchTeamData(entry.team);
         return {
             team: entry.team,
             name: teamRes instanceof Response ? entry.team.toString() : teamRes.name,
@@ -51,7 +51,7 @@ watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(asyn
         <div class="leaderboard">
             <div class="leaderboardItem" v-for="(item, i) of scoreboard" :key="i">
                 {{ i + 1 }}.
-                <RouterLink :to="'/team/@' + item.team.toString(36)">{{ item.name }}</RouterLink>
+                <RouterLink :to="`/team/@${item.team}`">{{ item.name }}</RouterLink>
                 - {{ item.score }} solved, {{ item.penalty }} penalty
             </div>
         </div>
