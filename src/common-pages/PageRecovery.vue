@@ -42,7 +42,7 @@ const validateCredentials = (checkPass: boolean = true): boolean => {
         loginError.value = 'Username must be less than 16 characters in length';
         return false;
     }
-    if (!/^[a-z]([a-z0-9-]*[a-z0-9])?$/.test(usernameInput.value)) {
+    if (!/^[a-z0-9-_]+$/.test(usernameInput.value)) {
         loginError.value = 'Username must contain only lowercase letters (a-z), numbers (0-9), underscores ("_"), and dashes ("-").';
         return false;
     }
