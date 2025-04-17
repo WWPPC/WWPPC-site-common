@@ -6,7 +6,7 @@ import InputDropdown from '#/inputs/InputDropdown.vue'; // this is required for 
 import WaitCover from '#/common/WaitCover.vue';
 import ContestProblemStatusCircle from '#/common-components/contest/ContestProblemStatusCircle.vue';
 import ContestProblemSubmissionCase from '#/common-components/contest/ContestProblemSubmissionCase.vue';
-import { computed, ref, toRaw, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { globalModal } from '#/modal';
 import { useServerState } from '#/modules/ServerState';
@@ -16,7 +16,7 @@ import { throttle } from '#/util/inputLimiting';
 
 const props = defineProps<{
     contest: string
-    isUpsolve?: boolean //i'm nuking this property, we can add it back after the contest
+    isUpsolve?: boolean // doesnt do anything because upsolve not ready
 }>();
 
 const route = useRoute();
@@ -36,17 +36,6 @@ const submissions = computed(() => {
     if (allSubmissions === undefined) return [];
     return allSubmissions.get(typeof problem.value == 'string' ? problem.value : problem.value.id) ?? [];
 });
-
-// placeholder data behind loading cover
-const loadErrorModal = (title: string, content: string) => {
-    modal.showModal({
-        title: title,
-        content: content + '<br>Click <code>OK</code> to return to problem list.',
-        color: 'var(--color-2)'
-    }).result.then(() => {
-        router.push(`../problemList`);
-    });
-};
 
 watch(() => typeof problem.value == 'string' ? problem.value : problem.value.name, () => {
     setTitlePanel(typeof problem.value == 'string' ? problem.value : problem.value.name);
@@ -89,7 +78,13 @@ const submitUpload = async () => {
     }
     const res = await contestManager.contests[props.contest]!.submitProblem(typeof problem.value == 'string' ? problem.value : problem.value.id, await file.text(), (languageDropdown.value.value as string));
     if (!res.ok) {
-        loadErrorModal(res.statusText, "HTTP error " + res.status.toString());
+    modal.showModal({
+        title: 'Failed to load problem',
+        content: `${res.status} - ${await res.text()}<br>Click <code>OK</code> to return to problem list.`,
+        color: 'var(--color-2)'
+    }).result.then(() => {
+        router.push(`../problemList`);
+    });
     } else {
         modal.showModal({ title: 'Submission uploaded', content: 'Grading will happen soon', color: 'var(--color-1)' });
         fileUpload.value.resetFileList();

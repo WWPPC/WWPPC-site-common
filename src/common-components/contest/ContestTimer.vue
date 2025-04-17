@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useContestManager } from '#/modules/ContestManager';
 import { useRoute } from 'vue-router';
-import { onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { GlitchText } from '#/text';
 import TimerDisplay from '#/common/TimerDisplay.vue';
 
@@ -16,8 +16,8 @@ const route = useRoute();
 const contestManager = useContestManager();
 
 const show = ref(false);
-onMounted(() => show.value = route.params.panel !== 'contest' || props.big);
-watch(() => route.params.panel, () => show.value = route.params.panel !== 'contest' || props.big);
+watch(() => route.params.panel, () => show.value = route.params.panel !== 'contest' || props.big, { immediate: true });
+const contestData = computed(() => contestManager.contests[contestType]?.data.contest);
 
 const round = ref('');
 const nextTime = ref(new Date(0));
@@ -25,7 +25,7 @@ const color = ref('white');
 const flashColor = ref('');
 let inRound = false;
 const updateTime = () => {
-    if (contestManager.contests[contestType]?.data.contest == undefined) {
+    if (contestData.value == undefined) {
         if (props.big) round.value = 'Not in contest';
         else round.value = '---';
         nextTime.value = new Date();
@@ -34,18 +34,14 @@ const updateTime = () => {
     }
     inRound = false;
     color.value = 'white';
-    round.value = contestManager.contests[contestType].data.contest.id;
-    nextTime.value = new Date(contestManager.contests[contestType].data.contest.endTime);
+    round.value = contestData.value.id;
+    nextTime.value = new Date(contestData.value.endTime);
     const now = Date.now();
-    if (now > contestManager.contests[contestType].data.contest.endTime) {
-        if (props.big) round.value = 'Contest ended';
-        else round.value = '---';
-        nextTime.value = new Date();
-        color.value = 'var(--color-2)';
-    }
-    for (let i = contestManager.contests[contestType].data.contest.rounds.length - 1; i >= 0; i--) {
-        const r = contestManager.contests[contestType].data.contest.rounds[i];
+    // text for in rounds
+    for (let i = contestData.value.rounds.length - 1; i >= 0; i--) {
+        const r = contestData.value.rounds[i];
         if (now < r.startTime) {
+            if (props.big) round.value = `Break ${r.round}`;
             nextTime.value = new Date(r.startTime);
             color.value = 'white';
         } else if (now < r.endTime) {
@@ -55,6 +51,24 @@ const updateTime = () => {
             color.value = 'var(--color-1)';
             inRound = true;
         }
+    }
+    // text for opening/closing
+    if (contestData.value.rounds.length > 0) {
+        if (now < contestData.value.rounds[0].startTime && now >= contestData.value.startTime) {
+            if (props.big) round.value = 'Opening';
+            color.value = 'white';
+        }
+        if (now >= contestData.value.rounds[contestData.value.rounds.length - 1].endTime && now < contestData.value.endTime) {
+            if (props.big) round.value = 'Closing';
+            color.value = 'white';
+        }
+    }
+    // after contest if contest window hasn't been closed
+    if (now >= contestData.value.endTime) {
+        if (props.big) round.value = 'Contest ended';
+        else round.value = '---';
+        nextTime.value = new Date();
+        color.value = 'var(--color-2)';
     }
     updateFlash();
 };
@@ -69,8 +83,7 @@ const updateFlash = () => {
         else flashColor.value = 'white';
     }
 };
-watch(() => contestManager.contests[contestType]?.data.contest, updateTime);
-onMounted(updateTime);
+watch(() => contestManager.contests[contestType]?.data.contest, updateTime, { immediate: true });
 setInterval(updateFlash, 1000);
 
 const emit = defineEmits<{

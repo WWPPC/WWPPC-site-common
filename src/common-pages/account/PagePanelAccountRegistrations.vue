@@ -2,7 +2,7 @@
 import { AnimateInContainer, TitledCutCornerContainer } from '#/containers';
 import { InputButton, InputDropdown } from '#/inputs';
 import WaitCover from '#/common/WaitCover.vue';
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { globalModal } from '#/modal';
 import { useAccountManager } from '#/modules/AccountManager';
 import { useContestManager } from '#/modules/ContestManager';
@@ -16,16 +16,15 @@ const registrationSelected = ref('');
 
 const updateAvailableContestList = async () => {
     const res = await contestManager.getOpenRegistrations();
-    if (res instanceof Response) {
-        modal.showModal({ title: res.statusText, content: 'Could not load upcoming contests.' + res.status, color: 'var(--color-2)' });
+    if (!Array.isArray(res)) {
+        contestList.value = [{ text: 'Failed to load contests', value: '' }];
         return;
     }
     contestList.value = res.filter((v) => {
         return !accountManager.team?.registrations.includes(v) && !accountManager.user.pastRegistrations.includes(v)
     }).map((c) => ({ text: c, value: c })) ?? [];
 };
-onMounted(updateAvailableContestList);
-watch(() => accountManager.team?.registrations, updateAvailableContestList);
+watch(() => accountManager.team?.registrations, updateAvailableContestList, { immediate: true });
 
 const showRegisterWait = ref(false);
 const attemptRegister = async () => {
@@ -131,4 +130,4 @@ const attemptUnregister = async (registration: string) => {
 .registrationBlock:hover>.registrationUnregister {
     opacity: 1;
 }
-</style>getTeamOpMessage, TeamOpResult,
+</style>
