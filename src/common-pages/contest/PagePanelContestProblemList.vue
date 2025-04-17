@@ -3,10 +3,10 @@ import NotFound from '#/common/NotFound.vue';
 import WaitCover from '#/common/WaitCover.vue';
 import { AnimateInContainer, AngledTitledContainer } from '#/containers';
 import ContestProblemListRound from '#/common-components/contest/problemList/ContestProblemListRound.vue';
-import { useContestManager, type Contest } from '#/modules/ContestManager';
+import { useContestManager } from '#/modules/ContestManager';
 import ContestProblemListProblem from '#/common-components/contest/problemList/ContestProblemListProblem.vue';
 import { useServerState } from '#/modules/ServerState';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed } from 'vue';
 import GlowText from '#/text/GlowText.vue';
 
 const props = defineProps<{

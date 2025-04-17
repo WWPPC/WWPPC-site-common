@@ -138,36 +138,37 @@ export class ContestHost {
         };
         // automatically load new problems in the background
         watch(this.longPolling.contestData.ref, async () => {
+            if (this.longPolling.contestData.ref.value === undefined) return;
             // structuredClone prevents reactivity triggering itself when problems are added
-            const dat = structuredClone(toRaw(this.longPolling.contestData.ref.value));
-            if (dat !== undefined) {
-                await Promise.all(dat.rounds.map(async (round, i) => {
-                    return Promise.all(round.problems.map(async (problem, j) => {
-                        const pId = problem as string;
-                        if (this.problemCache.has(pId)) round.problems[j] = this.problemCache.get(pId)!;
-                        else {
-                            const res = await apiFetch('GET', `/api/contest/${this.id}/problem/${pId}`);
-                            if (res.ok) {
-                                const p: Problem = await res.json();
-                                round.problems[j] = p;
-                                this.problemCache.set(p.id, p);
-                                this.longPolling.submissionData.set(p.id, new LongPollEventReceiver('GET', `/api/contest/${this.id}/submissions/${p.id}`));
-                                watch(() => this.longPolling.submissionData.get(p.id)?.value, () => {
-                                    this.data.submissions.set(p.id, this.longPolling.submissionData.get(p.id)?.value);
-                                });
-                            } else {
-                                const errText = `${res.status} - ${await res.text()}`;
-                                console.error(`Failed to fetch problem:\n${errText}`);
-                                const modal = globalModal();
-                                modal.showModal({
-                                    title: 'Problem fetch failed',
-                                    content: `Failed to fetch problem ${pId}.\n${errText}`,
-                                    color: 'var(--color-2)'
-                                });
-                            }
+            const dat = reactive(structuredClone(toRaw(this.longPolling.contestData.ref.value)));
+            for (let i = 0; i < dat.rounds.length; i++) {
+                const round = dat.rounds[i];
+                for (let j = 0; j < round.problems.length; j++) {
+                    const pId = round.problems[j] as string;
+                    if (this.problemCache.has(pId)) round.problems[j] = this.problemCache.get(pId)!;
+                    else (async () => {
+                        // immediately invoked function to async load all problems
+                        const res = await apiFetch('GET', `/api/contest/${this.id}/problem/${pId}`);
+                        if (res.ok) {
+                            const p: Problem = await res.json();
+                            dat.rounds[i].problems[j] = p;
+                            this.problemCache.set(p.id, p);
+                            this.longPolling.submissionData.set(p.id, new LongPollEventReceiver('GET', `/api/contest/${this.id}/submissions/${p.id}`));
+                            watch(() => this.longPolling.submissionData.get(p.id)?.value, () => {
+                                this.data.submissions.set(p.id, this.longPolling.submissionData.get(p.id)?.value);
+                            });
+                        } else {
+                            const errText = `${res.status} - ${await res.text()}`;
+                            console.error(`Failed to fetch problem:\n${errText}`);
+                            const modal = globalModal();
+                            modal.showModal({
+                                title: 'Problem fetch failed',
+                                content: `Failed to fetch problem ${pId}.\n${errText}`,
+                                color: 'var(--color-2)'
+                            });
                         }
-                    }));
-                }));
+                    })();
+                }
             }
             this.data.contest = dat;
         }, { immediate: true });

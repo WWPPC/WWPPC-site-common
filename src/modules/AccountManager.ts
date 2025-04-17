@@ -181,6 +181,7 @@ export const useAccountManager = defineStore('accountManager', {
                     const res = await apiFetch('GET', '/api/self/userData', undefined, undefined, { cache: forceReload ? 'reload' : 'default' });
                     if (res.ok) {
                         state.user = await res.json();
+                        unsaved.value = false;
                         resolve(true);
                     } else if (showErrors) {
                         const errText = `${res.status} - ${await res.text()}`;
