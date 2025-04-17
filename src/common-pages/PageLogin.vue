@@ -349,6 +349,7 @@ const attemptRecovery = async () => {
     margin-top: 0.5em;
     color: var(--color-2);
     text-align: center;
+    white-space-collapse: preserve;
 }
 
 @keyframes loginLogoBob {
