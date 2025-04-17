@@ -73,6 +73,7 @@ onMounted(updateDisp);
 .userDispUserName {
     max-width: 200px;
     margin-left: 4px;
+    color: white;
     transition: 500ms ease max-width, 500ms ease opacity;
     text-wrap: nowrap;
     text-overflow: ellipsis;
