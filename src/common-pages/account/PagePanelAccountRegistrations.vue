@@ -34,7 +34,7 @@ const attemptRegister = async () => {
     const res = await accountManager.registerContest(registrationSelected.value);
     if (!res.ok) modal.showModal({
         title: 'Could not register',
-        content: res.statusText,
+        content: `${res.status} - ${await res.text()}`,
         color: 'var(--color-2)'
     });
     showRegisterWait.value = false;
@@ -44,7 +44,7 @@ const attemptUnregister = async (registration: string) => {
     const res = await accountManager.unregisterContest(registration);
     if (!res.ok) modal.showModal({
         title: 'Could not unregister',
-        content: res.statusText,
+        content: `${res.status} - ${await res.text()}`,
         color: 'var(--color-2)'
     });
     showRegisterWait.value = false;
