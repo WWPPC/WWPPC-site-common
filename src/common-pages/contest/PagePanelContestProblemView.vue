@@ -209,7 +209,7 @@ const viewCode = throttle(async (index: number) => {
                         </span>
                         <span v-if="contestManager.config[props.contest]?.submitSolver">
                             <br>
-                            <i>Java and Python submissions have double the stated time limit.</i>
+                            <i>Java has double the stated time limit, Python has triple the stated time limit.</i>
                         </span>
                     </p>
                 </div>

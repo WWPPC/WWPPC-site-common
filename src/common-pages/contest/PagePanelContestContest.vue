@@ -37,20 +37,19 @@ const contestManager = useContestManager();
                             <ul>
                                 <li v-if="contestManager.config[contestType]?.rounds">Problems are submittable <b>ONLY during</b> rounds</li>
                                 <li>Work quickly, scores are based on the <b>number</b> of problems solved</li>
-                                <li>Subtasks are weighted based on the number of people who solve them</li>
-                                <li><b>All</b> cases per subtask must pass for subtask points to be earned</li>
+                                <li><b>All</b> cases per problem must pass for problem to be marked correct</li>
                                 <li>Submissions are across your <b>ENTIRE TEAM</b></li>
                                 <li>Not all problems are meant to be solved within the time limit</li>
-                                <li>Time penalties are small - they are meant to be tiebreakers</li>
+                                <li>Standings determined by number of problems solved, with ties broken by time of last submission that increases score</li>
                             </ul>
                             </p>
                             <h3>Technical Details</h3>
                             <p style="font-size: var(--font-20);">
                             <ul>
-                                <li>All: Input is fed through <code>stdin</code>, output is read from <code>stdout</code></li>
-                                <li>All: Exiting with a non-zero code will result in a <b>runtime error</b></li>
+                                <li>Input is fed through <code>stdin</code>, output is read from <code>stdout</code></li>
+                                <li>Exiting with a non-zero code will result in a <b>runtime error</b></li>
                                 <li>Java: Class name must be <code>Main</code></li>
-                                <li>C/C++: Programs are compiled with the gcc/g++ <code>-O2</code> and <code>-static</code> flags</li>
+                                <li>C/C++: Programs are compiled with the gcc/g++ <code>-O2</code> flag</li>
                             </ul>
                             </p>
                         </div>

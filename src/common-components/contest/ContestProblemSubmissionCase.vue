@@ -10,12 +10,12 @@ const props = defineProps<{
 const modal = globalModal();
 
 const submissionVerdict = () => props.case.state == ScoreState.CORRECT ? '*' : props.case.state == ScoreState.INCORRECT ? 'X' : props.case.state == ScoreState.TIME_LIM_EXCEEDED ? 'T' : props.case.state == ScoreState.MEM_LIM_EXCEEDED ? 'M' : '!';
-const submissionVerdictLong = () => props.case.state == ScoreState.CORRECT ? 'Accepted' : props.case.state == ScoreState.INCORRECT ? 'Incorrect answer' : props.case.state == ScoreState.TIME_LIM_EXCEEDED ? 'Time limit exceeded' : props.case.state == ScoreState.MEM_LIM_EXCEEDED ? 'Memory limit exceeded' : props.case.state == ScoreState.RUNTIME_ERROR ? 'Runtime error' : 'Compilation error';
+const submissionVerdictLong = () => props.case.state == ScoreState.CORRECT ? 'Accepted' : props.case.state == ScoreState.INCORRECT ? 'Wrong answer' : props.case.state == ScoreState.TIME_LIM_EXCEEDED ? 'Time limit exceeded' : props.case.state == ScoreState.MEM_LIM_EXCEEDED ? 'Memory limit exceeded' : props.case.state == ScoreState.RUNTIME_ERROR ? 'Runtime error' : 'Compilation error';
 
 const showModal = () => {
     modal.showModal({
         title: 'Test Case ' + (props.number + 1),
-        content: `Time: ${props.case.time}ms | Memory: ${props.case.memory}MB<br>Subtask: ${props.case.subtask}<br>Verdict: ${submissionVerdictLong()}`,
+        content: `Time: ${Math.round(props.case.time)}ms | Memory: ${Math.round(props.case.memory)}MB<br>Subtask: ${props.case.subtask}<br>Verdict: ${submissionVerdictLong()}`,
         color: props.case.state == ScoreState.CORRECT ? 'var(--color-1)' : 'var(--color-2)'
     });
 };
