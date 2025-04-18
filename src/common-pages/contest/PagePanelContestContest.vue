@@ -41,7 +41,7 @@ const contestManager = useContestManager();
                                 <li>Submissions are across your entire team</li>
                                 <li>Not all problems are meant to be solved within the time limit</li>
                                 <li>10 minutes time penalty for every wrong submission, including compile errors</li>
-                                <li>Your <b>last submission</b> is used to calculate score, even if it comes after an accepted submission</li>
+                                <li>Your <b>last submission</b> is used to calculate score and penalty, even if it comes after an accepted submission</li>
                                 <li>The first test case is not necessarily sample input</li>
                             </ul>
                             </p>
