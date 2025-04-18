@@ -52,7 +52,8 @@ watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(asyn
             <div class="leaderboardItem" v-for="(item, i) of scoreboard" :key="i">
                 {{ i + 1 }}.
                 <RouterLink :to="`/team/@${item.team}`">{{ item.name }}</RouterLink>
-                - {{ item.score }} solved, {{ item.penalty }} penalty
+                - {{ item.score }} solved, {{ item.penalty / 60 / 1000 }} penalty
+                <!--penalty is stored in ms, see scorer.ts-->
             </div>
         </div>
         <div v-if="!scoreboardLoaded" style="display: flex; flex-direction: column; align-items: center;">
