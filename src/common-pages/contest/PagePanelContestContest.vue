@@ -41,6 +41,8 @@ const contestManager = useContestManager();
                                 <li>Submissions are across your <b>ENTIRE TEAM</b></li>
                                 <li>Not all problems are meant to be solved within the time limit</li>
                                 <li>Standings determined by number of problems solved, with ties broken by time of last submission that increases score</li>
+                                <li>10 minutes time penalty for every wrong submission, including compile errors</li>
+                                <li>The first test case is not necessarily sample input</li>
                             </ul>
                             </p>
                             <h3>Technical Details</h3>
