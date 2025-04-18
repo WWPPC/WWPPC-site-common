@@ -36,12 +36,12 @@ const contestManager = useContestManager();
                             <p style="font-size: var(--font-20);">
                             <ul>
                                 <li v-if="contestManager.config[contestType]?.rounds">Problems are submittable <b>ONLY during</b> rounds</li>
-                                <li>Work quickly, scores are based on the <b>number</b> of problems solved</li>
+                                <li>Scores are based on the <b>number</b> of problems solved with ties broken by time of last submission that increases score</li>
                                 <li><b>All</b> cases per problem must pass for problem to be marked correct</li>
-                                <li>Submissions are across your <b>ENTIRE TEAM</b></li>
+                                <li>Submissions are across your entire team</li>
                                 <li>Not all problems are meant to be solved within the time limit</li>
-                                <li>Standings determined by number of problems solved, with ties broken by time of last submission that increases score</li>
                                 <li>10 minutes time penalty for every wrong submission, including compile errors</li>
+                                <li>Your <b>last submission</b> is used to calculate score, even if it comes after an accepted submission</li>
                                 <li>The first test case is not necessarily sample input</li>
                             </ul>
                             </p>
