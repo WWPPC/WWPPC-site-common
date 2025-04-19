@@ -2,7 +2,7 @@ import { globalModal } from '#/modal';
 import { debounce } from '#/util/inputLimiting';
 import { apiFetch } from '#/util/netUtil';
 import { defineStore } from 'pinia';
-import { reactive, ref, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 
 import type { AccountData } from './AccountManager';
 
@@ -15,6 +15,13 @@ export type ServerContestConfig = {
     acceptedSolverLanguages: string[]
     maxSubmissionSize: number
 };
+
+// much code is reused in admin portal
+const isAdmin = ref(false);
+export function setAuthToAdmin() {
+    isAdmin.value = true;
+}
+const authPath = computed(() => isAdmin.value ? '/admin' : '/auth');
 
 const state = reactive<{
     connected: boolean
@@ -55,7 +62,7 @@ const sessionId = ref('');
 const checkLoggedIn = async () => {
     // will detect if disconnected/session expired
     try {
-        const res = await apiFetch('GET', '/auth/login');
+        const res = await apiFetch('GET', authPath.value + '/login');
         sessionId.value = await res.text();
         if (res.ok) {
             // connected & logged in
@@ -78,7 +85,7 @@ const checkLoggedIn = async () => {
 };
 watch(sessionId, (prev, curr) => {
     if (prev != curr) {
-        apiFetch('GET', '/auth/publicKey', undefined, undefined, { cache: 'no-store' }).then(async (res) => {
+        apiFetch('GET', authPath.value + '/publicKey', undefined, undefined, { cache: 'no-store' }).then(async (res) => {
             if (window.crypto.subtle === undefined) {
                 console.warn('<h1>Insecure context!</h1><br>The page has been opened in an insecure context and cannot perform encryption processes. Credentials and submissions will be sent in PLAINTEXT!');
             } else {
@@ -120,7 +127,7 @@ export const useServerState = defineStore('serverState', {
         },
         // auth
         async login(username: string, password: string): Promise<Response> {
-            const res = await apiFetch('POST', '/auth/login', {
+            const res = await apiFetch('POST', authPath.value + '/login', {
                 username: username,
                 password: await RSAencrypt(password)
             });
@@ -128,7 +135,7 @@ export const useServerState = defineStore('serverState', {
             return res;
         },
         async signup(username: string, password: string, data: Omit<AccountData, 'username' | 'displayName' | 'profileImage' | 'bio' | 'pastRegistrations' | 'team'>): Promise<Response> {
-            const res = await apiFetch('POST', '/auth/signup', {
+            const res = await apiFetch('POST', authPath.value + '/signup', {
                 username: username,
                 password: await RSAencrypt(password),
                 email: await RSAencrypt(data.email),
@@ -144,33 +151,33 @@ export const useServerState = defineStore('serverState', {
             return res;
         },
         async requestRecovery(username: string, email: string): Promise<Response> {
-            return await apiFetch('POST', '/auth/requestRecovery', {
+            return await apiFetch('POST', authPath.value + '/requestRecovery', {
                 username: username,
                 email: await RSAencrypt(email)
             });
         },
         async recoverAccount(username: string, recoveryPassword: string, newPassword: string): Promise<Response> {
-            return await apiFetch('POST', '/auth/recovery', {
+            return await apiFetch('POST', authPath.value + '/recovery', {
                 username: username,
                 recoveryPassword: await RSAencrypt(recoveryPassword),
                 newPassword: await RSAencrypt(newPassword)
             });
         },
         async changePassword(currentPass: string, newPass: string): Promise<Response> {
-            return await apiFetch('PUT', '/auth/changePassword', {
+            return await apiFetch('PUT', authPath.value + '/changePassword', {
                 password: await RSAencrypt(currentPass),
                 newPassword: await RSAencrypt(newPass)
             })
         },
         async deleteAccount(password: string): Promise<Response> {
-            const res = await apiFetch('DELETE', '/auth/delete', {
+            const res = await apiFetch('DELETE', authPath.value + '/delete', {
                 password: await RSAencrypt(password),
             });
             if (res.ok) state.loggedIn = false;
             return res;
         },
         async logout(): Promise<Response> {
-            const res = await apiFetch('DELETE', '/auth/logout');
+            const res = await apiFetch('DELETE', authPath.value + '/logout');
             if (res.ok) state.loggedIn = false;
             return res;
         },

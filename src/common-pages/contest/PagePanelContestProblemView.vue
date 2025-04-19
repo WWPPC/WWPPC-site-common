@@ -78,15 +78,16 @@ const submitUpload = async () => {
     }
     const res = await contestManager.contests[props.contest]!.submitProblem(typeof problem.value == 'string' ? problem.value : problem.value.id, await file.text(), (languageDropdown.value.value as string));
     if (!res.ok) {
-    modal.showModal({
-        title: 'Failed to load problem',
-        content: `${res.status} - ${await res.text()}<br>Click <code>OK</code> to return to problem list.`,
-        color: 'var(--color-2)'
-    }).result.then(() => {
-        router.push(`../problemList`);
-    });
+        modal.showModal({
+            title: 'Submission failed',
+            content: res.status == 413 ? '413 - Submission too large' : (
+                res.status == 429 ? 'Too many submissions. Please wait a moment, then try again later.' : await res.text()
+            ),
+            color: 'var(--color-2)'
+        }).result.then(() => {
+            router.push(`../problemList`);
+        });
     } else {
-        modal.showModal({ title: 'Submission uploaded', content: 'Grading will happen soon', color: 'var(--color-1)' });
         fileUpload.value.resetFileList();
         languageDropdown.value.value = '';
     }
