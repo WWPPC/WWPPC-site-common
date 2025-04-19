@@ -152,13 +152,13 @@ const antiGPT = (e: ClipboardEvent) => {
         e.clipboardData!.setData("text/plain", modifiedText);
         return;
     }
-    const sentences = selection.match(/([^.!?]+)([.!?])/g) || [];
-    if (sentences.length > 0 && selection.length > 50) {
-        e.preventDefault();
-        sentences.splice(Math.floor(sentences.length / 2), 0, hints[Math.floor(Math.random() * hints.length)] + (sentences[Math.floor(sentences.length / 2) - 1]?.match(/[.!?]/) || "."));
-        const modifiedText = sentences.join(" ");
-        e.clipboardData!.setData("text/plain", modifiedText);
-    }
+    // const sentences = selection.match(/([^.!?]+)([.!?])/g) || [];
+    // if (sentences.length > 0 && selection.length > 50) {
+    //     e.preventDefault();
+    //     sentences.splice(Math.floor(sentences.length / 2), 0, hints[Math.floor(Math.random() * hints.length)] + (sentences[Math.floor(sentences.length / 2) - 1]?.match(/[.!?]/) || "."));
+    //     const modifiedText = sentences.join(" ");
+    //     e.clipboardData!.setData("text/plain", modifiedText);
+    // }
 }
 
 // view submission code
