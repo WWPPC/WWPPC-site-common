@@ -55,7 +55,7 @@ watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(asyn
             <div class="leaderboard">
                 <GlowText class="leaderboardData" text="#" glow color="var(--color-1)"></GlowText>
                 <GlowText class="leaderboardData" text="Team" glow color="var(--color-1)"></GlowText>
-                <GlowText class="leaderboardData" v-if="scoreboard.length > 0" v-for="(item, i) of scoreboard[0].solveStatus" :text="(item.round+1).toString() + '-' + (item.problem+1).toString()" glow color="var(--color-1)"></GlowText>
+                <GlowText class="leaderboardData" v-if="scoreboard.length > 0" v-for="(item, i) of scoreboard[0].solveStatus" :text="(item.round + 1).toString() + '-' + (item.problem + 1).toString()" glow color="var(--color-1)"></GlowText>
                 <GlowText class="leaderboardData" text="Score" glow color="var(--color-1)"></GlowText>
                 <GlowText class="leaderboardData" text="Penalty" glow color="var(--color-1)"></GlowText>
                 <div class="leaderboardItem" v-for="(item, i) of scoreboard" :key="i">
@@ -72,8 +72,10 @@ watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(asyn
             </div>
         </div>
         <div v-if="!scoreboardLoaded" style="display: flex; flex-direction: column; align-items: center;">
-            <div style="width: 10vw; height: 10vw">
-                <LoadingSpinner></LoadingSpinner>
+            <div class="leaderboardLoading">
+                <div>
+                    <LoadingSpinner></LoadingSpinner>
+                </div>
             </div>
             <p style="margin-top: 2vw;">
                 Please wait...
@@ -91,6 +93,7 @@ watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(asyn
     font-size: var(--font-medium);
     border: 1px solid white;
 }
+
 .leaderboardContainer {
     width: 100%;
     overflow: scroll;
@@ -101,7 +104,8 @@ watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(asyn
     display: contents;
 }
 
-.leaderboardData, .leaderboardItem > * {
+.leaderboardData,
+.leaderboardItem>* {
     border: 1px solid white;
     padding: 8px;
 }
@@ -114,6 +118,7 @@ watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(asyn
     overflow-x: hidden;
     text-overflow: ellipsis;
 }
+
 /* .stickyLeft1 {
     max-width: 45px;
     min-width: 45px;
@@ -148,8 +153,24 @@ watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(asyn
     color: var(--color-1);
     background-color: color-mix(in srgb, var(--color-1) 10%, rgb(0, 0, 0, 0));
 }
+
 .unsolved {
     color: var(--color-2);
     background-color: color-mix(in srgb, var(--color-2) 10%, rgb(0, 0, 0, 0));
+}
+
+.leaderboardLoading {
+    display: flex;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+.leaderboardLoading>div {
+    width: 10vh;
+    height: 10vh;
 }
 </style>
