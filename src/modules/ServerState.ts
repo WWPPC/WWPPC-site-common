@@ -42,7 +42,7 @@ const state = reactive<{
 
 const RSA: {
     publicKey: CryptoKey | null,
-    encrypt(text: string): Promise<ArrayBuffer | string>
+    encrypt(text: string): Promise<string | null>
 } = {
     publicKey: null,
     async encrypt(text) {
@@ -50,8 +50,14 @@ const RSA: {
             const encrypted = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, RSA.publicKey, new TextEncoder().encode(text)); if (typeof encrypted == 'string') return encrypted;
             return btoa(String.fromCharCode(...new Uint8Array(encrypted)));
         }
-        console.warn("Attempted encryption without public key");
-        return text;
+        console.warn('Attempted encryption before public key was loaded');
+        const modal = globalModal();
+        modal.showModal({
+            title: 'Encryption fail',
+            content: 'Attempted encryption before public key was loaded',
+            color: 'var(--color-3)'
+        });
+        return null;
     }
 };
 
