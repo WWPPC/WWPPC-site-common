@@ -79,7 +79,8 @@ const state = reactive<{
     team: TeamData | null,
     writeUserErr: string | undefined,
     writeTeamErr: string | undefined,
-    loaded: boolean
+    loaded: boolean,
+    teamCache: Map<number, TeamData>
 }>({
     user: {
         username: '',
@@ -100,7 +101,8 @@ const state = reactive<{
     team: null,
     writeUserErr: undefined,
     writeTeamErr: undefined,
-    loaded: false
+    loaded: false,
+    teamCache: new Map()
 });
 
 export const useAccountManager = defineStore('accountManager', {
@@ -170,8 +172,12 @@ export const useAccountManager = defineStore('accountManager', {
             return res;
         },
         async fetchTeamData(team: number): Promise<TeamData | Response> {
+            if (state.teamCache.has(team)) return state.teamCache.get(team)!;
             const res = await apiFetch('GET', '/api/teamData/' + team);
-            if (res.ok) return await res.json();
+            if (res.ok) {
+                state.teamCache.set(team, await res.json());
+                return state.teamCache.get(team)!;
+            }
             return res;
         },
         async fetchSelf(showErrors: boolean = true, forceReload: boolean = false): Promise<void> {

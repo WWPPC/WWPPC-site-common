@@ -93,9 +93,23 @@ export function completionStateString(status: ProblemCompletionState): string {
                         status == ProblemCompletionState.GRADED_PARTIAL ? 'Partially accepted' : 'Error fetching status'
 }
 
+/**Stores all the data about when/how/number of wa before solving a problem */
+export type ProblemSolveStatus = {
+    /**round */
+    round: number
+    /**problem id */
+    problem: number
+    /**solve time */
+    solveTime: number
+    /**solved */
+    solved: boolean
+    /**number of submissions that were not correct */
+    incorrectSubmissions: number
+}
 export type ScoreboardEntry = {
-    team: number
-    score: number
+    team: number,
+    solveStatus: ProblemSolveStatus[],
+    score: number,
     penalty: number
 }
 export type Scoreboard = {
@@ -172,7 +186,9 @@ export class ContestHost {
             }
             this.data.contest = dat;
         }, { immediate: true });
-        watch(this.longPolling.contestScoreboards.ref, () => this.data.scoreboard = this.longPolling.contestScoreboards.value);
+        watch(this.longPolling.contestScoreboards.ref, () => {
+            this.data.scoreboard = this.longPolling.contestScoreboards.value
+        });
     }
 
     async submitProblem(problemId: UUID, solution: string, language: string): Promise<Response> {

@@ -2,9 +2,10 @@
 import LoadingSpinner from '#/common/LoadingSpinner.vue';
 import { ref, watch } from 'vue';
 import { useAccountManager } from '#/modules/AccountManager';
-import { useContestManager } from '#/modules/ContestManager';
+import { useContestManager, type ProblemSolveStatus } from '#/modules/ContestManager';
 import GlitchSectionTitle from '#/common-components/GlitchSectionTitle.vue';
 import { throttle } from '#/util/inputLimiting';
+import { GlowText } from '#/text';
 
 const props = defineProps<{
     contest: string
@@ -19,7 +20,8 @@ const scoreboard = ref<{
     team: number,
     name: string,
     score: number,
-    penalty: number
+    penalty: number,
+    solveStatus: ProblemSolveStatus[]
 }[]>([]);
 watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(async () => {
     scoreboardLoaded.value = false;
@@ -28,8 +30,9 @@ watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(asyn
         return {
             team: entry.team,
             name: teamRes instanceof Response ? entry.team.toString() : teamRes.name,
-            score: Math.ceil(entry.score),
-            penalty: entry.penalty
+            score: Math.round(entry.score),
+            penalty: entry.penalty,
+            solveStatus: entry.solveStatus
         };
     }));
     results.sort((a, b) => {
@@ -48,12 +51,24 @@ watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(asyn
     <div class="centered">
         <br>
         <!-- todo: add button to update the leaderboard -->
-        <div class="leaderboard">
-            <div class="leaderboardItem" v-for="(item, i) of scoreboard" :key="i">
-                {{ i + 1 }}.
-                <RouterLink :to="`/team/@${item.team}`">{{ item.name }}</RouterLink>
-                - {{ item.score }} solved, {{ Math.round(item.penalty / 60 / 1000) }} penalty
-                <!--penalty is stored in ms, see scorer.ts-->
+        <div class="centered">
+            <div class="leaderboard">
+                <GlowText class="leaderboardData" text="#" glow color="var(--color-1)"></GlowText>
+                <GlowText class="leaderboardData" text="Team" glow color="var(--color-1)"></GlowText>
+                <GlowText class="leaderboardData" v-if="scoreboard.length > 0" v-for="(item, i) of scoreboard[0].solveStatus" :text="(item.round+1).toString() + '-' + (item.problem+1).toString()" glow color="var(--color-1)"></GlowText>
+                <GlowText class="leaderboardData" text="Score" glow color="var(--color-1)"></GlowText>
+                <GlowText class="leaderboardData" text="Penalty" glow color="var(--color-1)"></GlowText>
+                <div class="leaderboardItem" v-for="(item, i) of scoreboard" :key="i">
+                    <span class="leaderboardData">{{ i + 1 }}</span>
+                    <span class="leaderboardData teamName">{{ item.name }}</span>
+                    <div v-for="(item, j) of scoreboard[i].solveStatus" :class="item.solved ? 'solved' : item.incorrectSubmissions === 0 ? 'unattempted' : 'unsolved'">
+                        {{ (item.solved ? "+" : item.incorrectSubmissions == 0 ? "" : "-") }}{{ item.incorrectSubmissions == 0 ? "" : item.incorrectSubmissions }}
+                    </div>
+                    <!-- <RouterLink :to="`/team/@${item.team}`" class="leaderboardData">{{ item.name }}</RouterLink> -->
+                    <span class="leaderboardData">{{ item.score }}</span>
+                    <span class="leaderboardData">{{ Math.round(item.penalty / 60 / 1000) }}</span>
+                    <!--penalty is stored in ms, see scorer.ts-->
+                </div>
             </div>
         </div>
         <div v-if="!scoreboardLoaded" style="display: flex; flex-direction: column; align-items: center;">
@@ -70,17 +85,71 @@ watch(() => contestManager.contests[contestType]?.data.scoreboard, throttle(asyn
 
 <style scoped>
 .leaderboard {
+    width: min-content;
+    display: grid;
+    grid-template-columns: repeat(v-bind("4 + (scoreboard.length === 0 ? 0 : scoreboard[0].solveStatus.length)"), auto);
+    font-size: var(--font-medium);
+    border: 1px solid white;
+}
+.leaderboardContainer {
+    width: 100%;
+    overflow: scroll;
     position: absolute;
-    display: flex;
-    flex-direction: column;
-    row-gap: 16px;
-    margin-bottom: 16px;
 }
 
 .leaderboardItem {
-    background-color: #333;
-    font-size: var(--font-large);
-    border-radius: 8px;
-    padding: 4px 8px;
+    display: contents;
+}
+
+.leaderboardData, .leaderboardItem > * {
+    border: 1px solid white;
+    padding: 8px;
+}
+
+.teamName {
+    max-width: 250px;
+    min-width: 250px;
+    width: 250px;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}
+/* .stickyLeft1 {
+    max-width: 45px;
+    min-width: 45px;
+    width: 45px;
+    position: sticky;
+    left: 0;
+    background-color: black;
+}
+.stickyLeft2 {
+    max-width: 250px;
+    min-width: 250px;
+    width: 250px;
+    position: sticky;
+    left: 62px;
+    background-color: black;
+}
+.stickyRight1 {
+    max-width: 100px;
+    min-width: 100px;
+    width: 100px;
+    position: sticky;
+    right: 0;
+    background-color: black;
+}
+.stickyRight2 {
+    position: sticky;
+    right: 117px;
+    background-color: black;
+} */
+
+.solved {
+    color: var(--color-1);
+    background-color: color-mix(in srgb, var(--color-1) 10%, rgb(0, 0, 0, 0));
+}
+.unsolved {
+    color: var(--color-2);
+    background-color: color-mix(in srgb, var(--color-2) 10%, rgb(0, 0, 0, 0));
 }
 </style>
